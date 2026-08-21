@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
+    "@left4code/svg-renderer": "^1.0.5",
     "@zag-js/accordion": "^1.43.1",
     "@zag-js/checkbox": "^1.43.1",
     "@zag-js/combobox": "^1.43.1",
