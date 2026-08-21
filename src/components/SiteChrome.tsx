@@ -106,7 +106,7 @@ export function SiteChrome() {
               </Button>
               <a
                 target="_blank"
-                href="https://github.com/rizkimuhammada/cosmic-ui"
+                href="https://github.com/rizznme/cosmic-ui"
               >
                 <Button
                   shape="flat"
