@@ -3,3 +3,4 @@ dist/
 .astro/
 .env
 .DS_Store
+CLAUDE.md
