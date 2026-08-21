@@ -10,6 +10,61 @@ export type Paths = {
 }[];
 
 /**
+ * Evaluates a tiny arithmetic grammar (numbers, + - * /, parentheses, unary
+ * minus) via recursive descent. No dynamic code execution, so this is safe
+ * to run on untrusted input (e.g. customPaths passed in as JSON strings).
+ *
+ * @param source - The arithmetic expression to evaluate.
+ * @returns The numeric result, or 0 if the expression is invalid.
+ */
+function evaluateArithmetic(source: string): number {
+  const tokens = source.match(/\d+\.?\d*|[+\-*/()]/g);
+  if (!tokens || tokens.join("") !== source.replace(/\s+/g, "")) return 0;
+
+  let pos = 0;
+  const peek = () => tokens[pos];
+  const eat = (t: string) => (peek() === t ? (pos++, true) : false);
+
+  const parseExpr = (): number => {
+    let value = parseTerm();
+    for (;;) {
+      if (eat("+")) value += parseTerm();
+      else if (eat("-")) value -= parseTerm();
+      else return value;
+    }
+  };
+
+  const parseTerm = (): number => {
+    let value = parseFactor();
+    for (;;) {
+      if (eat("*")) value *= parseFactor();
+      else if (eat("/")) {
+        const divisor = parseFactor();
+        value = divisor === 0 ? NaN : value / divisor;
+      } else return value;
+    }
+  };
+
+  const parseFactor = (): number => {
+    if (eat("-")) return -parseFactor();
+    if (eat("+")) return parseFactor();
+    if (eat("(")) {
+      const value = parseExpr();
+      if (!eat(")")) return NaN;
+      return value;
+    }
+    const token = peek();
+    if (token === undefined || !/^\d/.test(token)) return NaN;
+    pos++;
+    return parseFloat(token);
+  };
+
+  const result = parseExpr();
+  if (pos !== tokens.length || !Number.isFinite(result)) return 0;
+  return result;
+}
+
+/**
  * Evaluates a string expression containing percentages or calculations.
  *
  * @param expr - The string expression to evaluate.
@@ -30,14 +85,9 @@ function evalExpression({
       return `(${val} / 100)`;
     })
     .replace(/width/g, width.toString())
-    .replace(/height/g, height.toString())
-    .replace(/100/g, "100");
+    .replace(/height/g, height.toString());
 
-  try {
-    return Function(`"use strict"; return (${replaced});`)();
-  } catch {
-    return 0;
-  }
+  return evaluateArithmetic(replaced);
 }
 
 /**
@@ -82,7 +132,7 @@ function createSvgPaths({
           const numY =
             typeof parsedY === "string" ? parseFloat(parsedY) : parsedY;
 
-          return `${cmd} ${parseInt(numX)},${parseInt(numY)}`;
+          return `${cmd} ${Math.trunc(numX)},${Math.trunc(numY)}`;
         })
         .join(" "),
     };
@@ -227,10 +277,7 @@ function setupSvgRenderer({
   enableViewBox?: boolean;
 }) {
   const parentElement = findRelativeParent(el) ?? el;
-  const parentWidth = () =>
-    parentElement?.getBoundingClientRect().width.toString();
-  const parentHeight = () =>
-    parentElement?.getBoundingClientRect().height.toString();
+  let destroyed = false;
 
   const render = () => {
     const width = el.getBoundingClientRect().width;
@@ -258,67 +305,49 @@ function setupSvgRenderer({
 
   observer.observe(el);
 
-  // Handle transitionstart → re-render until transition ends
-  parentElement.addEventListener("transitionstart", () => {
-    console.log("run");
+  // Starts a render loop that keeps redrawing the SVG until the transition
+  // or animation genuinely ends (or the renderer is destroyed).
+  const startLoop = () => {
     let running = true;
 
     function loop() {
-      if (!running) return;
+      if (!running || destroyed) return;
       render();
-
       requestAnimationFrame(loop);
     }
 
     loop();
 
-    parentElement.addEventListener(
-      "transitionend",
-      () => {
-        if (
-          parentWidth().toString() == el.getAttribute("data-width") &&
-          parentHeight().toString() == el.getAttribute("data-height")
-        ) {
-          running = false;
-          console.log("stop");
-        }
-      },
-      { once: true }
-    );
-  });
+    return () => {
+      running = false;
+    };
+  };
+
+  // Handle transitionstart → re-render until transition ends
+  const onTransitionStart = () => {
+    const stop = startLoop();
+    parentElement.addEventListener("transitionend", stop, { once: true });
+  };
 
   // Handle animationstart → re-render until animation ends
-  parentElement.addEventListener("animationstart", () => {
-    let running = true;
+  const onAnimationStart = () => {
+    const stop = startLoop();
+    parentElement.addEventListener("animationend", stop, { once: true });
+  };
 
-    function loop() {
-      if (!running) return;
-      render();
-
-      requestAnimationFrame(loop);
-    }
-
-    loop();
-
-    parentElement.addEventListener(
-      "animationend",
-      () => {
-        if (
-          parentWidth().toString() == el.getAttribute("data-width") &&
-          parentHeight().toString() == el.getAttribute("data-height")
-        ) {
-          running = false;
-        }
-      },
-      { once: true }
-    );
-  });
+  parentElement.addEventListener("transitionstart", onTransitionStart);
+  parentElement.addEventListener("animationstart", onAnimationStart);
 
   return {
     /**
-     * Disconnects the ResizeObserver and cleans up listeners.
+     * Disconnects the ResizeObserver and removes transition/animation listeners.
      */
-    destroy: () => observer.disconnect(),
+    destroy: () => {
+      destroyed = true;
+      observer.disconnect();
+      parentElement.removeEventListener("transitionstart", onTransitionStart);
+      parentElement.removeEventListener("animationstart", onAnimationStart);
+    },
   };
 }
 
