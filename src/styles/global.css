@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --background-image-temper: url("../assets/images/temper.svg");
+  --background-image-noise: url("../assets/images/noise.png");
+
+  --color-primary: rgb(20, 160, 230);
+  --color-primary-foreground: rgb(255, 255, 255);
+  --color-accent: rgb(202, 65, 34);
+  --color-accent-foreground: rgb(255, 255, 255);
+  --color-secondary: --alpha(
+    color-mix(in oklab, var(--color-primary), var(--color-white) 50%) / 60%
+  );
+  --color-secondary-foreground: color-mix(
+    in oklab,
+    var(--color-primary),
+    var(--color-white) 70%
+  );
+  --color-destructive: var(--color-rose-500);
+  --color-destructive-foreground: rgb(255, 255, 255);
+  --color-success: var(--color-teal-500);
+  --color-success-foreground: rgb(255, 255, 255);
+  --color-background: color-mix(
+    in oklab,
+    var(--color-primary),
+    var(--color-black) 80%
+  );
+  --color-foreground: var(--color-white);
+
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+
+  --text-xs: 0.59375rem; /* 9.5px */
+  --text-xs--line-height: calc(1 / 0.59375);
+
+  --text-sm: 0.71875rem; /* 11.5px */
+  --text-sm--line-height: calc(1.25 / 0.71875);
+
+  --text-base: 0.84375rem; /* 13.5px */
+  --text-base--line-height: calc(1.5 / 0.84375);
+
+  --text-lg: 0.96875rem; /* 15.5px */
+  --text-lg--line-height: calc(1.625 / 0.96875);
+
+  --text-xl: 1.09375rem; /* 17.5px */
+  --text-xl--line-height: calc(1.75 / 1.09375);
+
+  --text-2xl: 1.28125rem; /* 20.5px */
+  --text-2xl--line-height: calc(2 / 1.28125);
+
+  --text-3xl: 1.65625rem; /* 26.5px */
+  --text-3xl--line-height: calc(2.25 / 1.65625);
+
+  --text-4xl: 2.03125rem; /* 32.5px */
+  --text-4xl--line-height: calc(2.5 / 2.03125);
+
+  --text-5xl: 2.59375rem; /* 41.5px */
+  --text-5xl--line-height: 1;
+
+  --text-6xl: 3.21875rem; /* 51.5px */
+  --text-6xl--line-height: 1;
+
+  --text-7xl: 3.96875rem; /* 63.5px */
+  --text-7xl--line-height: 1;
+
+  --text-8xl: 5.46875rem; /* 87.5px */
+  --text-8xl--line-height: 1;
+
+  --text-9xl: 6.96875rem; /* 111.5px */
+  --text-9xl--line-height: 1;
+}
+
+@utility container {
+  max-width: 92rem;
+}
+
+@utility blur-in {
+  animation: blur-in 0.3s ease-in-out;
+}
+
+body {
+  @apply bg-background overflow-x-hidden bg-fixed antialiased text-sm font-orbitron text-foreground tracking-wider;
+  background-image: repeating-linear-gradient(
+      0deg,
+      --alpha(var(--color-foreground) / 5%) 0,
+      --alpha(var(--color-foreground) / 5%) 1px,
+      transparent 1px,
+      transparent 35rem
+    ),
+    repeating-linear-gradient(
+      90deg,
+      --alpha(var(--color-foreground) / 5%) 0,
+      --alpha(var(--color-foreground) / 5%) 1px,
+      transparent 1px,
+      transparent 35rem
+    );
+}
+
+.typing-container {
+  width: fit-content;
+  border-right: 4px solid --alpha(var(--color-foreground) / 70%);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.typing-text {
+  display: inline-block;
+  animation: typing 6s steps(25) 1s infinite, blink 0.7s step-end infinite;
+}
+
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  40% {
+    width: 25ch;
+  }
+  80% {
+    width: 25ch;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+@keyframes blur-in {
+  0% {
+    filter: blur(var(--blur-xl));
+  }
+
+  100% {
+    filter: blur(0px);
+  }
+}

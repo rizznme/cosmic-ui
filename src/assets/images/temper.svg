@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#0e7490" stop-opacity="0"/>
+      <stop offset="0.493" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#0e7490" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#0e7490" stop-opacity="0"/>
+      <stop offset="0.527" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#0e7490" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#6d28d9" stop-opacity="0"/>
+      <stop offset="0.502" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#6d28d9" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clip-Rubick_1">
+      <rect width="1920" height="1080"/>
+    </clipPath>
+  </defs>
+  <g id="Rubick_1" data-name="Rubick – 1" clip-path="url(#clip-Rubick_1)">
+    <g id="Group_58" data-name="Group 58" transform="translate(-728.457 394.041)" opacity="0.696">
+      <ellipse id="Ellipse_8" data-name="Ellipse 8" cx="93.814" cy="511.905" rx="93.814" ry="511.905" transform="translate(743.032 195.547) rotate(-42)" opacity="0.578" fill="url(#linear-gradient)"/>
+      <ellipse id="Ellipse_7" data-name="Ellipse 7" cx="102.814" cy="504.905" rx="102.814" ry="504.905" transform="translate(349.386 205.874) rotate(-42)" opacity="0.578" fill="url(#linear-gradient-2)"/>
+      <ellipse id="Ellipse_1" data-name="Ellipse 1" cx="139.314" cy="593.905" rx="139.314" ry="593.905" transform="translate(483.232 195.122) rotate(-42)" opacity="0.585" fill="url(#linear-gradient-3)"/>
+    </g>
+    <g id="Group_27" data-name="Group 27" transform="translate(-652.457 -338.959)" opacity="0.696">
+      <ellipse id="Ellipse_8-2" data-name="Ellipse 8" cx="93.814" cy="511.905" rx="93.814" ry="511.905" transform="translate(743.032 195.547) rotate(-42)" opacity="0.578" fill="url(#linear-gradient)"/>
+      <ellipse id="Ellipse_7-2" data-name="Ellipse 7" cx="102.814" cy="504.905" rx="102.814" ry="504.905" transform="translate(349.386 205.874) rotate(-42)" opacity="0.578" fill="url(#linear-gradient-2)"/>
+      <ellipse id="Ellipse_1-2" data-name="Ellipse 1" cx="139.314" cy="593.905" rx="139.314" ry="593.905" transform="translate(483.232 195.122) rotate(-42)" opacity="0.585" fill="url(#linear-gradient-3)"/>
+    </g>
+    <g id="Group_67" data-name="Group 67" transform="translate(668.929 293.877)" opacity="0.696">
+      <ellipse id="Ellipse_8-3" data-name="Ellipse 8" cx="104.84" cy="572.07" rx="104.84" ry="572.07" transform="translate(439.912 208.825) rotate(-42)" opacity="0.578" fill="url(#linear-gradient)"/>
+      <ellipse id="Ellipse_7-3" data-name="Ellipse 7" cx="114.898" cy="564.247" rx="114.898" ry="564.247" transform="translate(0 220.365) rotate(-42)" opacity="0.578" fill="url(#linear-gradient-2)"/>
+      <ellipse id="Ellipse_1-3" data-name="Ellipse 1" cx="155.687" cy="663.708" rx="155.687" ry="663.708" transform="translate(149.577 208.35) rotate(-42)" opacity="0.585" fill="url(#linear-gradient-3)"/>
+    </g>
+    <g id="Group_68" data-name="Group 68" transform="translate(753.861 -525.274)" opacity="0.696">
+      <ellipse id="Ellipse_8-4" data-name="Ellipse 8" cx="104.84" cy="572.07" rx="104.84" ry="572.07" transform="translate(439.912 208.825) rotate(-42)" opacity="0.578" fill="url(#linear-gradient)"/>
+      <ellipse id="Ellipse_7-4" data-name="Ellipse 7" cx="114.898" cy="564.247" rx="114.898" ry="564.247" transform="translate(0 220.365) rotate(-42)" opacity="0.578" fill="url(#linear-gradient-2)"/>
+      <ellipse id="Ellipse_1-4" data-name="Ellipse 1" cx="155.687" cy="663.708" rx="155.687" ry="663.708" transform="translate(149.577 208.35) rotate(-42)" opacity="0.585" fill="url(#linear-gradient-3)"/>
+    </g>
+  </g>
+</svg>
