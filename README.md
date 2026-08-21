@@ -1,5 +1,7 @@
 # Cosmic UI
 
+![hero](public/preview.jpeg)
+
 Sci-fi themed React component library and docs site, ported from the original
 Vite + React SPA to Astro (static output, React islands for interactive
 parts).
