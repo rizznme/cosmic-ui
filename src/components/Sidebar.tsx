@@ -30,7 +30,8 @@ const docLinks: { group: string; items: DocLink[] }[] = [
       { href: "/docs/radio-group", label: "Radio Group" },
       { href: "/docs/checkbox", label: "Checkbox" },
       { href: "/docs/chart", label: "Chart" },
-      { href: "/docs/combobox", label: "Combobox", badge: "New" },
+      { href: "/docs/combobox", label: "Combobox" },
+      { href: "/docs/select", label: "Select", badge: "New" },
     ],
   },
 ];
