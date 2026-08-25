@@ -3,7 +3,6 @@ import {
   CheckboxRoot,
   CheckboxLabel,
   CheckboxControl,
-  CheckboxHiddenInput,
 } from "@/components/ui/checkbox";
 import {
   Wrapper,
@@ -51,7 +50,6 @@ function CheckboxPage() {
                     <CheckboxRoot>
                       <CheckboxLabel>Accept terms and conditions</CheckboxLabel>
                       <CheckboxControl />
-                      <CheckboxHiddenInput />
                     </CheckboxRoot>
                   </>
                 ),
@@ -61,7 +59,6 @@ function CheckboxPage() {
 <CheckboxRoot>
   <CheckboxLabel>Accept terms and conditions</CheckboxLabel>
   <CheckboxControl />
-  <CheckboxHiddenInput />
 </CheckboxRoot>
                 `}
                   </PreviewCode>
@@ -76,8 +73,13 @@ function CheckboxPage() {
             <SectionContent>
               This component is built directly on the Zag.js state machine
               (not a wrapper). No Portal or presence hook needed, the check
-              mark just toggles opacity, no exit animation. Copy and paste
-              the following code into your project.
+              mark just toggles opacity, no exit animation. The hidden native
+              input (needed for keyboard, focus and form submission) renders
+              automatically inside{" "}
+              <span className="bg-foreground/15 px-1.5 py-px rounded-md">
+                CheckboxRoot
+              </span>
+              . Copy and paste the following code into your project.
             </SectionContent>
             <PreviewCode title="components/ui/checkbox.tsx">
               {`
@@ -85,7 +87,7 @@ import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import * as checkbox from "@zag-js/checkbox";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parsePaths } from "@/components/ui/frame";
 import { Check } from "lucide-react";
 
 const CheckboxContext = createContext<ReturnType<typeof checkbox.connect> | null>(
@@ -113,6 +115,7 @@ function CheckboxRoot({
         className={twMerge(["flex gap-3.5 items-center cursor-pointer", className])}
       >
         {children}
+        <input {...api.getHiddenInputProps()} />
       </label>
     </CheckboxContext.Provider>
   );
@@ -145,7 +148,7 @@ function CheckboxControl({ className }: { className?: string }) {
       ])}
     >
       <Frame
-        paths={JSON.parse(
+        paths={parsePaths(
           '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
         )}
       />
@@ -154,13 +157,7 @@ function CheckboxControl({ className }: { className?: string }) {
   );
 }
 
-function CheckboxHiddenInput() {
-  const api = useCheckboxContext();
-
-  return <input {...api.getHiddenInputProps()} />;
-}
-
-export { CheckboxRoot, CheckboxLabel, CheckboxControl, CheckboxHiddenInput };
+export { CheckboxRoot, CheckboxLabel, CheckboxControl };
               `}
             </PreviewCode>
             <SectionContent>
@@ -175,7 +172,6 @@ import {
   CheckboxRoot,
   CheckboxLabel,
   CheckboxControl,
-  CheckboxHiddenInput,
 } from "@/components/ui/checkbox";
               `}
             </PreviewCode>
@@ -184,7 +180,6 @@ import {
 <CheckboxRoot>
   <CheckboxLabel>Accept terms and conditions</CheckboxLabel>
   <CheckboxControl />
-  <CheckboxHiddenInput />
 </CheckboxRoot>
               `}
             </PreviewCode>

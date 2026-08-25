@@ -1,10 +1,4 @@
-import {
-  MenuRoot,
-  MenuTrigger,
-  MenuPositioner,
-  MenuContent,
-  MenuItem,
-} from "@/components/ui/menu";
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from "@/components/ui/menu";
 import { twMerge } from "tailwind-merge";
 import { Frame } from "@/components/ui/frame";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -205,17 +199,14 @@ function HomePage() {
               <MenuTrigger className="w-full mt-8">
                 Download Reports
               </MenuTrigger>
-              <MenuPositioner>
-                {/* className="[--color-frame-1-fill:color-mix(in_hsl,_var(--color-primary)_80%,_var(--color-background)_60%)]/60 [--color-frame-1-stroke:var(--color-primary)]/70" */}
-                <MenuContent>
-                  <MenuItem value="edit">
-                    <FilePenLine className="size-4 me-2.5" /> Monthly Report
-                  </MenuItem>
-                  <MenuItem value="duplicate">
-                    <CopySlash className="size-4 me-2.5" /> Annual Report
-                  </MenuItem>
-                </MenuContent>
-              </MenuPositioner>
+              <MenuContent>
+                <MenuItem value="edit">
+                  <FilePenLine className="size-4 me-2.5" /> Monthly Report
+                </MenuItem>
+                <MenuItem value="duplicate">
+                  <CopySlash className="size-4 me-2.5" /> Annual Report
+                </MenuItem>
+              </MenuContent>
             </MenuRoot>
           </div>
         </div>

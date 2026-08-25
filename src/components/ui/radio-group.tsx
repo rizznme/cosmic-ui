@@ -65,12 +65,13 @@ function RadioGroupItem({
         className={twMerge(["flex gap-3.5 items-center cursor-pointer", className])}
       >
         {children}
+        <input {...api.getItemHiddenInputProps({ value })} />
       </label>
     </RadioGroupItemContext.Provider>
   );
 }
 
-function RadioItemText({
+function RadioGroupItemText({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
@@ -84,14 +85,7 @@ function RadioItemText({
   );
 }
 
-function RadioItemHiddenInput() {
-  const api = useRadioGroupContext();
-  const { value } = useRadioGroupItemContext();
-
-  return <input {...api.getItemHiddenInputProps({ value })} />;
-}
-
-function RadioItemControl({ className }: { className?: string }) {
+function RadioGroupItemControl({ className }: { className?: string }) {
   const api = useRadioGroupContext();
   const { value } = useRadioGroupItemContext();
 
@@ -131,7 +125,6 @@ export {
   RadioGroupRoot,
   RadioGroupLabel,
   RadioGroupItem,
-  RadioItemText,
-  RadioItemHiddenInput,
-  RadioItemControl,
+  RadioGroupItemText,
+  RadioGroupItemControl,
 };

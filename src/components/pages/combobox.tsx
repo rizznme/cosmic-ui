@@ -14,12 +14,10 @@ import * as combobox from "@zag-js/combobox";
 import { useState } from "react";
 import {
   ComboboxRoot,
-  ComboboxControl,
   ComboboxInput,
   ComboboxTrigger,
-  ComboboxPositioner,
   ComboboxContent,
-  ComboboxItemGrouo,
+  ComboboxItemGroup,
   ComboboxItem,
   ComboboxItemText,
   ComboboxItemIndicator,
@@ -77,22 +75,18 @@ function ComboboxPage() {
                       onInputValueChange={handleInputChange}
                       onValueChange={(details) => setState(details.value)}
                     >
-                      <ComboboxControl>
-                        <ComboboxTrigger />
-                      </ComboboxControl>
-                      <ComboboxPositioner>
-                        <ComboboxContent>
-                          <ComboboxInput />
-                          <ComboboxItemGrouo>
-                            {itemsCollection.items.map((item) => (
-                              <ComboboxItem key={item} item={item}>
-                                <ComboboxItemText>{item}</ComboboxItemText>
-                                <ComboboxItemIndicator />
-                              </ComboboxItem>
-                            ))}
-                          </ComboboxItemGrouo>
-                        </ComboboxContent>
-                      </ComboboxPositioner>
+                      <ComboboxTrigger />
+                      <ComboboxContent>
+                        <ComboboxInput />
+                        <ComboboxItemGroup>
+                          {itemsCollection.items.map((item) => (
+                            <ComboboxItem key={item} item={item}>
+                              <ComboboxItemText>{item}</ComboboxItemText>
+                              <ComboboxItemIndicator />
+                            </ComboboxItem>
+                          ))}
+                        </ComboboxItemGroup>
+                      </ComboboxContent>
                     </ComboboxRoot>
                   </>
                 ),
@@ -121,22 +115,18 @@ const handleInputChange = (details: { inputValue: string }) => {
   onInputValueChange={handleInputChange}
   onValueChange={(details) => setState(details.value)}
 >
-  <ComboboxControl>
-    <ComboboxTrigger />
-  </ComboboxControl>
-  <ComboboxPositioner>
-    <ComboboxContent>
-      <ComboboxInput />
-      <ComboboxItemGrouo>
-        {itemsCollection.items.map((item) => (
-          <ComboboxItem key={item} item={item}>
-            <ComboboxItemText>{item}</ComboboxItemText>
-            <ComboboxItemIndicator />
-          </ComboboxItem>
-        ))}
-      </ComboboxItemGrouo>
-    </ComboboxContent>
-  </ComboboxPositioner>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      {itemsCollection.items.map((item) => (
+        <ComboboxItem key={item} item={item}>
+          <ComboboxItemText>{item}</ComboboxItemText>
+          <ComboboxItemIndicator />
+        </ComboboxItem>
+      ))}
+    </ComboboxItemGroup>
+  </ComboboxContent>
 </ComboboxRoot>
                 `}
                   </PreviewCode>
@@ -166,8 +156,14 @@ const handleInputChange = (details: { inputValue: string }) => {
               <span className="bg-foreground/15 px-1.5 py-px rounded-md">
                 combobox.collection()
               </span>{" "}
-              factory plus a plain case-insensitive match. Copy and paste the
-              following code into your project.
+              factory plus a plain case-insensitive match. The dropdown's
+              anchor is the control element wrapped inside{" "}
+              <span className="bg-foreground/15 px-1.5 py-px rounded-md">
+                ComboboxTrigger
+              </span>
+              , not the button itself, so its wrapper renders automatically
+              and doesn't need a part of its own. Copy and paste the following
+              code into your project.
             </SectionContent>
             <PreviewCode title="components/ui/combobox.tsx">
               {`
@@ -176,7 +172,7 @@ import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import * as combobox from "@zag-js/combobox";
 import { Button } from "@/components/ui/button";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parsePaths } from "@/components/ui/frame";
 import { Portal } from "@/components/ui/portal";
 import { usePresence } from "@/components/ui/presence";
 import { ChevronsUpDown, Search, Check } from "lucide-react";
@@ -218,45 +214,19 @@ function ComboboxRoot({
   );
 }
 
-function ComboboxControl({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
-  const api = useComboboxContext();
-
-  return (
-    <div {...api.getControlProps()} className={twMerge(["relative", className])}>
-      {children}
-    </div>
-  );
-}
-
 function ComboboxTrigger() {
   const api = useComboboxContext();
 
   return (
-    <Button
-      {...api.getTriggerProps()}
-      className="w-full min-w-55 px-0 [&>span]:justify-start px-8"
-    >
-      {api.value.length && api.value[0].length ? api.value : "Select option..."}{" "}
-      <ChevronsUpDown className="size-4 ms-auto opacity-70" />
-    </Button>
-  );
-}
-
-function ComboboxPositioner({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
-  const api = useComboboxContext();
-
-  return (
-    <Portal>
-      <div {...api.getPositionerProps()} className={className}>
-        {children}
-      </div>
-    </Portal>
+    <div {...api.getControlProps()} className="relative">
+      <Button
+        {...api.getTriggerProps()}
+        className="w-full min-w-55 px-0 [&>span]:justify-start px-8"
+      >
+        {api.value.length && api.value[0].length ? api.value : "Select option..."}{" "}
+        <ChevronsUpDown className="size-4 ms-auto opacity-70" />
+      </Button>
+    </div>
   );
 }
 
@@ -268,35 +238,39 @@ function ComboboxContent({
   const { present, ref } = usePresence(api.open);
 
   return (
-    <div
-      {...api.getContentProps()}
-      ref={ref}
-      hidden={!present}
-      className={twMerge([
-        "group relative min-w-(--reference-width) outline-none",
-        "[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2",
-        "[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200",
-        "[--color-frame-1-stroke:var(--color-primary)]",
-        "[--color-frame-1-fill:var(--color-primary)]/20",
-        "[--color-frame-2-stroke:var(--color-accent)]",
-        "[--color-frame-2-fill:var(--color-accent)]/40",
-        "[--color-frame-3-stroke:var(--color-accent)]",
-        "[--color-frame-3-fill:var(--color-accent)]/40",
-        "[--color-frame-4-stroke:var(--color-accent)]",
-        "[--color-frame-4-fill:var(--color-accent)]/40",
-        className,
-      ])}
-    >
-      <div className="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
-        <Frame
-          paths={JSON.parse(
-            '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
-          )}
-          enableBackdropBlur={true}
-        />
+    <Portal>
+      <div {...api.getPositionerProps()}>
+        <div
+          {...api.getContentProps()}
+          ref={ref}
+          hidden={!present}
+          className={twMerge([
+            "group relative min-w-(--reference-width) outline-none",
+            "[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2",
+            "[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200",
+            "[--color-frame-1-stroke:var(--color-primary)]",
+            "[--color-frame-1-fill:var(--color-primary)]/20",
+            "[--color-frame-2-stroke:var(--color-accent)]",
+            "[--color-frame-2-fill:var(--color-accent)]/40",
+            "[--color-frame-3-stroke:var(--color-accent)]",
+            "[--color-frame-3-fill:var(--color-accent)]/40",
+            "[--color-frame-4-stroke:var(--color-accent)]",
+            "[--color-frame-4-fill:var(--color-accent)]/40",
+            className,
+          ])}
+        >
+          <div className="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
+            <Frame
+              paths={parsePaths(
+                '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
+              )}
+              enableBackdropBlur={true}
+            />
+          </div>
+          {children}
+        </div>
       </div>
-      {children}
-    </div>
+    </Portal>
   );
 }
 
@@ -317,15 +291,16 @@ function ComboboxInput() {
   );
 }
 
-function ComboboxItemGrouo({
+function ComboboxItemGroup({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
   const api = useComboboxContext();
+  const groupId = useId();
 
   return (
     <div
-      {...api.getItemGroupProps({ id: "group" })}
+      {...api.getItemGroupProps({ id: groupId })}
       className={twMerge(["relative flex flex-col gap-2.5 px-6 pt-4 pb-7", className])}
     >
       {children}
@@ -375,12 +350,10 @@ function ComboboxItemIndicator({ className }: { className?: string }) {
 
 export {
   ComboboxRoot,
-  ComboboxControl,
   ComboboxInput,
   ComboboxTrigger,
-  ComboboxPositioner,
   ComboboxContent,
-  ComboboxItemGrouo,
+  ComboboxItemGroup,
   ComboboxItem,
   ComboboxItemText,
   ComboboxItemIndicator,
@@ -397,12 +370,10 @@ export {
               {`
 import {
   ComboboxRoot,
-  ComboboxControl,
   ComboboxInput,
   ComboboxTrigger,
-  ComboboxPositioner,
   ComboboxContent,
-  ComboboxItemGrouo,
+  ComboboxItemGroup,
   ComboboxItem,
   ComboboxItemText,
   ComboboxItemIndicator,
@@ -433,22 +404,18 @@ const handleInputChange = (details: { inputValue: string }) => {
   onInputValueChange={handleInputChange}
   onValueChange={(details) => setState(details.value)}
 >
-  <ComboboxControl>
-    <ComboboxTrigger />
-  </ComboboxControl>
-  <ComboboxPositioner>
-    <ComboboxContent>
-      <ComboboxInput />
-      <ComboboxItemGrouo>
-        {itemsCollection.items.map((item) => (
-          <ComboboxItem key={item} item={item}>
-            <ComboboxItemText>{item}</ComboboxItemText>
-            <ComboboxItemIndicator />
-          </ComboboxItem>
-        ))}
-      </ComboboxItemGrouo>
-    </ComboboxContent>
-  </ComboboxPositioner>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      {itemsCollection.items.map((item) => (
+        <ComboboxItem key={item} item={item}>
+          <ComboboxItemText>{item}</ComboboxItemText>
+          <ComboboxItemIndicator />
+        </ComboboxItem>
+      ))}
+    </ComboboxItemGroup>
+  </ComboboxContent>
 </ComboboxRoot>
               `}
             </PreviewCode>

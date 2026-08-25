@@ -26,21 +26,13 @@ function SwitchRoot({
     <SwitchContext.Provider value={api}>
       <label {...api.getRootProps()} className={twMerge(["flex items-center gap-4", className])}>
         {children}
+        <input {...api.getHiddenInputProps()} />
       </label>
     </SwitchContext.Provider>
   );
 }
 
-function SwitchHiddenInput() {
-  const api = useSwitchContext();
-
-  return <input {...api.getHiddenInputProps()} />;
-}
-
-function SwitchControl({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
+function SwitchControl({ className }: { className?: string }) {
   const api = useSwitchContext();
 
   return (
@@ -62,32 +54,23 @@ function SwitchControl({
           )}
         />
       </div>
-      {children}
-    </div>
-  );
-}
-
-function SwitchThumb({ className }: { className?: string }) {
-  const api = useSwitchContext();
-
-  return (
-    <div
-      {...api.getThumbProps()}
-      className={twMerge([
-        "relative w-1/2 h-3.5 z-[-1] -mb-px transition-all ms-0.5",
-        "[--color-frame-1-stroke:var(--color-primary)]/80",
-        "[--color-frame-1-fill:var(--color-primary)]/20",
-        "group-data-[state=checked]:[--color-frame-1-stroke:var(--color-primary)]",
-        "group-data-[state=checked]:[--color-frame-1-fill:var(--color-primary)]/30",
-        "group-data-[state=checked]:ms-[47%] group-data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]",
-        className,
-      ])}
-    >
-      <Frame
-        paths={parsePaths(
-          '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","7","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 7"],["L","7","0"]]}]'
-        )}
-      />
+      <div
+        {...api.getThumbProps()}
+        className={twMerge([
+          "relative w-1/2 h-3.5 z-[-1] -mb-px transition-all ms-0.5",
+          "[--color-frame-1-stroke:var(--color-primary)]/80",
+          "[--color-frame-1-fill:var(--color-primary)]/20",
+          "group-data-[state=checked]:[--color-frame-1-stroke:var(--color-primary)]",
+          "group-data-[state=checked]:[--color-frame-1-fill:var(--color-primary)]/30",
+          "group-data-[state=checked]:ms-[47%] group-data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]",
+        ])}
+      >
+        <Frame
+          paths={parsePaths(
+            '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","7","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 7"],["L","7","0"]]}]'
+          )}
+        />
+      </div>
     </div>
   );
 }
@@ -105,10 +88,4 @@ function SwitchLabel({
   );
 }
 
-export {
-  SwitchRoot,
-  SwitchHiddenInput,
-  SwitchControl,
-  SwitchThumb,
-  SwitchLabel,
-};
+export { SwitchRoot, SwitchControl, SwitchLabel };

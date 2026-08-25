@@ -13,11 +13,8 @@ import {
 import * as select from "@zag-js/select";
 import {
   SelectRoot,
-  SelectControl,
   SelectTrigger,
-  SelectPositioner,
   SelectContent,
-  SelectItemGroup,
   SelectItem,
   SelectItemText,
   SelectItemIndicator,
@@ -67,21 +64,15 @@ function SelectPage() {
                 preview: (
                   <>
                     <SelectRoot collection={frameworksCollection}>
-                      <SelectControl>
-                        <SelectTrigger />
-                      </SelectControl>
-                      <SelectPositioner>
-                        <SelectContent>
-                          <SelectItemGroup>
-                            {frameworks.map((item) => (
-                              <SelectItem key={item.value} item={item}>
-                                <SelectItemText>{item.label}</SelectItemText>
-                                <SelectItemIndicator />
-                              </SelectItem>
-                            ))}
-                          </SelectItemGroup>
-                        </SelectContent>
-                      </SelectPositioner>
+                      <SelectTrigger />
+                      <SelectContent>
+                        {frameworks.map((item) => (
+                          <SelectItem key={item.value} item={item}>
+                            <SelectItemText>{item.label}</SelectItemText>
+                            <SelectItemIndicator />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </SelectRoot>
                   </>
                 ),
@@ -102,21 +93,15 @@ const frameworksCollection = select.collection({
 });
 
 <SelectRoot collection={frameworksCollection}>
-  <SelectControl>
-    <SelectTrigger />
-  </SelectControl>
-  <SelectPositioner>
-    <SelectContent>
-      <SelectItemGroup>
-        {frameworks.map((item) => (
-          <SelectItem key={item.value} item={item}>
-            <SelectItemText>{item.label}</SelectItemText>
-            <SelectItemIndicator />
-          </SelectItem>
-        ))}
-      </SelectItemGroup>
-    </SelectContent>
-  </SelectPositioner>
+  <SelectTrigger />
+  <SelectContent>
+    {frameworks.map((item) => (
+      <SelectItem key={item.value} item={item}>
+        <SelectItemText>{item.label}</SelectItemText>
+        <SelectItemIndicator />
+      </SelectItem>
+    ))}
+  </SelectContent>
 </SelectRoot>
                 `}
                   </PreviewCode>
@@ -146,7 +131,9 @@ const frameworksCollection = select.collection({
               <a href="/docs/menu" className="font-medium">
                 Menu
               </a>
-              . Copy and paste the following code into your project.
+              . Unlike Combobox, the select's anchor is the trigger button
+              itself, so there's no separate control wrapper. Copy and paste
+              the following code into your project.
             </SectionContent>
             <PreviewCode title="components/ui/select.tsx">
               {`
@@ -191,19 +178,6 @@ function SelectRoot({
   );
 }
 
-function SelectControl({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
-  const api = useSelectContext();
-
-  return (
-    <div {...api.getControlProps()} className={twMerge(["relative", className])}>
-      {children}
-    </div>
-  );
-}
-
 function SelectTrigger({
   className,
   placeholder = "Select option...",
@@ -229,21 +203,6 @@ function SelectTrigger({
   );
 }
 
-function SelectPositioner({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
-  const api = useSelectContext();
-
-  return (
-    <Portal>
-      <div {...api.getPositionerProps()} className={className}>
-        {children}
-      </div>
-    </Portal>
-  );
-}
-
 function SelectContent({
   children,
   className,
@@ -252,48 +211,39 @@ function SelectContent({
   const { present, ref } = usePresence(api.open);
 
   return (
-    <div
-      {...api.getContentProps()}
-      ref={ref}
-      hidden={!present}
-      className={twMerge([
-        "group relative min-w-(--reference-width) px-6 py-7 outline-none mt-1.5",
-        "[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2",
-        "[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200",
-        "[--color-frame-1-stroke:var(--color-primary)]",
-        "[--color-frame-1-fill:var(--color-primary)]/20",
-        "[--color-frame-2-stroke:var(--color-accent)]",
-        "[--color-frame-2-fill:var(--color-accent)]/40",
-        "[--color-frame-3-stroke:var(--color-accent)]",
-        "[--color-frame-3-fill:var(--color-accent)]/40",
-        "[--color-frame-4-stroke:var(--color-accent)]",
-        "[--color-frame-4-fill:var(--color-accent)]/40",
-        className,
-      ])}
-    >
-      <div className="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
-        <Frame
-          paths={parsePaths(
-            '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
-          )}
-          enableBackdropBlur={true}
-        />
+    <Portal>
+      <div {...api.getPositionerProps()}>
+        <div
+          {...api.getContentProps()}
+          ref={ref}
+          hidden={!present}
+          className={twMerge([
+            "group relative min-w-(--reference-width) px-6 py-7 outline-none mt-1.5",
+            "[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2",
+            "[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200",
+            "[--color-frame-1-stroke:var(--color-primary)]",
+            "[--color-frame-1-fill:var(--color-primary)]/20",
+            "[--color-frame-2-stroke:var(--color-accent)]",
+            "[--color-frame-2-fill:var(--color-accent)]/40",
+            "[--color-frame-3-stroke:var(--color-accent)]",
+            "[--color-frame-3-fill:var(--color-accent)]/40",
+            "[--color-frame-4-stroke:var(--color-accent)]",
+            "[--color-frame-4-fill:var(--color-accent)]/40",
+            className,
+          ])}
+        >
+          <div className="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
+            <Frame
+              paths={parsePaths(
+                '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
+              )}
+              enableBackdropBlur={true}
+            />
+          </div>
+          <div className="relative flex flex-col gap-2.5">{children}</div>
+        </div>
       </div>
-      <div className="relative flex flex-col gap-2.5">{children}</div>
-    </div>
-  );
-}
-
-function SelectItemGroup({
-  children,
-  className,
-}: React.PropsWithChildren<{ className?: string }>) {
-  const api = useSelectContext();
-
-  return (
-    <div {...api.getItemGroupProps({ id: "group" })} className={className}>
-      {children}
-    </div>
+    </Portal>
   );
 }
 
@@ -339,11 +289,8 @@ function SelectItemIndicator({ className }: { className?: string }) {
 
 export {
   SelectRoot,
-  SelectControl,
   SelectTrigger,
-  SelectPositioner,
   SelectContent,
-  SelectItemGroup,
   SelectItem,
   SelectItemText,
   SelectItemIndicator,
@@ -360,11 +307,8 @@ export {
               {`
 import {
   SelectRoot,
-  SelectControl,
   SelectTrigger,
-  SelectPositioner,
   SelectContent,
-  SelectItemGroup,
   SelectItem,
   SelectItemText,
   SelectItemIndicator,
@@ -387,21 +331,15 @@ const frameworksCollection = select.collection({
 });
 
 <SelectRoot collection={frameworksCollection}>
-  <SelectControl>
-    <SelectTrigger />
-  </SelectControl>
-  <SelectPositioner>
-    <SelectContent>
-      <SelectItemGroup>
-        {frameworks.map((item) => (
-          <SelectItem key={item.value} item={item}>
-            <SelectItemText>{item.label}</SelectItemText>
-            <SelectItemIndicator />
-          </SelectItem>
-        ))}
-      </SelectItemGroup>
-    </SelectContent>
-  </SelectPositioner>
+  <SelectTrigger />
+  <SelectContent>
+    {frameworks.map((item) => (
+      <SelectItem key={item.value} item={item}>
+        <SelectItemText>{item.label}</SelectItemText>
+        <SelectItemIndicator />
+      </SelectItem>
+    ))}
+  </SelectContent>
 </SelectRoot>
               `}
             </PreviewCode>

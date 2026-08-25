@@ -3,9 +3,8 @@ import {
   RadioGroupRoot,
   RadioGroupLabel,
   RadioGroupItem,
-  RadioItemText,
-  RadioItemHiddenInput,
-  RadioItemControl,
+  RadioGroupItemText,
+  RadioGroupItemControl,
 } from "@/components/ui/radio-group";
 import {
   Wrapper,
@@ -61,9 +60,8 @@ function RadioGroupPage() {
                       <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
                       {items.map((opt) => (
                         <RadioGroupItem value={opt.id} key={opt.id}>
-                          <RadioItemText>{opt.label}</RadioItemText>
-                          <RadioItemHiddenInput />
-                          <RadioItemControl />
+                          <RadioGroupItemText>{opt.label}</RadioGroupItemText>
+                          <RadioGroupItemControl />
                         </RadioGroupItem>
                       ))}
                     </RadioGroupRoot>
@@ -76,9 +74,8 @@ function RadioGroupPage() {
   <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
   {items.map((opt) => (
     <RadioGroupItem value={opt.id} key={opt.id}>
-      <RadioItemText>{opt.label}</RadioItemText>
-      <RadioItemHiddenInput />
-      <RadioItemControl />
+      <RadioGroupItemText>{opt.label}</RadioGroupItemText>
+      <RadioGroupItemControl />
     </RadioGroupItem>
   ))}
 </RadioGroupRoot>
@@ -95,8 +92,12 @@ function RadioGroupPage() {
             <SectionContent>
               This component is built directly on the Zag.js state machine
               (not a wrapper). No Portal or presence hook needed, the
-              selected dot just toggles opacity, no exit animation. Copy and
-              paste the following code into your project.
+              selected dot just toggles opacity, no exit animation. The
+              hidden native input renders automatically inside{" "}
+              <span className="bg-foreground/15 px-1.5 py-px rounded-md">
+                RadioGroupItem
+              </span>
+              . Copy and paste the following code into your project.
             </SectionContent>
             <PreviewCode title="components/ui/radio-group.tsx">
               {`
@@ -104,7 +105,7 @@ import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import * as radioGroup from "@zag-js/radio-group";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parsePaths } from "@/components/ui/frame";
 
 const RadioGroupContext = createContext<ReturnType<typeof radioGroup.connect> | null>(
   null
@@ -167,12 +168,13 @@ function RadioGroupItem({
         className={twMerge(["flex gap-3.5 items-center cursor-pointer", className])}
       >
         {children}
+        <input {...api.getItemHiddenInputProps({ value })} />
       </label>
     </RadioGroupItemContext.Provider>
   );
 }
 
-function RadioItemText({
+function RadioGroupItemText({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
@@ -186,14 +188,7 @@ function RadioItemText({
   );
 }
 
-function RadioItemHiddenInput() {
-  const api = useRadioGroupContext();
-  const { value } = useRadioGroupItemContext();
-
-  return <input {...api.getItemHiddenInputProps({ value })} />;
-}
-
-function RadioItemControl({ className }: { className?: string }) {
+function RadioGroupItemControl({ className }: { className?: string }) {
   const api = useRadioGroupContext();
   const { value } = useRadioGroupItemContext();
 
@@ -208,7 +203,7 @@ function RadioItemControl({ className }: { className?: string }) {
       ])}
     >
       <Frame
-        paths={JSON.parse(
+        paths={parsePaths(
           '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
         )}
       />
@@ -220,7 +215,7 @@ function RadioItemControl({ className }: { className?: string }) {
         ])}
       >
         <Frame
-          paths={JSON.parse(
+          paths={parsePaths(
             '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
           )}
         />
@@ -233,9 +228,8 @@ export {
   RadioGroupRoot,
   RadioGroupLabel,
   RadioGroupItem,
-  RadioItemText,
-  RadioItemHiddenInput,
-  RadioItemControl,
+  RadioGroupItemText,
+  RadioGroupItemControl,
 };
               `}
             </PreviewCode>
@@ -251,9 +245,8 @@ import {
   RadioGroupRoot,
   RadioGroupLabel,
   RadioGroupItem,
-  RadioItemText,
-  RadioItemHiddenInput,
-  RadioItemControl,
+  RadioGroupItemText,
+  RadioGroupItemControl,
 } from "@/components/ui/radio-group";
               `}
             </PreviewCode>
@@ -270,12 +263,10 @@ const items = [
   <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
   {items.map((opt) => (
     <RadioGroupItem value={opt.id} key={opt.id}>
-      <RadioItemText>{opt.label}</RadioItemText>
-      <RadioItemHiddenInput />
-      <RadioItemControl />
+      <RadioGroupItemText>{opt.label}</RadioGroupItemText>
+      <RadioGroupItemControl />
     </RadioGroupItem>
   ))}
-  <RadioItemHiddenInput />
 </RadioGroupRoot>
               `}
             </PreviewCode>

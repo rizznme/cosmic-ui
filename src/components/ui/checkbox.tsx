@@ -30,6 +30,7 @@ function CheckboxRoot({
         className={twMerge(["flex gap-3.5 items-center cursor-pointer", className])}
       >
         {children}
+        <input {...api.getHiddenInputProps()} />
       </label>
     </CheckboxContext.Provider>
   );
@@ -71,10 +72,4 @@ function CheckboxControl({ className }: { className?: string }) {
   );
 }
 
-function CheckboxHiddenInput() {
-  const api = useCheckboxContext();
-
-  return <input {...api.getHiddenInputProps()} />;
-}
-
-export { CheckboxRoot, CheckboxLabel, CheckboxControl, CheckboxHiddenInput };
+export { CheckboxRoot, CheckboxLabel, CheckboxControl };
