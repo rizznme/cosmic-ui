@@ -2,7 +2,7 @@ import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import * as checkbox from "@zag-js/checkbox";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parsePaths } from "@/components/ui/frame";
 import { Check } from "lucide-react";
 
 const CheckboxContext = createContext<ReturnType<typeof checkbox.connect> | null>(
@@ -62,7 +62,7 @@ function CheckboxControl({ className }: { className?: string }) {
       ])}
     >
       <Frame
-        paths={JSON.parse(
+        paths={parsePaths(
           '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
         )}
       />

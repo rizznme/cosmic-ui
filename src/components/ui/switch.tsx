@@ -2,7 +2,7 @@ import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import * as switchMachine from "@zag-js/switch";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parsePaths } from "@/components/ui/frame";
 
 const SwitchContext = createContext<ReturnType<typeof switchMachine.connect> | null>(
   null
@@ -57,7 +57,7 @@ function SwitchControl({
     >
       <div className="absolute inset-0 z-[-1]">
         <Frame
-          paths={JSON.parse(
+          paths={parsePaths(
             '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","11","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 12"],["L","11","0"]]}]'
           )}
         />
@@ -84,7 +84,7 @@ function SwitchThumb({ className }: { className?: string }) {
       ])}
     >
       <Frame
-        paths={JSON.parse(
+        paths={parsePaths(
           '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","7","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 7"],["L","7","0"]]}]'
         )}
       />
