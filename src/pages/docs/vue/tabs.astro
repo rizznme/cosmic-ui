@@ -19,7 +19,7 @@ const data = [
   { value: "item-3", label: "Item three", content: "Item three content" },
 ];
 
-<TabsRoot :default-value="data[0].value">
+<TabsRoot :defaultValue="data[0].value">
   <TabsList>
     <TabsTrigger v-for="item in data" :key="item.value" :value="item.value">
       {{ item.label }}
@@ -185,7 +185,7 @@ import { TabsRoot, TabsList, TabsTrigger, TabsContent } from "@/components/ui/ta
 `;
 
 const usageExample = `
-<TabsRoot default-value="item-1">
+<TabsRoot defaultValue="item-1">
   <TabsList>
     <TabsTrigger value="item-1">Item one</TabsTrigger>
   </TabsList>

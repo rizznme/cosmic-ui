@@ -9,7 +9,7 @@ const data = [
 </script>
 
 <template>
-  <TabsRoot :default-value="data[0].value">
+  <TabsRoot :defaultValue="data[0].value">
     <TabsList>
       <TabsTrigger v-for="item in data" :key="item.value" :value="item.value">
         {{ item.label }}

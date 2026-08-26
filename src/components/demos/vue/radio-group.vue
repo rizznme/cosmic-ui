@@ -16,7 +16,7 @@ const items = [
 </script>
 
 <template>
-  <RadioGroupRoot default-value="apple">
+  <RadioGroupRoot defaultValue="apple">
     <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
     <RadioGroupItem v-for="opt in items" :key="opt.id" :value="opt.id">
       <RadioGroupItemText>{{ opt.label }}</RadioGroupItemText>

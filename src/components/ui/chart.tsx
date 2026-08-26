@@ -1,5 +1,6 @@
 import ChartJs from "chart.js/auto";
 import { useRef, useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 
 function getColor(name: string, opacity = 1) {
   const color = getComputedStyle(document.documentElement)
@@ -32,7 +33,11 @@ function Chart({
     }
   }, []);
 
-  return <canvas className={className} ref={chartRef} {...props} />;
+  return (
+    <div className={twMerge("relative h-64 w-full", className)}>
+      <canvas ref={chartRef} {...props} />
+    </div>
+  );
 }
 
 export { Chart, getColor };

@@ -26,7 +26,7 @@ const data = [
 </script>
 
 <template>
-  <AccordionRoot class="w-200" :default-value="[data[0].title]">
+  <AccordionRoot class="w-200" :defaultValue="[data[0].title]">
     <AccordionItem v-for="item in data" :key="item.title" :value="item.title">
       <AccordionTrigger>{{ item.title }}</AccordionTrigger>
       <AccordionContent>{{ item.content }}</AccordionContent>

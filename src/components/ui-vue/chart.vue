@@ -15,6 +15,7 @@ export { getColor };
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import ChartJs from "chart.js/auto";
+import { twMerge } from "tailwind-merge";
 
 const props = defineProps<{
   class?: string;
@@ -31,5 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <canvas ref="canvasRef" :class="props.class" />
+  <div :class="twMerge('relative h-64 w-full', props.class)">
+    <canvas ref="canvasRef" />
+  </div>
 </template>
