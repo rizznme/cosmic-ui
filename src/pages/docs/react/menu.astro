@@ -1,3 +1,89 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { MenuDemo } from "@/components/demos/react/menu";
+
+const previewCode = `
+<MenuRoot>
+  <MenuTrigger className="w-56">
+    <PenLine className="size-4 me-2.5" /> Actions
+  </MenuTrigger>
+  <MenuContent>
+    <MenuItem value="edit">
+      <FilePenLine className="size-4 me-2.5" /> Edit
+    </MenuItem>
+    <MenuItem value="duplicate">
+      <CopySlash className="size-4 me-2.5" /> Duplicate
+    </MenuItem>
+    <MenuItem value="delete">
+      <Eraser className="size-4 me-2.5" /> Delete
+    </MenuItem>
+    <MenuItem value="export">
+      <FileUp className="size-4 me-2.5" /> Export...
+    </MenuItem>
+  </MenuContent>
+</MenuRoot>
+`;
+
+const portalSource = `
+import { useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+
+const subscribe = () => () => {};
+
+/**
+ * Renders children into document.body on the client, and inline on the server.
+ *
+ * The server check matters: Astro server-renders islands, and \`createPortal\`
+ * needs a real \`document\`.
+ */
+function Portal({ children }: React.PropsWithChildren) {
+  const isServer = useSyncExternalStore(
+    subscribe,
+    () => false,
+    () => true
+  );
+
+  if (isServer) return <>{children}</>;
+
+  return createPortal(children, document.body);
+}
+
+export { Portal };
+`;
+
+const presenceSource = `
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as presence from "@zag-js/presence";
+
+/**
+ * Keeps a node mounted through its exit animation.
+ *
+ * \`open\` flips to false immediately, but \`present\` stays true until the
+ * node's CSS \`animationend\` fires (detected via \`ref\`), so exit animations
+ * (\`data-[state=closed]:animate-out\` etc.) actually get to play instead of
+ * the node disappearing on the same frame.
+ */
+function usePresence(open: boolean) {
+  const service = useMachine(presence.machine, { present: open });
+  const api = presence.connect(service, normalizeProps);
+
+  return { present: api.present, ref: api.setNode };
+}
+
+export { usePresence };
+`;
+
+const uiSource = `
 import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
@@ -118,3 +204,74 @@ function MenuItem({
 }
 
 export { MenuRoot, MenuTrigger, MenuContent, MenuItem };
+`;
+
+const usageImports = `
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from "@/components/ui/menu";
+`;
+
+const usageExample = `
+<MenuRoot>
+  <MenuTrigger className="w-56">
+    <PenLine className="size-4 me-2.5" /> Actions
+  </MenuTrigger>
+  <MenuContent>
+    <MenuItem value="edit">
+      <FilePenLine className="size-4 me-2.5" /> Edit
+    </MenuItem>
+    <MenuItem value="duplicate">
+      <CopySlash className="size-4 me-2.5" /> Duplicate
+    </MenuItem>
+    <MenuItem value="delete">
+      <Eraser className="size-4 me-2.5" /> Delete
+    </MenuItem>
+    <MenuItem value="export">
+      <FileUp className="size-4 me-2.5" /> Export...
+    </MenuItem>
+  </MenuContent>
+</MenuRoot>
+`;
+---
+
+<DocsLayout title="Menu | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Menu</Title>
+      <Subtitle>Displays a button or a component that looks like a button.</Subtitle>
+      <DocsLinks component="menu" />
+      <Preview>
+        <MenuDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/menu @zag-js/react @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus two small shared primitives used by every portal-based
+        component in this library: an SSR-safe{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>{" "}
+        and a{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>{" "}
+        hook that keeps content mounted through its exit animation. Copy all
+        three files into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/portal.tsx" code={portalSource} />
+      <PreviewCode title="components/ui/presence.ts" code={presenceSource} />
+      <SectionContent>Copy and paste the following code into your project.</SectionContent>
+      <PreviewCode title="components/ui/menu.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

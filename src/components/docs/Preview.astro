@@ -1,0 +1,84 @@
+---
+---
+
+<div class="mt-10" data-preview-tabs>
+  <div class="flex text-lg px-3" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      data-tab-trigger="preview"
+      aria-selected="true"
+      aria-controls="panel-preview"
+      id="tab-preview"
+      data-selected
+      class="px-2.5 opacity-70 cursor-pointer data-[selected]:opacity-100"
+    >
+      Preview
+    </button>
+    <button
+      type="button"
+      role="tab"
+      data-tab-trigger="code"
+      aria-selected="false"
+      aria-controls="panel-code"
+      id="tab-code"
+      tabindex="-1"
+      class="px-2.5 opacity-70 cursor-pointer data-[selected]:opacity-100"
+    >
+      Code
+    </button>
+  </div>
+  <div
+    role="tabpanel"
+    id="panel-preview"
+    aria-labelledby="tab-preview"
+    data-tab-panel="preview"
+    class="mt-4 backdrop-blur-md font-orbitron text-sm border bg-primary/5 border-primary/20 shadow-lg shadow-primary/10 min-h-100 flex items-center justify-center px-5 py-8 sm:p-8 lg:py-50 lg:px-20"
+  >
+    <slot name="preview" />
+  </div>
+  <div
+    role="tabpanel"
+    id="panel-code"
+    aria-labelledby="tab-code"
+    data-tab-panel="code"
+    hidden
+    class="-mt-4"
+  >
+    <slot name="code" />
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  function initTabs(root) {
+    const triggers = [...root.querySelectorAll("[data-tab-trigger]")];
+    const panels = [...root.querySelectorAll("[data-tab-panel]")];
+
+    function select(value) {
+      triggers.forEach((t) => {
+        const active = t.getAttribute("data-tab-trigger") === value;
+        t.toggleAttribute("data-selected", active);
+        t.setAttribute("aria-selected", String(active));
+        t.tabIndex = active ? 0 : -1;
+      });
+      panels.forEach((p) => {
+        p.hidden = p.getAttribute("data-tab-panel") !== value;
+      });
+    }
+
+    triggers.forEach((t, i) => {
+      t.addEventListener("click", () => select(t.getAttribute("data-tab-trigger")));
+      t.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        e.preventDefault();
+        const dir = e.key === "ArrowRight" ? 1 : -1;
+        const next = triggers[(i + dir + triggers.length) % triggers.length];
+        next.focus();
+        select(next.getAttribute("data-tab-trigger"));
+      });
+    });
+  }
+
+  document.querySelectorAll("[data-preview-tabs]").forEach(initTabs);
+</script>

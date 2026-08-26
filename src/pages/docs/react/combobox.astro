@@ -1,3 +1,56 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { ComboboxDemo } from "@/components/demos/react/combobox";
+
+const previewCode = `
+const frameworks = ["React", "Solid", "Vue", "Svelte"];
+
+const [state, setState] = useState([""]);
+const [itemsCollection, setItemsCollection] = useState(() =>
+  combobox.collection({ items: frameworks })
+);
+
+const handleInputChange = (details: { inputValue: string }) => {
+  const query = details.inputValue.toLowerCase();
+  setItemsCollection(
+    combobox.collection({
+      items: frameworks.filter((item) => item.toLowerCase().includes(query)),
+    })
+  );
+};
+
+<ComboboxRoot
+  value={state}
+  collection={itemsCollection}
+  onInputValueChange={handleInputChange}
+  onValueChange={(details) => setState(details.value)}
+>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      {itemsCollection.items.map((item) => (
+        <ComboboxItem key={item} item={item}>
+          <ComboboxItemText>{item}</ComboboxItemText>
+          <ComboboxItemIndicator />
+        </ComboboxItem>
+      ))}
+    </ComboboxItemGroup>
+  </ComboboxContent>
+</ComboboxRoot>
+`;
+
+const uiSource = `
 import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
@@ -191,3 +244,105 @@ export {
   ComboboxItemText,
   ComboboxItemIndicator,
 };
+`;
+
+const usageImports = `
+import {
+  ComboboxRoot,
+  ComboboxInput,
+  ComboboxTrigger,
+  ComboboxContent,
+  ComboboxItemGroup,
+  ComboboxItem,
+  ComboboxItemText,
+  ComboboxItemIndicator,
+} from "@/components/ui/combobox";
+`;
+
+const usageExample = `
+const frameworks = ["React", "Solid", "Vue", "Svelte"];
+
+const [state, setState] = useState([""]);
+const [itemsCollection, setItemsCollection] = useState(() =>
+  combobox.collection({ items: frameworks })
+);
+
+const handleInputChange = (details: { inputValue: string }) => {
+  const query = details.inputValue.toLowerCase();
+  setItemsCollection(
+    combobox.collection({
+      items: frameworks.filter((item) => item.toLowerCase().includes(query)),
+    })
+  );
+};
+
+<ComboboxRoot
+  value={state}
+  collection={itemsCollection}
+  onInputValueChange={handleInputChange}
+  onValueChange={(details) => setState(details.value)}
+>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      {itemsCollection.items.map((item) => (
+        <ComboboxItem key={item} item={item}>
+          <ComboboxItemText>{item}</ComboboxItemText>
+          <ComboboxItemIndicator />
+        </ComboboxItem>
+      ))}
+    </ComboboxItemGroup>
+  </ComboboxContent>
+</ComboboxRoot>
+`;
+---
+
+<DocsLayout title="Combobox | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Combobox</Title>
+      <Subtitle>
+        Autocomplete input and command palette with a list of suggestions.
+      </Subtitle>
+      <DocsLinks component="combobox" />
+      <Preview>
+        <ComboboxDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/combobox @zag-js/react @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the shared{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>{" "}
+        and{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>{" "}
+        primitives from the{" "}
+        <a href="/docs/react/menu" class="font-medium">Menu</a>{" "}
+        page. Filtering as you type uses Zag's own{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">combobox.collection()</span>{" "}
+        factory plus a plain case-insensitive match. The dropdown's anchor is
+        the control element wrapped inside{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">ComboboxTrigger</span>,
+        not the button itself, so its wrapper renders automatically and
+        doesn't need a part of its own. Copy and paste the following code
+        into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/combobox.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

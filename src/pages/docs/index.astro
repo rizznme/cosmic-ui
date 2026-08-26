@@ -1,6 +1,10 @@
 ---
 import DocsLayout from "@/layouts/DocsLayout.astro";
-import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/components/docs";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
 ---
 
 <DocsLayout title="Introduction | Cosmic UI">
@@ -16,7 +20,7 @@ import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/
         </Subtitle>
       </div>
       <div>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a>{" "}
           is a set of beautifully-crafted, customizable UI components with a
           sci-fi aesthetic. Built to empower you to create interfaces with
@@ -24,23 +28,23 @@ import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/
           leveraging{" "}
           <a href="https://zagjs.com/" target="_blank" class="font-medium">zag.js</a>{" "}
           for interactive components.
-        </SectionContent>
-        <SectionContent className="mb-5 opacity-90">
+        </p>
+        <p class="mt-2 mb-5 opacity-90">
           This is not a traditional component library. It is a system to
           build your own sci-fi component library.
-        </SectionContent>
-        <SectionContent className="mb-5 opacity-90">
+        </p>
+        <p class="mt-2 mb-5 opacity-90">
           You know how most component libraries work: you install a package,
           import the components, and use them as they are. But when you want
           a UI with a distinctive sci-fi style – sharp edges, frames,
           holographic panels – you often end up writing complex custom SVG
           or CSS code from scratch.
-        </SectionContent>
-        <SectionContent className="mb-5 opacity-90">
+        </p>
+        <p class="mt-2 mb-5 opacity-90">
           This is what{" "}
           <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a>{" "}
           aims to solve. It is built around the following principles:
-        </SectionContent>
+        </p>
         <div class="mb-7 opacity-90">
           <ul class="list-disc [&>li]:mb-1 pl-5">
             <li>SVG First: Components use customizable SVG shapes to achieve a truly sci-fi look.</li>
@@ -58,10 +62,10 @@ import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/
       </div>
       <div id="svg-first">
         <SectionTitle>SVG First</SectionTitle>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a>{" "}
           focuses on building components with SVG shapes at their core. This means:
-        </SectionContent>
+        </p>
         <div class="mb-7 opacity-90">
           <ul class="list-disc [&>li]:mb-1 pl-5">
             <li>Unique Designs: Break free from generic rectangles and create buttons, cards, modals, and panels with futuristic shapes.</li>
@@ -76,14 +80,14 @@ import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/
           <a href="https://zagjs.com/" target="_blank" class="font-medium">Zag.js</a>{" "}
           Integration
         </SectionTitle>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           Not all components require complex state management. For
           components that do (such as menus, dialogs, tabs),{" "}
           <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a>{" "}
           leverages{" "}
           <a href="https://zagjs.com/" target="_blank" class="font-medium">zag.js</a>{" "}
           to provide:
-        </SectionContent>
+        </p>
         <div class="mb-7 opacity-90">
           <ul class="list-disc [&>li]:mb-1 pl-5">
             <li>Accessible Logic: Keyboard interactions and ARIA compliance out-of-the-box.</li>
@@ -98,42 +102,42 @@ import { Wrapper, Title, Subtitle, Menu, SectionTitle, SectionContent } from "@/
       </div>
       <div id="scifi-defaults">
         <SectionTitle>Beautiful Sci-Fi Defaults</SectionTitle>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a>{" "}
           comes with a collection of components styled with a sci-fi aesthetic:
-        </SectionContent>
+        </p>
         <div class="mb-7 opacity-90">
           <ul class="list-disc [&>li]:mb-1 pl-5">
             <li>Buttons & Alerts: Styled with holographic glows, sharp angles, and SVG-based frames.</li>
             <li>Menus & Modals: Designed to blend seamlessly into sci-fi interfaces with a consistent visual language.</li>
           </ul>
         </div>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           These components look good out-of-the-box but are also easy to customize for your specific project needs.
-        </SectionContent>
+        </p>
       </div>
       <div id="full-control">
         <SectionTitle>Full Control</SectionTitle>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           Unlike traditional libraries, you are not locked into predefined styles or markup. You can:
-        </SectionContent>
+        </p>
         <div class="mb-7 opacity-90">
           <ul class="list-disc [&>li]:mb-1 pl-5">
             <li>Edit SVG Paths: Modify the structure of your components at the lowest level.</li>
             <li>Customize Styles Completely: Tailor colors, glows, gradients, and frames to match your design vision.</li>
           </ul>
         </div>
-        <SectionContent className="mb-5 opacity-90">
+        <p class="mt-2 mb-5 opacity-90">
           Extend Freely: Build new components using the same SVG-based approach to grow your sci-fi UI system.
-        </SectionContent>
+        </p>
       </div>
     </div>
   </Wrapper>
-  <Menu>
+  <TocMenu>
     <a class="hover:text-foreground py-1" href="#introduction">Introduction</a>
     <a class="hover:text-foreground py-1" href="#svg-first">SVG First</a>
     <a class="hover:text-foreground py-1" href="#zagjs-integration">Selective Zag.js Integration</a>
     <a class="hover:text-foreground py-1" href="#scifi-defaults">Beautiful Sci-Fi Defaults</a>
     <a class="hover:text-foreground py-1" href="#full-control">Full Control</a>
-  </Menu>
+  </TocMenu>
 </DocsLayout>

@@ -1,3 +1,45 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { SelectDemo } from "@/components/demos/react/select";
+
+const previewCode = `
+const frameworks = [
+  { label: "React", value: "react" },
+  { label: "Solid", value: "solid" },
+  { label: "Vue", value: "vue" },
+  { label: "Svelte", value: "svelte" },
+];
+
+const frameworksCollection = select.collection({
+  items: frameworks,
+  itemToString: (item) => item.label,
+  itemToValue: (item) => item.value,
+});
+
+<SelectRoot collection={frameworksCollection}>
+  <SelectTrigger />
+  <SelectContent>
+    {frameworks.map((item) => (
+      <SelectItem key={item.value} item={item}>
+        <SelectItemText>{item.label}</SelectItemText>
+        <SelectItemIndicator />
+      </SelectItem>
+    ))}
+  </SelectContent>
+</SelectRoot>
+`;
+
+const uiSource = `
 import { createContext, useContext, useId } from "react";
 import { twMerge } from "tailwind-merge";
 import { useMachine, normalizeProps } from "@zag-js/react";
@@ -158,3 +200,89 @@ export {
   SelectItemText,
   SelectItemIndicator,
 };
+`;
+
+const usageImports = `
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+} from "@/components/ui/select";
+`;
+
+const usageExample = `
+const frameworks = [
+  { label: "React", value: "react" },
+  { label: "Solid", value: "solid" },
+  { label: "Vue", value: "vue" },
+  { label: "Svelte", value: "svelte" },
+];
+
+const frameworksCollection = select.collection({
+  items: frameworks,
+  itemToString: (item) => item.label,
+  itemToValue: (item) => item.value,
+});
+
+<SelectRoot collection={frameworksCollection}>
+  <SelectTrigger />
+  <SelectContent>
+    {frameworks.map((item) => (
+      <SelectItem key={item.value} item={item}>
+        <SelectItemText>{item.label}</SelectItemText>
+        <SelectItemIndicator />
+      </SelectItem>
+    ))}
+  </SelectContent>
+</SelectRoot>
+`;
+---
+
+<DocsLayout title="Select | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Select</Title>
+      <Subtitle>
+        A dropdown that lets users pick one value from a list of options.
+      </Subtitle>
+      <DocsLinks component="select" />
+      <Preview>
+        <SelectDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/select @zag-js/react @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the shared{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>{" "}
+        and{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>{" "}
+        primitives from the{" "}
+        <a href="/docs/react/menu" class="font-medium">Menu</a>{" "}
+        page, and the same dropdown frame used by{" "}
+        <a href="/docs/react/menu" class="font-medium">Menu</a>.
+        Unlike Combobox, the select's anchor is the trigger button itself, so
+        there's no separate control wrapper. Copy and paste the following
+        code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/select.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

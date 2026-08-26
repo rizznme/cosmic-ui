@@ -1,0 +1,229 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { RadioGroupDemo } from "@/components/demos/react/radio-group";
+
+const previewCode = `
+<RadioGroupRoot defaultValue="apple">
+  <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
+  {items.map((opt) => (
+    <RadioGroupItem value={opt.id} key={opt.id}>
+      <RadioGroupItemText>{opt.label}</RadioGroupItemText>
+      <RadioGroupItemControl />
+    </RadioGroupItem>
+  ))}
+</RadioGroupRoot>
+`;
+
+const uiSource = `
+import { createContext, useContext, useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as radioGroup from "@zag-js/radio-group";
+import { Frame, parsePaths } from "@/components/ui/frame";
+
+const RadioGroupContext = createContext<ReturnType<typeof radioGroup.connect> | null>(
+  null
+);
+const RadioGroupItemContext = createContext<{ value: string } | null>(null);
+
+function useRadioGroupContext() {
+  const api = useContext(RadioGroupContext);
+  if (!api) throw new Error("RadioGroup parts must be used within <RadioGroupRoot>");
+  return api;
+}
+
+function useRadioGroupItemContext() {
+  const item = useContext(RadioGroupItemContext);
+  if (!item) throw new Error("RadioGroupItem parts must be used within <RadioGroupItem>");
+  return item;
+}
+
+function RadioGroupRoot({
+  children,
+  className,
+  ...rest
+}: React.PropsWithChildren<Partial<radioGroup.Props> & { className?: string }>) {
+  const service = useMachine(radioGroup.machine, { id: useId(), ...rest });
+  const api = radioGroup.connect(service, normalizeProps);
+
+  return (
+    <RadioGroupContext.Provider value={api}>
+      <div {...api.getRootProps()} className={twMerge(["flex flex-col gap-3", className])}>
+        {children}
+      </div>
+    </RadioGroupContext.Provider>
+  );
+}
+
+function RadioGroupLabel({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useRadioGroupContext();
+
+  return (
+    <div {...api.getLabelProps()} className={twMerge(["font-bold", className])}>
+      {children}
+    </div>
+  );
+}
+
+function RadioGroupItem({
+  children,
+  className,
+  value,
+}: React.PropsWithChildren<{ className?: string; value: string }>) {
+  const api = useRadioGroupContext();
+
+  return (
+    <RadioGroupItemContext.Provider value={{ value }}>
+      <label
+        {...api.getItemProps({ value })}
+        className={twMerge(["flex gap-3.5 items-center cursor-pointer", className])}
+      >
+        {children}
+        <input {...api.getItemHiddenInputProps({ value })} />
+      </label>
+    </RadioGroupItemContext.Provider>
+  );
+}
+
+function RadioGroupItemText({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useRadioGroupContext();
+  const { value } = useRadioGroupItemContext();
+
+  return (
+    <span {...api.getItemTextProps({ value })} className={twMerge(["order-2", className])}>
+      {children}
+    </span>
+  );
+}
+
+function RadioGroupItemControl({ className }: { className?: string }) {
+  const api = useRadioGroupContext();
+  const { value } = useRadioGroupItemContext();
+
+  return (
+    <div
+      {...api.getItemControlProps({ value })}
+      className={twMerge([
+        "group relative size-5 flex items-center justify-center data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]",
+        "[--color-frame-1-stroke:var(--color-primary)]/70",
+        "[--color-frame-1-fill:var(--color-primary)]/10",
+        className,
+      ])}
+    >
+      <Frame
+        paths={parsePaths(
+          '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
+        )}
+      />
+      <div
+        className={twMerge([
+          "group-data-[state=checked]:opacity-100 opacity-0 relative size-3 transition-all duration-100",
+          "[--color-frame-1-stroke:var(--color-primary)]",
+          "[--color-frame-1-fill:var(--color-primary)]/30",
+        ])}
+      >
+        <Frame
+          paths={parsePaths(
+            '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+export {
+  RadioGroupRoot,
+  RadioGroupLabel,
+  RadioGroupItem,
+  RadioGroupItemText,
+  RadioGroupItemControl,
+};
+`;
+
+const usageImports = `
+import {
+  RadioGroupRoot,
+  RadioGroupLabel,
+  RadioGroupItem,
+  RadioGroupItemText,
+  RadioGroupItemControl,
+} from "@/components/ui/radio-group";
+`;
+
+const usageExample = `
+const items = [
+  { id: "apple", label: "Apples" },
+  { id: "orange", label: "Oranges" },
+  { id: "mango", label: "Mangoes" },
+  { id: "grape", label: "Grapes" },
+];
+
+<RadioGroupRoot defaultValue="apple">
+  <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
+  {items.map((opt) => (
+    <RadioGroupItem value={opt.id} key={opt.id}>
+      <RadioGroupItemText>{opt.label}</RadioGroupItemText>
+      <RadioGroupItemControl />
+    </RadioGroupItem>
+  ))}
+</RadioGroupRoot>
+`;
+---
+
+<DocsLayout title="Radio Group | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Radio Group</Title>
+      <Subtitle>
+        A set of checkable buttons—known as radio buttons—where no more than
+        one of the buttons can be checked at a time.
+      </Subtitle>
+      <DocsLinks component="radio-group" />
+      <Preview>
+        <RadioGroupDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/radio-group @zag-js/react</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper). No Portal or presence hook needed, the selected dot just
+        toggles opacity, no exit animation. The hidden native input renders
+        automatically inside{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">RadioGroupItem</span>.
+        Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/radio-group.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

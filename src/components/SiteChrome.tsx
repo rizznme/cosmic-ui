@@ -60,7 +60,7 @@ export function SiteChrome() {
                 </a>
                 <a
                   className="hover:text-shadow-lg hover:text-shadow-primary/50"
-                  href="/docs/frame"
+                  href="/docs/react/frame"
                 >
                   Components
                 </a>

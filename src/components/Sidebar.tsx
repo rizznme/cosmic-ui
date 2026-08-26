@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
 import { X } from "lucide-react";
 import { getShowMenu, setShowMenu, subscribe } from "@/lib/mobile-menu-store";
+import { FrameworkSwitcher } from "@/components/FrameworkSwitcher";
 
 type DocLink = { href: string; label: string; end?: boolean; badge?: string };
 
@@ -10,28 +11,28 @@ const docLinks: { group: string; items: DocLink[] }[] = [
     group: "Getting Started",
     items: [
       { href: "/docs", label: "Introduction", end: true },
-      { href: "/docs/how-to-use", label: "How to Use" },
+      { href: "/docs/react/how-to-use", label: "How to Use" },
     ],
   },
   {
     group: "Components",
     items: [
-      { href: "/docs/frame", label: "Frame" },
-      { href: "/docs/menu", label: "Menu" },
-      { href: "/docs/alert", label: "Alert" },
-      { href: "/docs/accordion", label: "Accordion" },
-      { href: "/docs/dialog", label: "Dialog" },
-      { href: "/docs/tabs", label: "Tabs" },
-      { href: "/docs/toast", label: "Toast", badge: "New" },
-      { href: "/docs/button", label: "Button" },
-      { href: "/docs/input", label: "Input" },
-      { href: "/docs/switch", label: "Switch" },
-      { href: "/docs/textarea", label: "Textarea" },
-      { href: "/docs/radio-group", label: "Radio Group" },
-      { href: "/docs/checkbox", label: "Checkbox" },
-      { href: "/docs/chart", label: "Chart" },
-      { href: "/docs/combobox", label: "Combobox" },
-      { href: "/docs/select", label: "Select", badge: "New" },
+      { href: "/docs/react/frame", label: "Frame" },
+      { href: "/docs/react/menu", label: "Menu" },
+      { href: "/docs/react/alert", label: "Alert" },
+      { href: "/docs/react/accordion", label: "Accordion" },
+      { href: "/docs/react/dialog", label: "Dialog" },
+      { href: "/docs/react/tabs", label: "Tabs" },
+      { href: "/docs/react/toast", label: "Toast", badge: "New" },
+      { href: "/docs/react/button", label: "Button" },
+      { href: "/docs/react/input", label: "Input" },
+      { href: "/docs/react/switch", label: "Switch" },
+      { href: "/docs/react/textarea", label: "Textarea" },
+      { href: "/docs/react/radio-group", label: "Radio Group" },
+      { href: "/docs/react/checkbox", label: "Checkbox" },
+      { href: "/docs/react/chart", label: "Chart" },
+      { href: "/docs/react/combobox", label: "Combobox" },
+      { href: "/docs/react/select", label: "Select", badge: "New" },
     ],
   },
 ];
@@ -61,6 +62,7 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
         >
           <X className="size-6" />
         </div>
+        <FrameworkSwitcher currentPath={currentPath} />
         {docLinks.map((group) => (
           <div className="flex flex-col" key={group.group}>
             <div className="font-medium text-foreground mb-2">{group.group}</div>

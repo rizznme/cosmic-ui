@@ -1,0 +1,133 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  title?: string;
+  code: string;
+}
+
+const { title = "", code: rawCode } = Astro.props;
+// The original React version's code came from template literals with a
+// leading and trailing blank line baked in by how they were indented in
+// JSX (e.g. `{`\nimport ...;\n              `}`). That blank padding is
+// part of the block's rendered height. Rather than hand-copy each call
+// site's arbitrary trailing-space count, normalize: trim to the real
+// content, then re-add exactly one blank line on each side.
+// A trailing "\n" alone doesn't render as a blank line in <pre> unless
+// something follows it on that line — hence the trailing space.
+const code = `\n${rawCode.trim()}\n `;
+---
+
+<div
+  class="mt-8 mb-10 border bg-primary/5 border-primary/20 shadow-lg shadow-primary/10 relative"
+  data-preview-code
+  data-has-title={title ? "true" : "false"}
+>
+  <div class="flex items-center py-2 px-5 gap-5">
+    {title && <Icon name="file-scan" class="stroke-1 size-5 fill-foreground/10" />}
+    <div class="flex items-center w-full gap-2">
+      <div>{title}</div>
+      <div
+        data-toggle-wrap
+        class="ms-auto mr-2 cursor-pointer px-3.5 py-1 relative after:w-px after:h-5 after:inset-y-0 after:my-auto after:bg-primary/20 after:right-0 after:absolute"
+      >
+        <span data-toggle-label>Expand</span>
+      </div>
+      <button type="button" data-copy-btn aria-label="Copy" class:list={["cursor-pointer", !title && "mt-1"]}>
+        <Icon
+          name="clipboard"
+          data-icon-clipboard
+          class="size-5 stroke-1 fill-foreground/10"
+        />
+        <Icon
+          name="check"
+          data-icon-check
+          class="hidden size-5 stroke-1 fill-foreground/10"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    data-code-box
+    class:list={[
+      "max-h-100 text-sm px-5 overflow-x-auto overflow-y-hidden before:h-80 before:absolute before:bg-gradient-to-b before:from-transparent before:to-background/80 before:inset-x-0 before:bottom-0",
+      title ? "border-t border-primary/20" : "-mt-13 border-0",
+    ]}
+  >
+    <pre><code>{code}</code></pre>
+    <div
+      data-expand-btn-wrap
+      class="absolute bottom-0 inset-x-0 mx-auto w-26 mb-8 py-0.5 cursor-pointer border border-primary/50 bg-primary/20 flex items-center justify-center gap-2 text-base backdrop-blur"
+    >
+      <Icon name="arrow-down" class="size-4" /> Expand
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  function initPreviewCode(root) {
+    const codeBox = root.querySelector("[data-code-box]");
+    const toggleWrap = root.querySelector("[data-toggle-wrap]");
+    const toggleLabel = root.querySelector("[data-toggle-label]");
+    const expandBtnWrap = root.querySelector("[data-expand-btn-wrap]");
+    const copyBtn = root.querySelector("[data-copy-btn]");
+    const clipboardIcon = root.querySelector("[data-icon-clipboard]");
+    const checkIcon = root.querySelector("[data-icon-check]");
+    let expand = false;
+    let copyTimeout = null;
+
+    function render() {
+      const short = codeBox.offsetHeight < 300;
+
+      codeBox.classList.toggle("max-h-100", !expand);
+      codeBox.classList.toggle("max-h-auto", expand);
+      codeBox.classList.toggle("before:hidden", expand);
+
+      if (toggleLabel) toggleLabel.textContent = expand ? "Collapse" : "Expand";
+      toggleWrap?.classList.toggle("opacity-0", short);
+      expandBtnWrap?.classList.toggle("hidden", expand);
+    }
+
+    // codeBox can start out inside a hidden ancestor (e.g. an inactive tab
+    // panel), where offsetHeight always reads 0 regardless of real content
+    // length. ResizeObserver catches the moment it actually gets laid out
+    // (tab switch, accordion open, etc.) and re-measures then, instead of
+    // locking in a wrong "short" verdict at init time.
+    let measured = false;
+    const resizeObserver = new ResizeObserver(() => {
+      if (measured || codeBox.offsetHeight === 0) return;
+      measured = true;
+      if (codeBox.offsetHeight < 300) expand = true;
+      render();
+      resizeObserver.disconnect();
+    });
+    resizeObserver.observe(codeBox);
+
+    toggleWrap?.addEventListener("click", () => {
+      expand = !expand;
+      render();
+    });
+
+    expandBtnWrap?.addEventListener("click", () => {
+      expand = true;
+      render();
+    });
+
+    copyBtn?.addEventListener("click", () => {
+      const text = codeBox.querySelector("code")?.textContent ?? "";
+      navigator.clipboard.writeText(text).then(() => {
+        clipboardIcon?.classList.add("hidden");
+        checkIcon?.classList.remove("hidden");
+        if (copyTimeout) clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+          clipboardIcon?.classList.remove("hidden");
+          checkIcon?.classList.add("hidden");
+        }, 3000);
+      });
+    });
+
+  }
+
+  document.querySelectorAll("[data-preview-code]").forEach(initPreviewCode);
+</script>

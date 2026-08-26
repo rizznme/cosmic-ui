@@ -1,0 +1,97 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { InputDemo } from "@/components/demos/react/input";
+
+const previewCode = `
+<Input type="text" placeholder="Email" />
+`;
+
+const uiSource = `
+import { Frame, parsePaths } from "@/components/ui/frame";
+import { twMerge } from "tailwind-merge";
+
+function Input({
+  className,
+  children,
+  variant = "lifted",
+  type,
+  ...props
+}: React.ComponentProps<"input"> & {
+  variant?: "flat" | "lifted" | "simple";
+}) {
+  return (
+    <div
+      className={twMerge([
+        "relative",
+        "[--color-frame-1-stroke:var(--color-primary)]/70",
+        "[--color-frame-1-fill:var(--color-primary)]/10",
+        "[--color-frame-2-stroke:transparent]",
+        "[--color-frame-2-fill:transparent]",
+      ])}
+    >
+      <div className="absolute inset-0 -mb-2 [&>svg]:drop-shadow-[0_0px_20px_var(--color-primary)]">
+        <Frame
+          paths={parsePaths(
+            '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","17","0"],["L","100% - 7","0"],["L","100% + 0","0% + 9.5"],["L","100% - 18","100% - 6"],["L","4","100% - 6"],["L","0","100% - 15"],["L","17","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","9","100% - 6"],["L","100% - 22","100% - 6"],["L","100% - 25","100% + 0"],["L","12","100% + 0"],["L","9","100% - 6"]]}]'
+          )}
+        />
+      </div>
+      <input
+        type={type}
+        className="w-full outline-none px-8 py-2 relative placeholder:text-foreground/70"
+        {...props}
+      />
+    </div>
+  );
+}
+
+export { Input };
+`;
+
+const usageImports = `
+import { Input } from "@/components/ui/input";
+`;
+
+const usageExample = `
+<Input type="text" placeholder="Email" />
+`;
+---
+
+<DocsLayout title="Input | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Input</Title>
+      <Subtitle>
+        Displays a form input field or a component that looks like an input
+        field.
+      </Subtitle>
+      <Preview>
+        <InputDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Copy and paste the following code into your project.</SectionContent>
+      <PreviewCode title="components/ui/input.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

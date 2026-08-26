@@ -21,7 +21,7 @@ function HomePage() {
           <a href="/docs">
             <Button className="w-64 sm:w-56">Get Started</Button>
           </a>
-          <a href="/docs/frame">
+          <a href="/docs/react/frame">
             <Button variant="accent" className="w-64 sm:w-56">
               Browse Components
             </Button>

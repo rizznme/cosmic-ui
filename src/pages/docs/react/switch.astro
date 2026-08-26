@@ -1,0 +1,169 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { SwitchDemo } from "@/components/demos/react/switch";
+
+const previewCode = `
+<SwitchRoot>
+  <SwitchControl />
+  <SwitchLabel>Airplane Mode</SwitchLabel>
+</SwitchRoot>
+`;
+
+const uiSource = `
+import { createContext, useContext, useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as switchMachine from "@zag-js/switch";
+import { Frame, parsePaths } from "@/components/ui/frame";
+
+const SwitchContext = createContext<ReturnType<typeof switchMachine.connect> | null>(
+  null
+);
+
+function useSwitchContext() {
+  const api = useContext(SwitchContext);
+  if (!api) throw new Error("Switch parts must be used within <SwitchRoot>");
+  return api;
+}
+
+function SwitchRoot({
+  children,
+  className,
+  ...rest
+}: React.PropsWithChildren<Partial<switchMachine.Props> & { className?: string }>) {
+  const service = useMachine(switchMachine.machine, { id: useId(), ...rest });
+  const api = switchMachine.connect(service, normalizeProps);
+
+  return (
+    <SwitchContext.Provider value={api}>
+      <label {...api.getRootProps()} className={twMerge(["flex items-center gap-4", className])}>
+        {children}
+        <input {...api.getHiddenInputProps()} />
+      </label>
+    </SwitchContext.Provider>
+  );
+}
+
+function SwitchControl({ className }: { className?: string }) {
+  const api = useSwitchContext();
+
+  return (
+    <div
+      {...api.getControlProps()}
+      className={twMerge([
+        "group relative w-14 h-6 flex items-center p-1 cursor-pointer",
+        "[--color-frame-1-stroke:var(--color-primary)]/70",
+        "[--color-frame-1-fill:var(--color-primary)]/10",
+        "data-[state=checked]:[--color-frame-1-stroke:var(--color-primary)]",
+        "data-[state=checked]:[--color-frame-1-fill:var(--color-primary)]/20",
+        className,
+      ])}
+    >
+      <div className="absolute inset-0 z-[-1]">
+        <Frame
+          paths={parsePaths(
+            '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","11","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 12"],["L","11","0"]]}]'
+          )}
+        />
+      </div>
+      <div
+        {...api.getThumbProps()}
+        className={twMerge([
+          "relative w-1/2 h-3.5 z-[-1] -mb-px transition-all ms-0.5",
+          "[--color-frame-1-stroke:var(--color-primary)]/80",
+          "[--color-frame-1-fill:var(--color-primary)]/20",
+          "group-data-[state=checked]:[--color-frame-1-stroke:var(--color-primary)]",
+          "group-data-[state=checked]:[--color-frame-1-fill:var(--color-primary)]/30",
+          "group-data-[state=checked]:ms-[47%] group-data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]",
+        ])}
+      >
+        <Frame
+          paths={parsePaths(
+            '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","7","0"],["L","100% + 0","0"],["L","100% + 0","100% + 0"],["L","0","100% + 0"],["L","0","0% + 7"],["L","7","0"]]}]'
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SwitchLabel({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useSwitchContext();
+
+  return (
+    <span {...api.getLabelProps()} className={className}>
+      {children}
+    </span>
+  );
+}
+
+export { SwitchRoot, SwitchControl, SwitchLabel };
+`;
+
+const usageImports = `
+import { SwitchRoot, SwitchControl, SwitchLabel } from "@/components/ui/switch";
+`;
+
+const usageExample = `
+<SwitchRoot>
+  <SwitchControl />
+  <SwitchLabel>Airplane Mode</SwitchLabel>
+</SwitchRoot>
+`;
+---
+
+<DocsLayout title="Switch | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Switch</Title>
+      <Subtitle>
+        A control that allows the user to toggle between checked and not
+        checked.
+      </Subtitle>
+      <DocsLinks component="switch" />
+      <Preview>
+        <SwitchDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/switch @zag-js/react</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper). No Portal or presence hook needed, the thumb just slides via
+        CSS transition, no exit animation. The thumb and the hidden native
+        input both render automatically inside{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">SwitchControl</span>{" "}
+        /{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">SwitchRoot</span>.
+        Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/switch.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

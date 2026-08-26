@@ -1,0 +1,96 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<div
+  class="mt-8 mb-10 border bg-primary/5 border-primary/20 shadow-lg shadow-primary/10"
+  data-install-package
+>
+  <div class="flex items-center py-2 px-5 gap-5">
+    <Icon name="square-chevron-right" class="stroke-1 size-5 fill-foreground/10" />
+    <div class="flex items-center w-full gap-2">
+      <div
+        data-pm-btn="pnpm"
+        class="cursor-pointer px-3.5 py-1 [&.active]:border [&.active]:border-primary/20 [&.active]:bg-primary/10"
+      >
+        pnpm
+      </div>
+      <div
+        data-pm-btn="npm"
+        class="cursor-pointer px-3.5 py-1 [&.active]:border [&.active]:border-primary/20 [&.active]:bg-primary/10"
+      >
+        npm
+      </div>
+      <div
+        data-pm-btn="yarn"
+        class="active cursor-pointer px-3.5 py-1 [&.active]:border [&.active]:border-primary/20 [&.active]:bg-primary/10"
+      >
+        yarn
+      </div>
+      <div
+        data-pm-btn="bun"
+        class="cursor-pointer px-3.5 py-1 [&.active]:border [&.active]:border-primary/20 [&.active]:bg-primary/10"
+      >
+        bun
+      </div>
+      <button type="button" data-copy-btn aria-label="Copy" class="ms-auto cursor-pointer">
+        <Icon
+          name="clipboard"
+          data-icon-clipboard
+          class="size-5 stroke-1 fill-foreground/10"
+        />
+        <Icon
+          name="check"
+          data-icon-check
+          class="hidden size-5 stroke-1 fill-foreground/10"
+        />
+      </button>
+    </div>
+  </div>
+  <div data-command-row class="p-5 border-t border-primary/20">
+    <span data-pm-label>yarn</span> <span data-command><slot /></span>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  function initInstallPackage(root) {
+    const baseCommand = root.querySelector("[data-command]")?.textContent?.trim() ?? "";
+    const pmLabel = root.querySelector("[data-pm-label]");
+    const commandEl = root.querySelector("[data-command]");
+    const buttons = [...root.querySelectorAll("[data-pm-btn]")];
+    const copyBtn = root.querySelector("[data-copy-btn]");
+    const clipboardIcon = root.querySelector("[data-icon-clipboard]");
+    const checkIcon = root.querySelector("[data-icon-check]");
+    let copyTimeout = null;
+
+    function setPm(pm) {
+      buttons.forEach((b) => b.classList.toggle("active", b.getAttribute("data-pm-btn") === pm));
+      if (pmLabel) pmLabel.textContent = pm;
+      if (commandEl) {
+        commandEl.textContent = pm === "npm" ? baseCommand.replace("add", "install") : baseCommand;
+      }
+    }
+
+    buttons.forEach((b) => {
+      b.addEventListener("click", () => setPm(b.getAttribute("data-pm-btn")));
+    });
+
+    copyBtn?.addEventListener("click", () => {
+      const text = root.querySelector("[data-command-row]")?.textContent?.trim() ?? "";
+      navigator.clipboard.writeText(text).then(() => {
+        clipboardIcon?.classList.add("hidden");
+        checkIcon?.classList.remove("hidden");
+        if (copyTimeout) clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+          clipboardIcon?.classList.remove("hidden");
+          checkIcon?.classList.add("hidden");
+        }, 3000);
+      });
+    });
+
+    setPm("yarn");
+  }
+
+  document.querySelectorAll("[data-install-package]").forEach(initInstallPackage);
+</script>

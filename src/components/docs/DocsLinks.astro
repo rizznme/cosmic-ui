@@ -1,0 +1,28 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  component: string;
+  framework?: "react" | "vue" | "svelte";
+}
+
+const { component, framework = "react" } = Astro.props;
+const base = `https://zagjs.com/components/${framework}/${component}`;
+---
+
+<div class="flex gap-3 mt-5">
+  <a
+    class="pr-3 pl-3.5 py-0.5 border border-primary/20 bg-primary/10 flex items-center gap-2 text-sm"
+    target="_blank"
+    href={base}
+  >
+    Docs <Icon name="move-up-right" class="stroke-1 size-3" />
+  </a>
+  <a
+    class="pr-3 pl-3.5 py-0.5 border border-primary/20 bg-primary/10 flex items-center gap-2 text-sm"
+    target="_blank"
+    href={`${base}#api-reference`}
+  >
+    Api Reference <Icon name="move-up-right" class="stroke-1 size-3" />
+  </a>
+</div>
