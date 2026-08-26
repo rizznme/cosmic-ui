@@ -1,0 +1,272 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import RadioGroupDemo from "@/components/demos/vue/radio-group.vue";
+
+const previewCode = `
+const items = [
+  { id: "apple", label: "Apples" },
+  { id: "orange", label: "Oranges" },
+  { id: "mango", label: "Mangoes" },
+  { id: "grape", label: "Grapes" },
+];
+
+<RadioGroupRoot default-value="apple">
+  <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
+  <RadioGroupItem v-for="opt in items" :key="opt.id" :value="opt.id">
+    <RadioGroupItemText>{{ opt.label }}</RadioGroupItemText>
+    <RadioGroupItemControl />
+  </RadioGroupItem>
+</RadioGroupRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as radioGroup from "@zag-js/radio-group";
+
+type RadioGroupApi = ComputedRef<ReturnType<typeof radioGroup.connect>>;
+
+const RadioGroupApiKey: InjectionKey<RadioGroupApi> = Symbol("radio-group-api");
+const RadioGroupItemValueKey: InjectionKey<string> = Symbol("radio-group-item-value");
+
+export { RadioGroupApiKey, RadioGroupItemValueKey };
+export type { RadioGroupApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as radioGroup from "@zag-js/radio-group";
+import { twMerge } from "tailwind-merge";
+import { RadioGroupApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<radioGroup.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, ...rest };
+});
+const service = useMachine(radioGroup.machine, machineProps);
+const api = computed(() => radioGroup.connect(service, normalizeProps));
+
+provide(RadioGroupApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()" :class="twMerge(['flex flex-col gap-3', rawAttrs.class])">
+    <slot />
+  </div>
+</template>
+`;
+
+const labelSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { RadioGroupApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(RadioGroupApiKey);
+if (!injectedApi) throw new Error("RadioGroup parts must be used within <RadioGroupRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div v-bind="api.getLabelProps()" :class="twMerge(['font-bold', className])">
+    <slot />
+  </div>
+</template>
+`;
+
+const itemSource = `
+<script setup lang="ts">
+import { inject, provide } from "vue";
+import { twMerge } from "tailwind-merge";
+import { RadioGroupApiKey, RadioGroupItemValueKey } from "./context";
+
+const { class: className, value } = defineProps<{ class?: string; value: string }>();
+
+const injectedApi = inject(RadioGroupApiKey);
+if (!injectedApi) throw new Error("RadioGroup parts must be used within <RadioGroupRoot>");
+const api = injectedApi;
+
+provide(RadioGroupItemValueKey, value);
+</script>
+
+<template>
+  <label
+    v-bind="api.getItemProps({ value })"
+    :class="twMerge(['flex gap-3.5 items-center cursor-pointer', className])"
+  >
+    <slot />
+    <input v-bind="api.getItemHiddenInputProps({ value })" />
+  </label>
+</template>
+`;
+
+const itemTextSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { RadioGroupApiKey, RadioGroupItemValueKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(RadioGroupApiKey);
+if (!injectedApi) throw new Error("RadioGroup parts must be used within <RadioGroupRoot>");
+const api = injectedApi;
+
+const value = inject(RadioGroupItemValueKey);
+if (value === undefined) throw new Error("RadioGroupItemText must be used within <RadioGroupItem>");
+</script>
+
+<template>
+  <span v-bind="api.getItemTextProps({ value })" :class="twMerge(['order-2', className])">
+    <slot />
+  </span>
+</template>
+`;
+
+const itemControlSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { RadioGroupApiKey, RadioGroupItemValueKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(RadioGroupApiKey);
+if (!injectedApi) throw new Error("RadioGroup parts must be used within <RadioGroupRoot>");
+const api = injectedApi;
+
+const value = inject(RadioGroupItemValueKey);
+if (value === undefined) throw new Error("RadioGroupItemControl must be used within <RadioGroupItem>");
+
+const outerPaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
+);
+const innerPaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemControlProps({ value })"
+    :class="
+      twMerge([
+        'group relative size-5 flex items-center justify-center data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]',
+        '[--color-frame-1-stroke:var(--color-primary)]/70',
+        '[--color-frame-1-fill:var(--color-primary)]/10',
+        className,
+      ])
+    "
+  >
+    <Frame :paths="outerPaths" />
+    <div
+      class="group-data-[state=checked]:opacity-100 opacity-0 relative size-3 transition-all duration-100 [--color-frame-1-stroke:var(--color-primary)] [--color-frame-1-fill:var(--color-primary)]/30"
+    >
+      <Frame :paths="innerPaths" />
+    </div>
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as RadioGroupRoot } from "./RadioGroupRoot.vue";
+export { default as RadioGroupLabel } from "./RadioGroupLabel.vue";
+export { default as RadioGroupItem } from "./RadioGroupItem.vue";
+export { default as RadioGroupItemText } from "./RadioGroupItemText.vue";
+export { default as RadioGroupItemControl } from "./RadioGroupItemControl.vue";
+`;
+
+const usageImports = `
+import {
+  RadioGroupRoot,
+  RadioGroupLabel,
+  RadioGroupItem,
+  RadioGroupItemText,
+  RadioGroupItemControl,
+} from "@/components/ui/radio-group";
+`;
+
+const usageExample = `
+const items = [
+  { id: "apple", label: "Apples" },
+  { id: "orange", label: "Oranges" },
+  { id: "mango", label: "Mangoes" },
+  { id: "grape", label: "Grapes" },
+];
+
+<RadioGroupRoot default-value="apple">
+  <RadioGroupLabel>Airplane Mode</RadioGroupLabel>
+  <RadioGroupItem v-for="opt in items" :key="opt.id" :value="opt.id">
+    <RadioGroupItemText>{{ opt.label }}</RadioGroupItemText>
+    <RadioGroupItemControl />
+  </RadioGroupItem>
+</RadioGroupRoot>
+`;
+---
+
+<DocsLayout title="Radio Group | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Radio Group</Title>
+      <Subtitle>
+        A set of checkable buttons—known as radio buttons—where no more than
+        one of the buttons can be checked at a time.
+      </Subtitle>
+      <DocsLinks component="radio-group" framework="vue" />
+      <Preview>
+        <RadioGroupDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/radio-group @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper). No Portal or presence composable needed, the selected dot
+        just toggles opacity, no exit animation. The hidden native input
+        renders automatically inside
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">RadioGroupItem</span>.
+        Vue SFCs can't export multiple components from one file, so Radio
+        Group is a folder instead of a single file &mdash; copy all of it
+        into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/radio-group/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/radio-group/RadioGroupRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/radio-group/RadioGroupLabel.vue" code={labelSource} />
+      <PreviewCode title="components/ui/radio-group/RadioGroupItem.vue" code={itemSource} />
+      <PreviewCode title="components/ui/radio-group/RadioGroupItemText.vue" code={itemTextSource} />
+      <PreviewCode title="components/ui/radio-group/RadioGroupItemControl.vue" code={itemControlSource} />
+      <PreviewCode title="components/ui/radio-group/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

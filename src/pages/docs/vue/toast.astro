@@ -1,0 +1,356 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import ToastDemo from "@/components/demos/vue/toast.vue";
+
+const previewCode = `
+const toaster = createToaster({
+  overlap: true,
+  placement: "bottom-end",
+  offsets: "1.6rem",
+  max: 3,
+});
+
+function launch() {
+  toaster.create({
+    title: "Success! Event has been created!",
+    description: "This is a toast with title and description.",
+    duration: 100000000,
+  });
+}
+
+<Button class="min-w-30" type="submit" @click="launch">
+  <Rocket class="size-4 me-2.5" />
+  Launch Project
+</Button>
+<Toaster :toaster="toaster">
+  <template #default="{ toast }">
+    <ToastRoot :key="toast.id">
+      <ToastTitle>{{ toast.title }}</ToastTitle>
+      <ToastDescription>{{ toast.description }}</ToastDescription>
+      <ToastCloseTrigger />
+    </ToastRoot>
+  </template>
+</Toaster>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as toast from "@zag-js/toast";
+
+type ToastApi = ComputedRef<ReturnType<typeof toast.connect>>;
+
+const ToastApiKey: InjectionKey<ToastApi> = Symbol("toast-api");
+
+export { ToastApiKey };
+export type { ToastApi };
+`;
+
+const actorSource = `
+<script setup lang="ts">
+import { computed, provide } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as toast from "@zag-js/toast";
+import { ToastApiKey } from "./context";
+
+// \`defineProps()\`'s runtime declaration form still trips Vue's automatic
+// type-declaration generation if a prop is cast to a complex external type
+// (\`Object as () => toast.Props\`) right there in the macro call. Keeping the
+// props untyped here and casting them as normal TS expressions below avoids it.
+const props = defineProps({
+  value: { type: Object, required: true },
+  parent: { type: Object, required: true },
+  index: { type: Number, required: true },
+});
+const value = props.value as toast.Props;
+const parent = props.parent as toast.GroupService;
+
+const service = useMachine(
+  toast.machine,
+  computed(() => ({ ...value, parent, index: props.index }))
+);
+const api = computed(() => toast.connect(service, normalizeProps));
+
+provide(ToastApiKey, api);
+</script>
+
+<template>
+  <slot :toast="value" />
+</template>
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as toast from "@zag-js/toast";
+import Portal from "@/components/ui/portal.vue";
+import ToastActor from "./ToastActor.vue";
+
+const props = defineProps({
+  toaster: { type: Object, required: true },
+});
+const toaster = props.toaster as toast.Store;
+const id = useId();
+
+const service = useMachine(
+  toast.group.machine,
+  computed(() => ({ id, store: toaster }))
+);
+const api = computed(() => toast.group.connect(service, normalizeProps));
+</script>
+
+<template>
+  <Portal>
+    <div v-bind="api.getGroupProps()">
+      <ToastActor
+        v-for="(item, index) in api.getToasts()"
+        :key="item.id"
+        :value="item"
+        :parent="service"
+        :index="index"
+      >
+        <template #default="{ toast: toastValue }">
+          <slot :toast="toastValue" />
+        </template>
+      </ToastActor>
+    </div>
+  </Portal>
+</template>
+`;
+
+const toastRootSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { ToastApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ToastApiKey);
+if (!injectedApi) throw new Error("Toast parts must be used within <ToastRoot>'s <Toaster>");
+const api = injectedApi;
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","35","0"],["L","0% + 70.5","0"],["L","0% + 87.5","7"],["L","0% + 81.5","0% + 0"],["L","100% - 96.5","0% + 0"],["L","100% - 91.5","0% + 3"],["L","100% - 86.5","0% + 0"],["L","100% - 32.5","0% + 0"],["L","100% - 18.5","0% + 10"],["L","100% + 0","100% - 16"],["L","100% - 9","100% - 6"],["L","0% + 12","100% - 6"],["L","0","100% - 17.5"],["L","16","0% + 14.5"],["L","35","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","20","100% - 6"],["L","100% - 19.5","100% - 6"],["L","100% - 25.5","100% + 0"],["L","26","100% + 0"],["L","20","100% - 6"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="api.getRootProps()"
+    class="[translate:var(--x)_var(--y)] [scale:var(--scale)] [z-index:var(--z-index)] [height:var(--height)] [opacity:var(--opacity)] [will-change:translate,scale] [transition:translate_400ms,_scale_400ms,_opacity_400ms] [transition-timing-function:cubic-bezier(0.21,_1.02,_0.73,_1)] data-[state=closed]:[transition:translate_400ms,_scale_400ms,_opacity_200ms] data-[state=closed]:[transition-timing-function:cubic-bezier(0.06,_0.71,_0.55,_1)]"
+  >
+    <div v-bind="api.getGhostBeforeProps()" />
+    <div
+      :class="
+        twMerge([
+          'relative me-1 px-10 py-6 font-orbitron text-sm',
+          '[--color-frame-1-stroke:var(--color-primary)]',
+          '[--color-frame-1-fill:var(--color-primary)]/20',
+          '[--color-frame-2-stroke:var(--color-primary)]',
+          '[--color-frame-2-fill:var(--color-primary)]/20',
+          '[--color-frame-3-stroke:var(--color-accent)]',
+          '[--color-frame-3-fill:var(--color-accent)]/35',
+          className,
+        ])
+      "
+    >
+      <Frame enable-backdrop-blur enable-view-box :paths="framePaths" />
+      <slot />
+    </div>
+    <div v-bind="api.getGhostAfterProps()" />
+  </div>
+</template>
+`;
+
+const titleSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { ToastApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ToastApiKey);
+if (!injectedApi) throw new Error("Toast parts must be used within <ToastRoot>'s <Toaster>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="api.getTitleProps()"
+    :class="
+      twMerge([
+        'flex items-center text-shadow-lg text-shadow-primary font-bold w-full relative text-nowrap',
+        className,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const descriptionSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { ToastApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ToastApiKey);
+if (!injectedApi) throw new Error("Toast parts must be used within <ToastRoot>'s <Toaster>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="api.getDescriptionProps()"
+    :class="twMerge(['relative pt-2 opacity-80 text-nowrap', className])"
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const closeTriggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Button from "@/components/ui/button.vue";
+import { X } from "@lucide/vue";
+import { ToastApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ToastApiKey);
+if (!injectedApi) throw new Error("Toast parts must be used within <ToastRoot>'s <Toaster>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Button
+    v-bind="api.getCloseTriggerProps()"
+    shape="flat"
+    variant="accent"
+    enable-view-box
+    :class="
+      twMerge([
+        'absolute right-2 -top-1.5 px-4 py-1.5 transform scale-x-[-1]',
+        '[--color-frame-1-fill:var(--color-accent)]/70',
+        className,
+      ])
+    "
+  >
+    <X class="size-4" />
+  </Button>
+</template>
+`;
+
+const indexSource = `
+import * as toast from "@zag-js/toast";
+
+const createToaster = toast.createStore;
+
+export { default as ToasterRoot } from "./ToasterRoot.vue";
+export { default as Toaster } from "./ToasterRoot.vue";
+export { default as ToastRoot } from "./ToastRoot.vue";
+export { default as ToastTitle } from "./ToastTitle.vue";
+export { default as ToastDescription } from "./ToastDescription.vue";
+export { default as ToastCloseTrigger } from "./ToastCloseTrigger.vue";
+export { createToaster };
+`;
+
+const usageImports = `
+import {
+  createToaster,
+  Toaster,
+  ToastRoot,
+  ToastTitle,
+  ToastDescription,
+  ToastCloseTrigger,
+} from "@/components/ui/toast";
+`;
+
+const usageExample = `
+const toaster = createToaster({ placement: "bottom-end" });
+
+toaster.create({ title: "Saved", description: "Your changes were saved." });
+
+<Toaster :toaster="toaster">
+  <template #default="{ toast }">
+    <ToastRoot :key="toast.id">
+      <ToastTitle>{{ toast.title }}</ToastTitle>
+      <ToastDescription>{{ toast.description }}</ToastDescription>
+      <ToastCloseTrigger />
+    </ToastRoot>
+  </template>
+</Toaster>
+`;
+---
+
+<DocsLayout title="Toast | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Toast</Title>
+      <Subtitle>
+        The toast component is used to give feedback to users after an action
+        has taken place.
+      </Subtitle>
+      <DocsLinks component="toast" framework="vue" />
+      <Preview>
+        <ToastDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/toast @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the shared
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>
+        primitive from the
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>
+        page. Each toast in the list gets its own machine instance parented
+        to a shared group machine, the same pattern Zag's own adapters use
+        internally &mdash; in Vue this means the per-toast content is passed
+        through as a scoped slot rather than a render-prop function. Vue
+        SFCs can't export multiple components from one file, so Toast is a
+        folder instead of a single file &mdash; copy all of it into your
+        project.
+      </SectionContent>
+      <PreviewCode title="components/ui/toast/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/toast/ToastActor.vue" code={actorSource} />
+      <PreviewCode title="components/ui/toast/ToasterRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/toast/ToastRoot.vue" code={toastRootSource} />
+      <PreviewCode title="components/ui/toast/ToastTitle.vue" code={titleSource} />
+      <PreviewCode title="components/ui/toast/ToastDescription.vue" code={descriptionSource} />
+      <PreviewCode title="components/ui/toast/ToastCloseTrigger.vue" code={closeTriggerSource} />
+      <PreviewCode title="components/ui/toast/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

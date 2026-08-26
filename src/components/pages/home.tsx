@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react";
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from "@/components/ui/menu";
 import { twMerge } from "tailwind-merge";
 import { Frame } from "@/components/ui/frame";
@@ -5,8 +6,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Chart, getColor } from "@/components/ui/chart";
 import { FilePenLine, CopySlash } from "lucide-react";
+import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
 
 function HomePage() {
+  const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
+
   return (
     <>
       <div className="flex flex-col items-center mt-50 gap-6">
@@ -21,7 +25,7 @@ function HomePage() {
           <a href="/docs">
             <Button className="w-64 sm:w-56">Get Started</Button>
           </a>
-          <a href="/docs/react/frame">
+          <a href={`/docs/${framework}/frame`}>
             <Button variant="accent" className="w-64 sm:w-56">
               Browse Components
             </Button>

@@ -1,0 +1,145 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import ChartDemo from "@/components/demos/vue/chart.vue";
+
+const previewCode = `
+const config = {
+  type: "bar",
+  data: {
+    labels: [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ],
+    datasets: [
+      {
+        label: "Html Template",
+        maxBarThickness: 12,
+        data: [60, 150, 30, 200, 180, 50, 180, 120, 230, 180, 250, 270],
+        backgroundColor: () => getColor("--color-primary", 0.3),
+        borderColor: () => getColor("--color-primary"),
+        borderWidth: 1,
+      },
+    ],
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { display: false }, y: { display: false } },
+  },
+};
+
+<Chart class="max-w-100" :config="config" />
+`;
+
+const uiSource = `
+<script lang="ts">
+function getColor(name: string, opacity = 1) {
+  const color = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  if (opacity < 1) {
+    return \`color-mix(in oklch, \${color} \${opacity * 100}%, transparent \${
+      100 - opacity * 100
+    }%)\`;
+  }
+  return color;
+}
+
+export { getColor };
+</script>
+
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import ChartJs from "chart.js/auto";
+
+const props = defineProps<{
+  class?: string;
+  config: ConstructorParameters<typeof ChartJs>[1];
+}>();
+
+const canvasRef = ref<(HTMLCanvasElement & { instance?: unknown }) | null>(null);
+
+onMounted(() => {
+  if (canvasRef.value && !canvasRef.value.instance) {
+    canvasRef.value.instance = new ChartJs(canvasRef.value, props.config);
+  }
+});
+</script>
+
+<template>
+  <canvas ref="canvasRef" :class="props.class" />
+</template>
+`;
+
+const usageImports = `
+import Chart, { getColor } from "@/components/ui/chart.vue";
+`;
+
+const usageExample = `
+const config = {
+  type: "bar",
+  data: {
+    labels: [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ],
+    datasets: [
+      {
+        label: "Html Template",
+        maxBarThickness: 12,
+        data: [60, 150, 30, 200, 180, 50, 180, 120, 230, 180, 250, 270],
+        backgroundColor: () => getColor("--color-primary", 0.3),
+        borderColor: () => getColor("--color-primary"),
+        borderWidth: 1,
+      },
+    ],
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { display: false }, y: { display: false } },
+  },
+};
+
+<Chart class="max-w-100" :config="config" />
+`;
+---
+
+<DocsLayout title="Chart | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Chart</Title>
+      <Subtitle>
+        Beautiful charts. Built using Chartjs. Copy and paste into your apps.
+      </Subtitle>
+      <Preview>
+        <ChartDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add chart.js</InstallPackage>
+      <SectionContent>Copy and paste the following code into your project.</SectionContent>
+      <PreviewCode title="components/ui/chart.vue" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

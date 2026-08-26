@@ -1,10 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import vue from "@astrojs/vue";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  integrations: [react()],
+  integrations: [react(), vue()],
   redirects: {
     "/docs/frame": "/docs/react/frame",
     "/docs/menu": "/docs/react/menu",

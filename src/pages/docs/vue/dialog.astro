@@ -1,0 +1,358 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import DialogDemo from "@/components/demos/vue/dialog.vue";
+
+const previewCode = `
+<DialogRoot>
+  <DialogTrigger>
+    <FileUp class="size-4 me-2.5" /> Dialog
+  </DialogTrigger>
+  <DialogContent>
+    <DialogTitle>Edit Profile</DialogTitle>
+    <DialogDescription>
+      Make changes to your profile here. Click save when you're done.
+    </DialogDescription>
+    <div class="py-5 flex flex-col gap-4">
+      <Input type="text" placeholder="Email" />
+      <Input type="password" placeholder="Password" />
+    </div>
+    <div class="flex flex-col sm:flex-row gap-y-3 justify-end mt-3 pb-2">
+      <DialogCloseTrigger v-slot="{ triggerProps }">
+        <Button v-bind="triggerProps" variant="secondary" class="min-w-30">
+          <Unplug class="size-4 me-2.5" />
+          Cancel
+        </Button>
+      </DialogCloseTrigger>
+      <Button class="min-w-30" type="submit">
+        <Save class="size-4 me-2.5" />
+        Save changes
+      </Button>
+    </div>
+    <DialogCloseTrigger />
+  </DialogContent>
+</DialogRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as dialog from "@zag-js/dialog";
+
+type DialogApi = ComputedRef<ReturnType<typeof dialog.connect>>;
+
+const DialogApiKey: InjectionKey<DialogApi> = Symbol("dialog-api");
+
+export { DialogApiKey };
+export type { DialogApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as dialog from "@zag-js/dialog";
+import { DialogApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<dialog.Props>;
+const id = useId();
+
+const service = useMachine(
+  dialog.machine,
+  computed(() => ({ id, ...rawAttrs }))
+);
+const api = computed(() => dialog.connect(service, normalizeProps));
+
+provide(DialogApiKey, api);
+</script>
+
+<template>
+  <slot />
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import Button from "@/components/ui/button.vue";
+import { DialogApiKey } from "./context";
+
+defineProps<{ class?: string }>();
+
+const injectedApi = inject(DialogApiKey);
+if (!injectedApi) throw new Error("Dialog parts must be used within <DialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Button v-bind="api.getTriggerProps()" :class="$props.class">
+    <slot />
+  </Button>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Portal from "@/components/ui/portal.vue";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { usePresence } from "@/components/ui/presence";
+import { DialogApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(DialogApiKey);
+if (!injectedApi) throw new Error("Dialog parts must be used within <DialogRoot>");
+const api = injectedApi;
+
+const backdrop = usePresence(() => api.value.open);
+const content = usePresence(() => api.value.open);
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","25","12"],["L","100% - 23","12"],["L","100% - 7","30"],["L","100% - 6","0% + 26.666666666666668%"],["L","100% - 14","0% + 28.641975308641975%"],["L","100% - 14","100% - 35.55555555555556%"],["L","100% - 7","100% - 33.33333333333332%"],["L","100% - 7","100% - 40"],["L","100% - 22","100% - 25"],["L","50% + 7.5","100% - 25"],["L","50% - 6.5","100% - 9"],["L","24","100% - 9"],["L","9","100% - 24"],["L","9","100% - 33.58024691358026%"],["L","17","100% - 36.04938271604938%"],["L","17","0% + 28.641975308641975%"],["L","8","0% + 26.666666666666668%"],["L","8","30"],["L","25","12"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 12.5","100% - 19"],["L","50% + 25","100% - 19"],["L","50% + 17","100% - 11.5"],["L","50% + 4.5","100% - 11.5"],["L","50% + 12.5","100% - 19"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30.5","100% - 19"],["L","50% + 40","100% - 19"],["L","50% + 34","100% - 13.5"],["L","50% + 24.5","100% - 13.5"],["L","50% + 30.5","100% - 19"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 46.5","100% - 19"],["L","50% + 54","100% - 19"],["L","50% + 48","100% - 14.5"],["L","50% + 40.5","100% - 14"],["L","50% + 46.5","100% - 19"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-5-stroke)","fill":"var(--color-frame-5-fill)"},"path":[["M","23","5"],["L","100% - 21","6"],["L","100% + 0","27"],["L","100% + 0","0% + 27.407407407407412%"],["L","100% - 8","0% + 29.876543209876544%"],["L","100% - 8","100% - 41.97530864197531%"],["L","100% + 0","0% + 60.74074074074073%"],["L","100% + 0","100% - 37"],["L","100% - 20","100% - 18"],["L","50% + 61.5","100% - 18"],["L","50% + 48.5","100% - 6"],["L","50% + 3.5","100% - 6"],["L","50% - 3.5","100% + 0"],["L","26","100% + 0"],["L","0","100% - 24"],["L","0","100% - 39.99999999999999%"],["L","11","100% - 42.71604938271605%"],["L","10","0% + 29.135802469135804%"],["L","0","0% + 26.666666666666668%"],["L","0","28"],["L","23","5"]]}]'
+);
+</script>
+
+<template>
+  <Portal>
+    <div
+      v-bind="api.getBackdropProps()"
+      :ref="backdrop.setNode"
+      :hidden="!backdrop.present.value"
+      class="fixed inset-0 bg-background/80 z-50 [&[data-state='open']]:animate-in [&[data-state='open']]:fade-in-0 [&[data-state='closed']]:animate-out [&[data-state='closed']]:fade-out-0"
+    />
+    <div v-bind="api.getPositionerProps()">
+      <div
+        v-bind="api.getContentProps()"
+        :ref="content.setNode"
+        :hidden="!content.present.value"
+        :class="
+          twMerge([
+            \`outline-none backdrop-blur-sm fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] sm:max-w-lg pb-14 pt-11 px-14\`,
+            \`[&[data-state='open']]:animate-in [&[data-state='open']]:fade-in-0 [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:duration-250\`,
+            \`[&[data-state='closed']]:animate-out [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:duration-400\`,
+            '[--color-frame-1-stroke:var(--color-primary)]/50',
+            '[--color-frame-1-fill:var(--color-primary)]/20',
+            '[--color-frame-2-stroke:var(--color-accent)]',
+            '[--color-frame-2-fill:var(--color-accent)]/20',
+            '[--color-frame-3-stroke:var(--color-accent)]',
+            '[--color-frame-3-fill:var(--color-accent)]/20',
+            '[--color-frame-4-stroke:var(--color-accent)]',
+            '[--color-frame-4-fill:var(--color-accent)]/20',
+            '[--color-frame-5-stroke:var(--color-primary)]/23',
+            '[--color-frame-5-fill:transparent]',
+            className,
+          ])
+        "
+      >
+        <Frame class="drop-shadow-2xl drop-shadow-primary/50" :paths="framePaths" />
+        <slot />
+      </div>
+    </div>
+  </Portal>
+</template>
+`;
+
+const titleSource = `
+<script setup lang="ts">
+import { inject, useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+import { DialogApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+
+const injectedApi = inject(DialogApiKey);
+if (!injectedApi) throw new Error("Dialog parts must be used within <DialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="{ ...api.getTitleProps(), ...attrsWithoutClass }"
+    :class="
+      twMerge([
+        'font-medium text-shadow-lg text-shadow-primary font-bold text-lg relative',
+        rawAttrs.class,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const descriptionSource = `
+<script setup lang="ts">
+import { inject, useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+import { DialogApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+
+const injectedApi = inject(DialogApiKey);
+if (!injectedApi) throw new Error("Dialog parts must be used within <DialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="{ ...api.getDescriptionProps(), ...attrsWithoutClass }"
+    :class="twMerge(['opacity-80 py-2 relative', rawAttrs.class])"
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const closeTriggerSource = `
+<script setup lang="ts">
+import { inject, useSlots } from "vue";
+import { twMerge } from "tailwind-merge";
+import Button from "@/components/ui/button.vue";
+import { X } from "@lucide/vue";
+import { DialogApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(DialogApiKey);
+if (!injectedApi) throw new Error("Dialog parts must be used within <DialogRoot>");
+const api = injectedApi;
+
+// React's \`asChild\` clones its child element to merge in the close-trigger
+// props, avoiding an extra wrapper. Vue has no built-in equivalent, so a
+// custom trigger element is provided via a scoped slot instead: bind
+// \`triggerProps\` onto your own element rather than wrapping <DialogCloseTrigger>
+// around it.
+const hasCustomTrigger = !!useSlots().default;
+</script>
+
+<template>
+  <slot v-if="hasCustomTrigger" :trigger-props="api.getCloseTriggerProps()" />
+  <Button
+    v-else
+    shape="flat"
+    v-bind="api.getCloseTriggerProps()"
+    :class="
+      twMerge([
+        'absolute right-0 top-0 px-5 py-1.5 transform scale-x-[-1] drop-shadow-[0_0px_20px_var(--color-accent)]',
+        '[--color-frame-1-stroke:var(--color-accent)]',
+        '[--color-frame-1-fill:var(--color-accent)]/50',
+        className,
+      ])
+    "
+  >
+    <X class="size-4" />
+  </Button>
+</template>
+`;
+
+const indexSource = `
+export { default as DialogRoot } from "./DialogRoot.vue";
+export { default as DialogTrigger } from "./DialogTrigger.vue";
+export { default as DialogContent } from "./DialogContent.vue";
+export { default as DialogTitle } from "./DialogTitle.vue";
+export { default as DialogDescription } from "./DialogDescription.vue";
+export { default as DialogCloseTrigger } from "./DialogCloseTrigger.vue";
+`;
+
+const usageImports = `
+import {
+  DialogRoot,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogCloseTrigger,
+} from "@/components/ui/dialog";
+`;
+
+const usageExample = `
+<DialogRoot>
+  <DialogTrigger>Open</DialogTrigger>
+  <DialogContent>
+    <DialogTitle>Edit Profile</DialogTitle>
+    <DialogDescription>Make changes to your profile.</DialogDescription>
+    <DialogCloseTrigger />
+  </DialogContent>
+</DialogRoot>
+`;
+---
+
+<DocsLayout title="Dialog | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Dialog</Title>
+      <Subtitle>
+        A window overlaid on either the primary window or another dialog
+        window, rendering the content underneath inert.
+      </Subtitle>
+      <DocsLinks component="dialog" framework="vue" />
+      <Preview>
+        <DialogDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/dialog @zag-js/vue @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the same shared
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>
+        and
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>
+        primitives from the
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>
+        page: the backdrop and the content each get their own presence
+        instance, since each animates out on its own timing.
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DialogContent</span>
+        renders the Portal, backdrop and positioner internally, so there's
+        nothing else to wrap it in. Vue has no equivalent to React's
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">asChild</span>
+        prop, so a custom close trigger is wired up via a scoped slot
+        instead (see the usage example below). Vue SFCs can't export
+        multiple components from one file, so Dialog is a folder instead of
+        a single file &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/dialog/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/dialog/DialogRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/dialog/DialogTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/dialog/DialogContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/dialog/DialogTitle.vue" code={titleSource} />
+      <PreviewCode title="components/ui/dialog/DialogDescription.vue" code={descriptionSource} />
+      <PreviewCode title="components/ui/dialog/DialogCloseTrigger.vue" code={closeTriggerSource} />
+      <PreviewCode title="components/ui/dialog/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

@@ -1,0 +1,242 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import TabsDemo from "@/components/demos/vue/tabs.vue";
+
+const previewCode = `
+const data = [
+  { value: "item-1", label: "Item one", content: "Item one content" },
+  { value: "item-2", label: "Item two", content: "Item two content" },
+  { value: "item-3", label: "Item three", content: "Item three content" },
+];
+
+<TabsRoot :default-value="data[0].value">
+  <TabsList>
+    <TabsTrigger v-for="item in data" :key="item.value" :value="item.value">
+      {{ item.label }}
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent v-for="item in data" class="xl:w-150" :key="item.value" :value="item.value">
+    {{ item.content }}
+  </TabsContent>
+</TabsRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as tabs from "@zag-js/tabs";
+
+type TabsApi = ComputedRef<ReturnType<typeof tabs.connect>>;
+
+const TabsApiKey: InjectionKey<TabsApi> = Symbol("tabs-api");
+
+export { TabsApiKey };
+export type { TabsApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as tabs from "@zag-js/tabs";
+import { twMerge } from "tailwind-merge";
+import { TabsApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<tabs.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, ...rest };
+});
+const service = useMachine(tabs.machine, machineProps);
+const api = computed(() => tabs.connect(service, normalizeProps));
+
+provide(TabsApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()" :class="twMerge(['flex flex-col gap-2', rawAttrs.class])">
+    <slot />
+  </div>
+</template>
+`;
+
+const listSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { TabsApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(TabsApiKey);
+if (!injectedApi) throw new Error("Tabs parts must be used within <TabsRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div v-bind="api.getListProps()" :class="twMerge(['px-6 flex', className])">
+    <slot />
+  </div>
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Button from "@/components/ui/button.vue";
+import { TabsApiKey } from "./context";
+
+const { class: className, value } = defineProps<{ class?: string; value: string }>();
+
+const injectedApi = inject(TabsApiKey);
+if (!injectedApi) throw new Error("Tabs parts must be used within <TabsRoot>");
+const api = injectedApi;
+
+const customPaths = [
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","18","0"],["L","100% + 0","0"],["L","100% - 22","100% - 5.5"],["L","4","100% - 5.5"],["L","0","100% - 15.5"],["L","18","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","10","100% - 6"],["L","100% - 28","100% - 6"],["L","100% - 31","100% + 0"],["L","12","100% + 0"],["L","10","100% - 6"]]}]',
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","22","0"],["L","100% + 0","0"],["L","100% - 22","100% - 5.5"],["L","0","100% - 5.5"],["L","22","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","8","100% - 6"],["L","100% - 26","100% - 6"],["L","100% - 29","100% - 0"],["L","5","100% - 0"],["L","8","100% - 6"]]}]',
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","22","0"],["L","100% - 6","0"],["L","100% - 0","10"],["L","100% - 16","100% - 5.5"],["L","0","100% - 5.5"],["L","22","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","7","100% - 6"],["L","100% - 21","100% - 6"],["L","100% - 24","100% - 0"],["L","3","100% - 0"],["L","7","100% - 6"]]}]',
+];
+</script>
+
+<template>
+  <Button
+    v-bind="api.getTriggerProps({ value })"
+    :class="
+      twMerge([
+        'text-nowrap opacity-80 [&>div>svg]:hidden -mr-4',
+        'data-[selected]:text-shadow-lg text-shadow-primary',
+        'data-[selected]:opacity-100 data-[selected]:drop-shadow-[0_0px_20px_var(--color-primary)]',
+        '[&:first-of-type>div>svg:nth-child(1)]:block',
+        '[&:not(:first-of-type):not(:last-of-type)>div>svg:nth-child(2)]:block',
+        '[&:last-of-type>div>svg:nth-child(3)]:block',
+        className,
+      ])
+    "
+    :custom-paths="customPaths"
+  >
+    <slot />
+  </Button>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { TabsApiKey } from "./context";
+
+const { class: className, value } = defineProps<{ class?: string; value: string }>();
+
+const injectedApi = inject(TabsApiKey);
+if (!injectedApi) throw new Error("Tabs parts must be used within <TabsRoot>");
+const api = injectedApi;
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","19","0"],["L","100% - 18","0"],["L","100% + 0","0% + 18.5"],["L","100% + 0","50% - 21.119592875318066%"],["L","100% - 8","50% - 19.338422391857506%"],["L","100% - 8","50% + 17.557251908396946%"],["L","100% + 0","100% - 30.15267175572519%"],["L","100% + 0","100% - 22.5"],["L","100% - 17","100% - 7.5"],["L","50% + 17.16417910447761%","100% - 7.5"],["L","50% + 15.298507462686567%","100% - 15.5"],["L","50% - 14.552238805970148%","100% - 15.5"],["L","50% - 16.417910447761194%","100% - 6.5"],["L","0% + 17","100% - 7.5"],["L","0% + 0","100% - 24.5"],["L","0% + 0","50% + 19.84732824427481%"],["L","0% + 9","50% + 17.557251908396946%"],["L","0% + 10","50% - 18.829516539440203%"],["L","0","50% - 21.62849872773537%"],["L","0","0% + 19.5"],["L","19","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","28","100% - 7.000000000000057"],["L","50% - 16.417910447761194%","100% - 7"],["L","50% - 14.552238805970148%","100% - 15.5"],["L","50% + 15.298507462686567%","100% - 15.5"],["L","50% + 17.16417910447761%","100% - 7.5"],["L","100% - 26","100% - 7.5"],["L","100% - 33","100% + 0"],["L","50% + 16.23134328358209%","100% - 1.1368683772161605"],["L","50% + 14.552238805970148%","100% - 8"],["L","50% - 13.619402985074627%","100% - 8"],["L","50% - 15.111940298507463%","100% + 0"],["L","33","100% + 0"],["L","28","100% - 7"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="api.getContentProps({ value })"
+    :class="
+      twMerge([
+        'relative px-10 pt-5 pb-10 min-h-50 w-full data-[selected]:animate-in data-[selected]:fade-in-0 data-[selected]:zoom-in-80 data-[selected]:duration-500',
+        '[--color-frame-1-stroke:var(--color-primary)]',
+        '[--color-frame-1-fill:var(--color-primary)]/20',
+        '[--color-frame-2-stroke:var(--color-primary)]',
+        '[--color-frame-2-fill:transparent]',
+        className,
+      ])
+    "
+  >
+    <Frame :paths="framePaths" />
+    <div class="relative">
+      <p><slot /></p>
+    </div>
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as TabsRoot } from "./TabsRoot.vue";
+export { default as TabsList } from "./TabsList.vue";
+export { default as TabsTrigger } from "./TabsTrigger.vue";
+export { default as TabsContent } from "./TabsContent.vue";
+`;
+
+const usageImports = `
+import { TabsRoot, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+`;
+
+const usageExample = `
+<TabsRoot default-value="item-1">
+  <TabsList>
+    <TabsTrigger value="item-1">Item one</TabsTrigger>
+  </TabsList>
+  <TabsContent value="item-1">Item one content</TabsContent>
+</TabsRoot>
+`;
+---
+
+<DocsLayout title="Tabs | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Tabs</Title>
+      <Subtitle>
+        An accessible tabs component that follows the WAI-ARIA Tabs Design
+        Pattern. Each tab in the tab list has associated content, with only
+        the selected tab's content being displayed.
+      </Subtitle>
+      <DocsLinks component="tabs" framework="vue" />
+      <Preview>
+        <TabsDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/tabs @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), the same one that already powers this site's own
+        Preview/Code tabs on every docs page. No Portal or presence
+        composable needed; switching tabs has no exit animation. Vue SFCs
+        can't export multiple components from one file, so Tabs is a folder
+        instead of a single file &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/tabs/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/tabs/TabsRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/tabs/TabsList.vue" code={listSource} />
+      <PreviewCode title="components/ui/tabs/TabsTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/tabs/TabsContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/tabs/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

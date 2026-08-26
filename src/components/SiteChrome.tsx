@@ -1,11 +1,14 @@
+import { useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
 import { Zap } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
 import { Frame } from "@/components/ui/frame";
 import { Button } from "@/components/ui/button";
 import { setShowMenu } from "@/lib/mobile-menu-store";
+import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
 
 export function SiteChrome() {
+  const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
   return (
     <>
       <div className="h-18 mt-2 mx-2 lg:-mt-px lg:-mx-px flex fixed top-0 inset-x-0 z-50">
@@ -60,7 +63,7 @@ export function SiteChrome() {
                 </a>
                 <a
                   className="hover:text-shadow-lg hover:text-shadow-primary/50"
-                  href="/docs/react/frame"
+                  href={`/docs/${framework}/frame`}
                 >
                   Components
                 </a>

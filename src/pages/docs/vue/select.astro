@@ -1,0 +1,354 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import SelectDemo from "@/components/demos/vue/select.vue";
+
+const previewCode = `
+const frameworks = [
+  { label: "React", value: "react" },
+  { label: "Solid", value: "solid" },
+  { label: "Vue", value: "vue" },
+  { label: "Svelte", value: "svelte" },
+];
+
+const frameworksCollection = select.collection({
+  items: frameworks,
+  itemToString: (item) => item.label,
+  itemToValue: (item) => item.value,
+});
+
+<SelectRoot :collection="frameworksCollection">
+  <SelectTrigger />
+  <SelectContent>
+    <SelectItem v-for="item in frameworks" :key="item.value" :item="item">
+      <SelectItemText>{{ item.label }}</SelectItemText>
+      <SelectItemIndicator />
+    </SelectItem>
+  </SelectContent>
+</SelectRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as select from "@zag-js/select";
+
+type SelectApi = ComputedRef<ReturnType<typeof select.connect>>;
+
+const SelectApiKey: InjectionKey<SelectApi> = Symbol("select-api");
+const SelectItemKey: InjectionKey<select.CollectionItem> = Symbol("select-item");
+
+export { SelectApiKey, SelectItemKey };
+export type { SelectApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as select from "@zag-js/select";
+import { SelectApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<select.Props>;
+const id = useId();
+
+const service = useMachine(
+  select.machine,
+  computed(() => ({ id, ...rawAttrs }))
+);
+const api = computed(() => select.connect(service, normalizeProps));
+
+provide(SelectApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()">
+    <slot />
+  </div>
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Button from "@/components/ui/button.vue";
+import { ChevronDown } from "@lucide/vue";
+import { SelectApiKey } from "./context";
+
+const { class: className, placeholder = "Select option..." } = defineProps<{
+  class?: string;
+  placeholder?: string;
+}>();
+
+const injectedApi = inject(SelectApiKey);
+if (!injectedApi) throw new Error("Select parts must be used within <SelectRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Button
+    v-bind="api.getTriggerProps()"
+    :class="twMerge(['w-full min-w-55 px-0 [&>span]:justify-start px-8', className])"
+  >
+    {{ api.valueAsString || placeholder }}
+    <span
+      v-bind="api.getIndicatorProps()"
+      class="ms-auto transition-transform group-data-[state=open]:rotate-180"
+    >
+      <ChevronDown class="size-4" />
+    </span>
+  </Button>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { computed, inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Portal from "@/components/ui/portal.vue";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { usePresence } from "@/components/ui/presence";
+import { SelectApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(SelectApiKey);
+if (!injectedApi) throw new Error("Select parts must be used within <SelectRoot>");
+const api = injectedApi;
+
+const presence = usePresence(() => api.value.open);
+
+const positionerStyle = computed(() => ({
+  ...api.value.getPositionerProps().style,
+  zIndex: 70,
+}));
+
+const framePaths = parsePaths(
+  '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
+);
+</script>
+
+<template>
+  <Portal>
+    <div v-bind="api.getPositionerProps()" :style="positionerStyle">
+      <div
+        v-bind="api.getContentProps()"
+        :ref="presence.setNode"
+        :hidden="!presence.present.value"
+        :class="
+          twMerge([
+            'group relative min-w-(--reference-width) px-6 py-7 outline-none mt-1.5',
+            \`[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2\`,
+            \`[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200\`,
+            '[--color-frame-1-stroke:var(--color-primary)]',
+            '[--color-frame-1-fill:var(--color-primary)]/20',
+            '[--color-frame-2-stroke:var(--color-accent)]',
+            '[--color-frame-2-fill:var(--color-accent)]/40',
+            '[--color-frame-3-stroke:var(--color-accent)]',
+            '[--color-frame-3-fill:var(--color-accent)]/40',
+            '[--color-frame-4-stroke:var(--color-accent)]',
+            '[--color-frame-4-fill:var(--color-accent)]/40',
+            className,
+          ])
+        "
+      >
+        <div class="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
+          <Frame :paths="framePaths" enable-backdrop-blur />
+        </div>
+        <div class="relative flex flex-col gap-2.5">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </Portal>
+</template>
+`;
+
+const itemSource = `
+<script setup lang="ts">
+import { inject, provide } from "vue";
+import { twMerge } from "tailwind-merge";
+import type * as select from "@zag-js/select";
+import { SelectApiKey, SelectItemKey } from "./context";
+
+const rawProps = defineProps({
+  class: { type: String, required: false },
+  item: { type: null, required: true },
+});
+const item = rawProps.item as select.CollectionItem;
+
+const injectedApi = inject(SelectApiKey);
+if (!injectedApi) throw new Error("Select parts must be used within <SelectRoot>");
+const api = injectedApi;
+
+provide(SelectItemKey, item);
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemProps({ item })"
+    :class="
+      twMerge([
+        'cursor-pointer flex items-center -mx-3 -my-0.5 px-3 py-0.5 border border-transparent hover:border-primary/30 hover:bg-primary/10 data-[highlighted]:border-primary/30 data-[highlighted]:bg-primary/10',
+        rawProps.class,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const itemTextSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { SelectApiKey, SelectItemKey } from "./context";
+
+const injectedApi = inject(SelectApiKey);
+if (!injectedApi) throw new Error("Select parts must be used within <SelectRoot>");
+const api = injectedApi;
+
+const item = inject(SelectItemKey);
+if (!item) throw new Error("SelectItemText must be used within <SelectItem>");
+</script>
+
+<template>
+  <div v-bind="api.getItemTextProps({ item })">
+    <slot />
+  </div>
+</template>
+`;
+
+const itemIndicatorSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { Check } from "@lucide/vue";
+import { SelectApiKey, SelectItemKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(SelectApiKey);
+if (!injectedApi) throw new Error("Select parts must be used within <SelectRoot>");
+const api = injectedApi;
+
+const item = inject(SelectItemKey);
+if (!item) throw new Error("SelectItemIndicator must be used within <SelectItem>");
+</script>
+
+<template>
+  <div v-bind="api.getItemIndicatorProps({ item })" :class="twMerge(['ms-auto', className])">
+    <Check class="size-3.5" />
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as SelectRoot } from "./SelectRoot.vue";
+export { default as SelectTrigger } from "./SelectTrigger.vue";
+export { default as SelectContent } from "./SelectContent.vue";
+export { default as SelectItem } from "./SelectItem.vue";
+export { default as SelectItemText } from "./SelectItemText.vue";
+export { default as SelectItemIndicator } from "./SelectItemIndicator.vue";
+`;
+
+const usageImports = `
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+} from "@/components/ui/select";
+`;
+
+const usageExample = `
+const frameworks = [
+  { label: "React", value: "react" },
+  { label: "Solid", value: "solid" },
+  { label: "Vue", value: "vue" },
+  { label: "Svelte", value: "svelte" },
+];
+
+const frameworksCollection = select.collection({
+  items: frameworks,
+  itemToString: (item) => item.label,
+  itemToValue: (item) => item.value,
+});
+
+<SelectRoot :collection="frameworksCollection">
+  <SelectTrigger />
+  <SelectContent>
+    <SelectItem v-for="item in frameworks" :key="item.value" :item="item">
+      <SelectItemText>{{ item.label }}</SelectItemText>
+      <SelectItemIndicator />
+    </SelectItem>
+  </SelectContent>
+</SelectRoot>
+`;
+---
+
+<DocsLayout title="Select | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Select</Title>
+      <Subtitle>
+        A dropdown that lets users pick one value from a list of options.
+      </Subtitle>
+      <DocsLinks component="select" framework="vue" />
+      <Preview>
+        <SelectDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/select @zag-js/vue @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the shared
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>
+        and
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>
+        primitives from the
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>
+        page, and the same dropdown frame used by
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>.
+        Unlike Combobox, the select's anchor is the trigger button itself,
+        so there's no separate control wrapper. Vue SFCs can't export
+        multiple components from one file, so Select is a folder instead of
+        a single file &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/select/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/select/SelectRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/select/SelectTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/select/SelectContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/select/SelectItem.vue" code={itemSource} />
+      <PreviewCode title="components/ui/select/SelectItemText.vue" code={itemTextSource} />
+      <PreviewCode title="components/ui/select/SelectItemIndicator.vue" code={itemIndicatorSource} />
+      <PreviewCode title="components/ui/select/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

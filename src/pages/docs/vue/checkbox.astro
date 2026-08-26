@@ -1,0 +1,190 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import CheckboxDemo from "@/components/demos/vue/checkbox.vue";
+
+const previewCode = `
+<CheckboxRoot>
+  <CheckboxLabel>Accept terms and conditions</CheckboxLabel>
+  <CheckboxControl />
+</CheckboxRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as checkbox from "@zag-js/checkbox";
+
+type CheckboxApi = ComputedRef<ReturnType<typeof checkbox.connect>>;
+
+const CheckboxApiKey: InjectionKey<CheckboxApi> = Symbol("checkbox-api");
+
+export { CheckboxApiKey };
+export type { CheckboxApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as checkbox from "@zag-js/checkbox";
+import { twMerge } from "tailwind-merge";
+import { CheckboxApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<checkbox.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, ...rest };
+});
+const service = useMachine(checkbox.machine, machineProps);
+const api = computed(() => checkbox.connect(service, normalizeProps));
+
+provide(CheckboxApiKey, api);
+</script>
+
+<template>
+  <label
+    v-bind="api.getRootProps()"
+    :class="twMerge(['flex gap-3.5 items-center cursor-pointer', rawAttrs.class])"
+  >
+    <slot />
+    <input v-bind="api.getHiddenInputProps()" />
+  </label>
+</template>
+`;
+
+const labelSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { CheckboxApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(CheckboxApiKey);
+if (!injectedApi) throw new Error("Checkbox parts must be used within <CheckboxRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <span v-bind="api.getLabelProps()" :class="twMerge(['order-2', className])">
+    <slot />
+  </span>
+</template>
+`;
+
+const controlSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { Check } from "@lucide/vue";
+import { CheckboxApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(CheckboxApiKey);
+if (!injectedApi) throw new Error("Checkbox parts must be used within <CheckboxRoot>");
+const api = injectedApi;
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","50% - 28.125%","0"],["L","50% + 28.125%","0"],["L","100% + 0","50% - 28.125%"],["L","100% + 0","50% + 28.125%"],["L","50% + 28.125%","100% - 0"],["L","50% - 28.125%","100% + 0"],["L","0","50% + 28.125%"],["L","0","50% - 28.125%"],["L","50% - 28.125%","0"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="api.getControlProps()"
+    :class="
+      twMerge([
+        'group relative size-5 flex items-center justify-center data-[state=checked]:drop-shadow-[0_0px_20px_var(--color-primary)]',
+        '[--color-frame-1-stroke:var(--color-primary)]/80',
+        '[--color-frame-1-fill:var(--color-primary)]/10',
+        className,
+      ])
+    "
+  >
+    <Frame :paths="framePaths" />
+    <Check
+      class="group-data-[state=checked]:opacity-100 opacity-0 size-6 -mt-1 -mr-2 stroke-(--color-primary)/80 drop-shadow-[0_0px_2px_var(--color-primary)] transition-all duration-100"
+    />
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as CheckboxRoot } from "./CheckboxRoot.vue";
+export { default as CheckboxLabel } from "./CheckboxLabel.vue";
+export { default as CheckboxControl } from "./CheckboxControl.vue";
+`;
+
+const usageImports = `
+import { CheckboxRoot, CheckboxLabel, CheckboxControl } from "@/components/ui/checkbox";
+`;
+
+const usageExample = `
+<CheckboxRoot>
+  <CheckboxLabel>Accept terms and conditions</CheckboxLabel>
+  <CheckboxControl />
+</CheckboxRoot>
+`;
+---
+
+<DocsLayout title="Checkbox | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Checkbox</Title>
+      <Subtitle>
+        A set of checkable buttons—known as radio buttons—where no more than
+        one of the buttons can be checked at a time.
+      </Subtitle>
+      <DocsLinks component="checkbox" framework="vue" />
+      <Preview>
+        <CheckboxDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/checkbox @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper). No Portal or presence composable needed, the check mark
+        just toggles opacity, no exit animation. The hidden native input
+        (needed for keyboard, focus and form submission) renders
+        automatically inside
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">CheckboxRoot</span>.
+        Vue SFCs can't export multiple components from one file, so Checkbox
+        is a folder instead of a single file &mdash; copy all of it into your
+        project.
+      </SectionContent>
+      <PreviewCode title="components/ui/checkbox/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/checkbox/CheckboxRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/checkbox/CheckboxLabel.vue" code={labelSource} />
+      <PreviewCode title="components/ui/checkbox/CheckboxControl.vue" code={controlSource} />
+      <PreviewCode title="components/ui/checkbox/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

@@ -1,0 +1,161 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+
+const indexCss = `
+@import "tailwindcss";
+`;
+
+const tsconfig = `
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+`;
+
+const tsconfigApp = `
+{
+  "compilerOptions": {
+    // ...
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+    // ...
+  }
+}
+`;
+
+const viteConfig = `
+import path from "path"
+import tailwindcss from "@tailwindcss/vite"
+import vue from "@vitejs/plugin-vue"
+import { defineConfig } from "vite"
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [vue(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+`;
+
+const appVue = `
+<script setup lang="ts">
+import Button from "@/components/ui/button.vue";
+</script>
+
+<template>
+  <div class="flex min-h-svh flex-col items-center justify-center">
+    <Button variant="success">Button</Button>
+  </div>
+</template>
+`;
+---
+
+<DocsLayout title="How to Use | Cosmic UI">
+  <Wrapper>
+    <div class="flex flex-col gap-5">
+      <div>
+        <Title>How to Use</Title>
+        <Subtitle>
+          Install and configure <a href="https://www.cosmic-ui.com" class="font-medium">Cosmic UI</a> for Vite.
+        </Subtitle>
+      </div>
+      <div class="mt-5" id="create-project">
+        <SectionTitle>Create project</SectionTitle>
+        <SectionContent>
+          Start by creating a new Vue project using vite. Select the Vue
+          + TypeScript template:
+        </SectionContent>
+        <InstallPackage>create vite@latest</InstallPackage>
+      </div>
+      <div id="add-tailwindcss">
+        <SectionTitle>Add Tailwind CSS</SectionTitle>
+        <InstallPackage>add tailwindcss @tailwindcss/vite</InstallPackage>
+        <SectionContent>
+          Replace everything in
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">src/index.css</span>
+          with the following:
+        </SectionContent>
+        <PreviewCode title="src/index.css" code={indexCss} />
+      </div>
+      <div id="edit-tsconfig">
+        <SectionTitle>Edit tsconfig.json file</SectionTitle>
+        <SectionContent>
+          The current version of Vite splits TypeScript configuration into
+          three files, two of which need to be edited. Add the
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">baseUrl</span>
+          and
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">paths</span>
+          properties to the
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">compilerOptions</span>
+          section of the
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">tsconfig.json</span>
+          and
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">tsconfig.app.json</span>
+          files:
+        </SectionContent>
+        <PreviewCode title="tsconfig.json" code={tsconfig} />
+      </div>
+      <div id="edit-tsconfig-app">
+        <SectionTitle>Edit tsconfig.app.json file</SectionTitle>
+        <SectionContent>
+          Add the following code to the
+          <span class="bg-foreground/15 px-1.5 py-px rounded-md">tsconfig.app.json</span>
+          file to resolve paths, for your IDE:
+        </SectionContent>
+        <PreviewCode title="tsconfig.app.json" code={tsconfigApp} />
+      </div>
+      <div id="update-vite-config">
+        <SectionTitle>Update vite.config.ts</SectionTitle>
+        <SectionContent>
+          Add the following code to the vite.config.ts so your app can
+          resolve paths without error:
+        </SectionContent>
+        <InstallPackage>add -D @types/node</InstallPackage>
+        <PreviewCode title="vite.config.ts" code={viteConfig} />
+      </div>
+      <div id="add-components">
+        <SectionTitle>Add Components</SectionTitle>
+        <SectionContent>
+          You can now start adding components to your project.
+        </SectionContent>
+        <PreviewCode title="src/App.vue" code={appVue} />
+      </div>
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#create-project">Create project</a>
+    <a class="hover:text-foreground py-1" href="#add-tailwindcss">Add Tailwind CSS</a>
+    <a class="hover:text-foreground py-1" href="#edit-tsconfig">Edit tsconfig.json file</a>
+    <a class="hover:text-foreground py-1" href="#edit-tsconfig-app">Edit tsconfig.app.json file</a>
+    <a class="hover:text-foreground py-1" href="#update-vite-config">Update vite.config.ts</a>
+    <a class="hover:text-foreground py-1" href="#add-components">Add Components</a>
+  </TocMenu>
+</DocsLayout>

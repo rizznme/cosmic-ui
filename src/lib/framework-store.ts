@@ -2,11 +2,19 @@ type Listener = () => void;
 
 const STORAGE_KEY = "cosmic-ui-framework";
 
-export type Framework = "react";
+export type Framework = "react" | "vue";
 
 export const FRAMEWORKS: { id: Framework; label: string }[] = [
   { id: "react", label: "React" },
+  { id: "vue", label: "Vue" },
 ];
+
+/** Extracts the framework from a `/docs/{framework}/...` path, if present. */
+export function frameworkFromPath(path: string): Framework | null {
+  const match = path.match(/^\/docs\/(react|vue)(\/|$)/);
+  const id = match?.[1];
+  return FRAMEWORKS.some((f) => f.id === id) ? (id as Framework) : null;
+}
 
 const DEFAULT_FRAMEWORK: Framework = "react";
 

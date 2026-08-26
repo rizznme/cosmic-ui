@@ -1,0 +1,423 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import ComboboxDemo from "@/components/demos/vue/combobox.vue";
+
+const previewCode = `
+const frameworks = ["React", "Solid", "Vue", "Svelte"];
+
+const state = ref([""]);
+const itemsCollection = ref(combobox.collection({ items: frameworks }));
+
+function handleInputChange(details) {
+  const query = details.inputValue.toLowerCase();
+  itemsCollection.value = combobox.collection({
+    items: frameworks.filter((item) => item.toLowerCase().includes(query)),
+  });
+}
+
+function handleValueChange(details) {
+  state.value = details.value;
+}
+
+<ComboboxRoot
+  :value="state"
+  :collection="itemsCollection"
+  :onInputValueChange="handleInputChange"
+  :onValueChange="handleValueChange"
+>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      <ComboboxItem v-for="item in itemsCollection.items" :key="item" :item="item">
+        <ComboboxItemText>{{ item }}</ComboboxItemText>
+        <ComboboxItemIndicator />
+      </ComboboxItem>
+    </ComboboxItemGroup>
+  </ComboboxContent>
+</ComboboxRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as combobox from "@zag-js/combobox";
+
+type ComboboxApi = ComputedRef<ReturnType<typeof combobox.connect>>;
+
+const ComboboxApiKey: InjectionKey<ComboboxApi> = Symbol("combobox-api");
+const ComboboxItemKey: InjectionKey<combobox.CollectionItem> = Symbol("combobox-item");
+
+export { ComboboxApiKey, ComboboxItemKey };
+export type { ComboboxApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as combobox from "@zag-js/combobox";
+import { ComboboxApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<combobox.Props>;
+const id = useId();
+
+const machineProps = computed(() => ({
+  id,
+  selectionBehavior: "clear" as const,
+  ...rawAttrs,
+}));
+const service = useMachine(combobox.machine, machineProps);
+const api = computed(() => combobox.connect(service, normalizeProps));
+
+provide(ComboboxApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()">
+    <slot />
+  </div>
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import Button from "@/components/ui/button.vue";
+import { ChevronsUpDown } from "@lucide/vue";
+import { ComboboxApiKey } from "./context";
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div v-bind="api.getControlProps()" class="relative">
+    <Button v-bind="api.getTriggerProps()" class="w-full min-w-55 px-0 [&>span]:justify-start px-8">
+      {{ api.value.length && api.value[0].length ? api.value.join(", ") : "Select option..." }}
+      <ChevronsUpDown class="size-4 ms-auto opacity-70" />
+    </Button>
+  </div>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { computed, inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Portal from "@/components/ui/portal.vue";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { usePresence } from "@/components/ui/presence";
+import { ComboboxApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+
+const presence = usePresence(() => api.value.open);
+
+const positionerStyle = computed(() => ({
+  ...api.value.getPositionerProps().style,
+  zIndex: 70,
+}));
+
+const framePaths = parsePaths(
+  '[{"show":false,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","14","6"],["L","50% - 7","6"],["L","50% - 2","0"],["L","50% + 4","0"],["L","50% + 9","6"],["L","100% - 13","6"],["L","100% + 0","19"],["L","100% + 0","100% - 26"],["L","100% - 13","100% - 12"],["L","50% + 13","100% - 12"],["L","50% - 0","100% + 0"],["L","0% + 14","100% + 0"],["L","0% + 0","100% - 13"],["L","0","0% + 19"],["L","14","6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 16","100% - 8"],["L","50% + 25","100% - 8"],["L","50% + 18","100% - 2"],["L","50% + 9","100% - 2"],["L","50% + 16","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 30","100% - 8"],["L","50% + 37","100% - 8"],["L","50% + 32","100% - 3"],["L","50% + 25","100% - 3"],["L","50% + 30","100% - 8"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 42","100% - 8"],["L","50% + 48","100% - 8"],["L","50% + 44","100% - 4"],["L","50% + 38","100% - 4"],["L","50% + 42","100% - 8"]]}]'
+);
+</script>
+
+<template>
+  <Portal>
+    <div v-bind="api.getPositionerProps()" :style="positionerStyle">
+      <div
+        v-bind="api.getContentProps()"
+        :ref="presence.setNode"
+        :hidden="!presence.present.value"
+        :class="
+          twMerge([
+            'group relative min-w-(--reference-width) outline-none',
+            \`[&[data-state='open']]:animate-in [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:fade-in-0 [&[data-state='open']]:duration-200 [&[data-state='open'][data-placement='bottom-start']]:slide-in-from-top-2 [&[data-state='open'][data-placement='left-start']]:slide-in-from-right-2 [&[data-state='open'][data-placement='right-start']]:slide-in-from-left-2 [&[data-state='open'][data-placement='top-start']]:slide-in-from-bottom-2\`,
+            \`[&[data-state='closed']]:animate-out [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:duration-200\`,
+            '[--color-frame-1-stroke:var(--color-primary)]',
+            '[--color-frame-1-fill:var(--color-primary)]/20',
+            '[--color-frame-2-stroke:var(--color-accent)]',
+            '[--color-frame-2-fill:var(--color-accent)]/40',
+            '[--color-frame-3-stroke:var(--color-accent)]',
+            '[--color-frame-3-fill:var(--color-accent)]/40',
+            '[--color-frame-4-stroke:var(--color-accent)]',
+            '[--color-frame-4-fill:var(--color-accent)]/40',
+            className,
+          ])
+        "
+      >
+        <div class="absolute inset-0 group-data-[placement=top-start]:scale-y-[-1]">
+          <Frame :paths="framePaths" enable-backdrop-blur />
+        </div>
+        <slot />
+      </div>
+    </div>
+  </Portal>
+</template>
+`;
+
+const inputSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { Search } from "@lucide/vue";
+import { ComboboxApiKey } from "./context";
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div class="relative border-b border-primary/30">
+    <div class="absolute size-3.5 inset-y-0 my-auto ml-5">
+      <Search class="size-full mt-0.5 opacity-70" />
+    </div>
+    <input
+      v-bind="api.getInputProps()"
+      class="outline-none ps-11 pe-6 pt-2.5 pb-3 mt-2 w-full"
+      placeholder="Search..."
+    />
+  </div>
+</template>
+`;
+
+const itemGroupSource = `
+<script setup lang="ts">
+import { inject, useId } from "vue";
+import { twMerge } from "tailwind-merge";
+import { ComboboxApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+
+const groupId = useId();
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemGroupProps({ id: groupId })"
+    :class="twMerge(['relative flex flex-col gap-2.5 px-6 pt-4 pb-7', className])"
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const itemSource = `
+<script setup lang="ts">
+import { inject, provide } from "vue";
+import { twMerge } from "tailwind-merge";
+import type * as combobox from "@zag-js/combobox";
+import { ComboboxApiKey, ComboboxItemKey } from "./context";
+
+// defineProps<{ item: combobox.CollectionItem }>() can't statically resolve
+// the external CollectionItem type, so this uses the runtime declaration
+// form (type: null accepts any value) and casts it as a normal TS
+// expression below instead.
+const rawProps = defineProps({
+  class: { type: String, required: false },
+  item: { type: null, required: true },
+});
+const item = rawProps.item as combobox.CollectionItem;
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+
+provide(ComboboxItemKey, item);
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemProps({ item })"
+    :class="
+      twMerge([
+        'cursor-pointer flex items-center -mx-3 -my-0.5 px-3 py-0.5 border border-transparent hover:border-primary/30 hover:bg-primary/10 data-[highlighted]:border-primary/30 data-[highlighted]:bg-primary/10',
+        rawProps.class,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const itemTextSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { ComboboxApiKey, ComboboxItemKey } from "./context";
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+
+const item = inject(ComboboxItemKey);
+if (!item) throw new Error("ComboboxItemText must be used within <ComboboxItem>");
+</script>
+
+<template>
+  <div v-bind="api.getItemTextProps({ item })">
+    <slot />
+  </div>
+</template>
+`;
+
+const itemIndicatorSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { Check } from "@lucide/vue";
+import { ComboboxApiKey, ComboboxItemKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(ComboboxApiKey);
+if (!injectedApi) throw new Error("Combobox parts must be used within <ComboboxRoot>");
+const api = injectedApi;
+
+const item = inject(ComboboxItemKey);
+if (!item) throw new Error("ComboboxItemIndicator must be used within <ComboboxItem>");
+</script>
+
+<template>
+  <div v-bind="api.getItemIndicatorProps({ item })" :class="twMerge(['ms-auto', className])">
+    <Check class="size-3.5" />
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as ComboboxRoot } from "./ComboboxRoot.vue";
+export { default as ComboboxInput } from "./ComboboxInput.vue";
+export { default as ComboboxTrigger } from "./ComboboxTrigger.vue";
+export { default as ComboboxContent } from "./ComboboxContent.vue";
+export { default as ComboboxItemGroup } from "./ComboboxItemGroup.vue";
+export { default as ComboboxItem } from "./ComboboxItem.vue";
+export { default as ComboboxItemText } from "./ComboboxItemText.vue";
+export { default as ComboboxItemIndicator } from "./ComboboxItemIndicator.vue";
+`;
+
+const usageImports = `
+import {
+  ComboboxRoot,
+  ComboboxInput,
+  ComboboxTrigger,
+  ComboboxContent,
+  ComboboxItemGroup,
+  ComboboxItem,
+  ComboboxItemText,
+  ComboboxItemIndicator,
+} from "@/components/ui/combobox";
+`;
+
+const usageExample = `
+const frameworks = ["React", "Solid", "Vue", "Svelte"];
+
+const state = ref([""]);
+const itemsCollection = ref(combobox.collection({ items: frameworks }));
+
+function handleInputChange(details) {
+  const query = details.inputValue.toLowerCase();
+  itemsCollection.value = combobox.collection({
+    items: frameworks.filter((item) => item.toLowerCase().includes(query)),
+  });
+}
+
+<ComboboxRoot
+  :value="state"
+  :collection="itemsCollection"
+  :onInputValueChange="handleInputChange"
+  :onValueChange="(details) => (state = details.value)"
+>
+  <ComboboxTrigger />
+  <ComboboxContent>
+    <ComboboxInput />
+    <ComboboxItemGroup>
+      <ComboboxItem v-for="item in itemsCollection.items" :key="item" :item="item">
+        <ComboboxItemText>{{ item }}</ComboboxItemText>
+        <ComboboxItemIndicator />
+      </ComboboxItem>
+    </ComboboxItemGroup>
+  </ComboboxContent>
+</ComboboxRoot>
+`;
+---
+
+<DocsLayout title="Combobox | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Combobox</Title>
+      <Subtitle>
+        Autocomplete input and command palette with a list of suggestions.
+      </Subtitle>
+      <DocsLinks component="combobox" framework="vue" />
+      <Preview>
+        <ComboboxDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/combobox @zag-js/vue @zag-js/presence</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper), plus the shared
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Portal</span>
+        and
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>
+        primitives from the
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>
+        page. Filtering as you type uses Zag's own
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">combobox.collection()</span>
+        factory plus a plain case-insensitive match. The dropdown's anchor is
+        the control element wrapped inside
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">ComboboxTrigger</span>,
+        not the button itself, so its wrapper renders automatically and
+        doesn't need a part of its own. Vue SFCs can't export multiple
+        components from one file, so Combobox is a folder instead of a
+        single file &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/combobox/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxInput.vue" code={inputSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxItemGroup.vue" code={itemGroupSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxItem.vue" code={itemSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxItemText.vue" code={itemTextSource} />
+      <PreviewCode title="components/ui/combobox/ComboboxItemIndicator.vue" code={itemIndicatorSource} />
+      <PreviewCode title="components/ui/combobox/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

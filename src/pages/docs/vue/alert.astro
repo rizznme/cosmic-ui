@@ -1,0 +1,271 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import AlertDemo from "@/components/demos/vue/alert.vue";
+
+const previewCode = `
+<AlertRoot>
+  <AlertTitle>
+    <SquareCheck class="flex-none size-4.5 me-2.5" /> Success! Your
+    changes have been saved
+  </AlertTitle>
+  <AlertDescription>
+    This is an alert with icon, title and description.
+  </AlertDescription>
+  <AlertCloseTrigger />
+</AlertRoot>
+`;
+
+const presenceSource = `
+import { computed, toValue, type MaybeRefOrGetter } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as presence from "@zag-js/presence";
+
+/**
+ * Keeps a node mounted through its exit animation.
+ *
+ * \`open\` flips to false immediately, but \`present\` stays true until the
+ * node's CSS \`animationend\` fires (detected via the returned ref callback),
+ * so exit animations (\`data-[state=closed]:animate-out\` etc.) actually get
+ * to play instead of the node disappearing on the same frame.
+ */
+function usePresence(open: MaybeRefOrGetter<boolean>) {
+  const service = useMachine(
+    presence.machine,
+    computed(() => ({ present: toValue(open) }))
+  );
+  const api = computed(() => presence.connect(service, normalizeProps));
+
+  return {
+    present: computed(() => api.value.present),
+    setNode: (node: HTMLElement | null) => api.value.setNode(node),
+  };
+}
+
+export { usePresence };
+`;
+
+const contextSource = `
+import type { InjectionKey, Ref } from "vue";
+
+const AlertPresentKey: InjectionKey<Ref<boolean>> = Symbol("alert-present");
+
+export { AlertPresentKey };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { ref, provide, useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { usePresence } from "@/components/ui/presence";
+import { AlertPresentKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+
+const present = ref(true);
+provide(AlertPresentKey, present);
+
+const presence = usePresence(() => present.value);
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","0% + 34","7"],["L","0% + 79.5","7"],["L","0% + 96.5","13"],["L","100% - 21.5","13"],["L","100% + 0","34"],["L","100% - 13","100% - 15"],["L","100% - 26","100% - 6"],["L","0% + 11.5","100% - 6"],["L","0","100% - 18"],["L","13","0% + 28"],["L","34","7"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","18","100% - 6"],["L","100% - 33.5","100% - 6"],["L","100% - 39.5","100% - 0"],["L","24","100% + 0"],["L","18","100% - 6"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","17","7"],["L","0% + 26.5","7"],["L","0% + 12.5","0% + 20"],["L","13","0% + 11"],["L","17","7"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="attrsWithoutClass"
+    :ref="presence.setNode"
+    :hidden="!presence.present.value"
+    :data-state="present ? 'open' : 'closed'"
+    :class="
+      twMerge([
+        'relative px-10 pt-8 pb-6.5 w-full [&>svg]:drop-shadow-[0_0px_20px_var(--color-primary)]',
+        'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-200',
+        '[--color-frame-1-stroke:var(--color-primary)]',
+        '[--color-frame-1-fill:var(--color-primary)]/20',
+        '[--color-frame-2-stroke:var(--color-primary)]',
+        '[--color-frame-2-fill:transparent]',
+        '[--color-frame-3-stroke:var(--color-accent)]',
+        '[--color-frame-3-fill:var(--color-accent)]/50',
+        rawAttrs.class,
+      ])
+    "
+  >
+    <Frame :paths="framePaths" />
+    <slot />
+  </div>
+</template>
+`;
+
+const titleSource = `
+<script setup lang="ts">
+import { useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+</script>
+
+<template>
+  <div
+    v-bind="attrsWithoutClass"
+    :class="
+      twMerge([
+        'flex items-center text-shadow-lg text-shadow-primary font-bold w-full relative',
+        rawAttrs.class,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const descriptionSource = `
+<script setup lang="ts">
+import { useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+</script>
+
+<template>
+  <div v-bind="attrsWithoutClass" :class="twMerge(['relative pt-2 opacity-80', rawAttrs.class])">
+    <slot />
+  </div>
+</template>
+`;
+
+const closeTriggerSource = `
+<script setup lang="ts">
+import { inject, useAttrs, computed } from "vue";
+import { twMerge } from "tailwind-merge";
+import Button from "@/components/ui/button.vue";
+import { X } from "@lucide/vue";
+import { AlertPresentKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+const attrsWithoutClass = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return rest;
+});
+
+const present = inject(AlertPresentKey);
+if (!present) throw new Error("AlertCloseTrigger must be used within <AlertRoot>");
+</script>
+
+<template>
+  <Button
+    v-bind="attrsWithoutClass"
+    shape="flat"
+    variant="accent"
+    :class="
+      twMerge([
+        'absolute -right-1 top-2 px-5 py-1.5 transform scale-x-[-1]',
+        '[--color-frame-1-fill:var(--color-accent)]/70',
+        rawAttrs.class,
+      ])
+    "
+    @click="present = false"
+  >
+    <X class="size-4" />
+  </Button>
+</template>
+`;
+
+const indexSource = `
+export { default as AlertRoot } from "./AlertRoot.vue";
+export { default as AlertTitle } from "./AlertTitle.vue";
+export { default as AlertDescription } from "./AlertDescription.vue";
+export { default as AlertCloseTrigger } from "./AlertCloseTrigger.vue";
+`;
+
+const usageImports = `
+import { AlertRoot, AlertTitle, AlertDescription, AlertCloseTrigger } from "@/components/ui/alert";
+`;
+
+const usageExample = `
+<AlertRoot>
+  <AlertTitle>
+    <SquareCheck class="flex-none size-4.5 me-2.5" /> Success! Your
+    changes have been saved
+  </AlertTitle>
+  <AlertDescription>
+    This is an alert with icon, title and description.
+  </AlertDescription>
+  <AlertCloseTrigger />
+</AlertRoot>
+`;
+---
+
+<DocsLayout title="Alert | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Alert</Title>
+      <Subtitle>Displays a callout for user attention.</Subtitle>
+      <Preview>
+        <AlertDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/presence @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This uses the shared
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">usePresence</span>
+        composable (see the
+        <a href="/docs/vue/menu" class="font-medium">Menu</a>
+        page's Installation section for
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">components/ui/presence.ts</span>)
+        to keep the alert mounted through its exit animation instead of
+        vanishing the instant it's dismissed. Vue SFCs can't export multiple
+        components from one file, so Alert is a folder instead of a single
+        file &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/presence.ts" code={presenceSource} />
+      <PreviewCode title="components/ui/alert/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/alert/AlertRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/alert/AlertTitle.vue" code={titleSource} />
+      <PreviewCode title="components/ui/alert/AlertDescription.vue" code={descriptionSource} />
+      <PreviewCode title="components/ui/alert/AlertCloseTrigger.vue" code={closeTriggerSource} />
+      <PreviewCode title="components/ui/alert/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

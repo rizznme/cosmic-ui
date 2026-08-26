@@ -1,0 +1,261 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import AccordionDemo from "@/components/demos/vue/accordion.vue";
+
+const previewCode = `
+const data = [
+  {
+    title: "Product Information",
+    content: "Our flagship product combines cutting-edge technology with sleek design...",
+  },
+  {
+    title: "Shipping Details",
+    content: "Our flagship product combines cutting-edge technology with sleek design...",
+  },
+  {
+    title: "Return Policy",
+    content: "Our flagship product combines cutting-edge technology with sleek design...",
+  },
+];
+
+<AccordionRoot class="w-200" :default-value="[data[0].title]">
+  <AccordionItem v-for="item in data" :key="item.title" :value="item.title">
+    <AccordionTrigger>{{ item.title }}</AccordionTrigger>
+    <AccordionContent>{{ item.content }}</AccordionContent>
+  </AccordionItem>
+</AccordionRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as accordion from "@zag-js/accordion";
+
+type AccordionApi = ComputedRef<ReturnType<typeof accordion.connect>>;
+
+const AccordionApiKey: InjectionKey<AccordionApi> = Symbol("accordion-api");
+const AccordionItemValueKey: InjectionKey<string> = Symbol("accordion-item-value");
+
+export { AccordionApiKey, AccordionItemValueKey };
+export type { AccordionApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as accordion from "@zag-js/accordion";
+import { twMerge } from "tailwind-merge";
+import { AccordionApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<accordion.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, collapsible: true, ...rest };
+});
+const service = useMachine(accordion.machine, machineProps);
+const api = computed(() => accordion.connect(service, normalizeProps));
+
+provide(AccordionApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()" :class="twMerge(['flex flex-col gap-3', rawAttrs.class])">
+    <slot />
+  </div>
+</template>
+`;
+
+const itemSource = `
+<script setup lang="ts">
+import { inject, provide } from "vue";
+import { twMerge } from "tailwind-merge";
+import Frame, { parsePaths } from "@/components/ui/frame.vue";
+import { AccordionApiKey, AccordionItemValueKey } from "./context";
+
+const { class: className, value } = defineProps<{ class?: string; value: string }>();
+
+const injectedApi = inject(AccordionApiKey);
+if (!injectedApi) throw new Error("Accordion parts must be used within <AccordionRoot>");
+const api = injectedApi;
+
+provide(AccordionItemValueKey, value);
+
+const framePaths = parsePaths(
+  '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","15","0"],["L","100% - 0","0"],["L","100% - 0","100% - 7"],["L","0% + 0","100% - 7"],["L","0% + 0","0% + 15"],["L","15","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","7","100% - 7"],["L","100% - 8","100% - 7"],["L","100% - 14","100% + 0"],["L","12","100% + 0"],["L","7","100% - 7"]]}]'
+);
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemProps({ value })"
+    :class="
+      twMerge([
+        'relative px-6 pt-3 pb-5 data-[state=open]:drop-shadow-[0_0px_20px_var(--color-primary)]',
+        '[--color-frame-1-stroke:var(--color-primary)]',
+        '[--color-frame-1-fill:var(--color-primary)]/20',
+        '[--color-frame-2-stroke:var(--color-primary)]',
+        '[--color-frame-2-fill:transparent]',
+        className,
+      ])
+    "
+  >
+    <Frame :paths="framePaths" />
+    <div class="relative">
+      <slot />
+    </div>
+  </div>
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { ChevronDown, FilePenLine } from "@lucide/vue";
+import { AccordionApiKey, AccordionItemValueKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(AccordionApiKey);
+if (!injectedApi) throw new Error("Accordion parts must be used within <AccordionRoot>");
+const api = injectedApi;
+
+const value = inject(AccordionItemValueKey);
+if (value === undefined) throw new Error("AccordionTrigger must be used within <AccordionItem>");
+</script>
+
+<template>
+  <button
+    v-bind="api.getItemTriggerProps({ value })"
+    :class="
+      twMerge([
+        'flex items-center data-[state=open]:text-shadow-lg text-shadow-primary font-bold cursor-pointer w-full group py-2 -my-2 data-[state=open]:pt-3.5 transition-[padding] duration-100',
+        className,
+      ])
+    "
+  >
+    <FilePenLine class="size-4.5 me-2.5" /> <slot />
+    <ChevronDown class="ms-auto size-4 group-data-[state=open]:rotate-180" />
+  </button>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { AccordionApiKey, AccordionItemValueKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(AccordionApiKey);
+if (!injectedApi) throw new Error("Accordion parts must be used within <AccordionRoot>");
+const api = injectedApi;
+
+const value = inject(AccordionItemValueKey);
+if (value === undefined) throw new Error("AccordionContent must be used within <AccordionItem>");
+</script>
+
+<template>
+  <div
+    v-bind="api.getItemContentProps({ value })"
+    :class="
+      twMerge([
+        'py-2 mt-1 opacity-80 data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in-0',
+        className,
+      ])
+    "
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as AccordionRoot } from "./AccordionRoot.vue";
+export { default as AccordionItem } from "./AccordionItem.vue";
+export { default as AccordionTrigger } from "./AccordionTrigger.vue";
+export { default as AccordionContent } from "./AccordionContent.vue";
+`;
+
+const usageImports = `
+import {
+  AccordionRoot,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+`;
+
+const usageExample = `
+<AccordionRoot :default-value="['item-1']">
+  <AccordionItem value="item-1">
+    <AccordionTrigger>Product Information</AccordionTrigger>
+    <AccordionContent>
+      Our flagship product combines cutting-edge technology with sleek design.
+    </AccordionContent>
+  </AccordionItem>
+</AccordionRoot>
+`;
+---
+
+<DocsLayout title="Accordion | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Accordion</Title>
+      <Subtitle>
+        A vertically stacked set of interactive headings that each reveal a
+        section of content.
+      </Subtitle>
+      <DocsLinks component="accordion" framework="vue" />
+      <Preview>
+        <AccordionDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/accordion @zag-js/vue</InstallPackage>
+      <SectionContent>
+        This component is built directly on the Zag.js state machine (not a
+        wrapper). Unlike most other components in this library, it needs no
+        Portal or presence composable, since closing an item has no exit
+        animation, so Zag's own
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">hidden</span>
+        handling is enough. Vue SFCs can't export multiple components from
+        one file, so Accordion is a folder instead of a single file &mdash;
+        copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/accordion/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/accordion/AccordionRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/accordion/AccordionItem.vue" code={itemSource} />
+      <PreviewCode title="components/ui/accordion/AccordionTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/accordion/AccordionContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/accordion/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

@@ -1,10 +1,11 @@
 import * as select from "@zag-js/select";
-import { useId, useSyncExternalStore } from "react";
+import { useEffect, useId, useSyncExternalStore } from "react";
 import { useMachine, normalizeProps } from "@zag-js/react";
 import { ChevronDown, Check } from "lucide-react";
 import { Portal } from "@/components/ui/portal";
 import {
   FRAMEWORKS,
+  frameworkFromPath,
   getFramework,
   getServerFramework,
   setFramework,
@@ -26,6 +27,17 @@ function getEquivalentPath(pathname: string, framework: Framework): string {
 
 export function FrameworkSwitcher({ currentPath }: { currentPath: string }) {
   const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
+
+  // A URL that names its framework explicitly (e.g. reached via a search
+  // engine or a shared link) is authoritative — sync the stored preference
+  // to match so the switcher doesn't show a framework other than the one
+  // actually on screen.
+  useEffect(() => {
+    const urlFramework = frameworkFromPath(currentPath);
+    if (urlFramework && urlFramework !== getFramework()) {
+      setFramework(urlFramework);
+    }
+  }, [currentPath]);
 
   const service = useMachine(select.machine, {
     id: useId(),
