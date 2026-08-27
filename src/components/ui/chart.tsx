@@ -34,7 +34,7 @@ function Chart({
   }, []);
 
   return (
-    <div className={twMerge("relative h-64 w-full", className)}>
+    <div className={twMerge("relative h-full w-full", className)}>
       <canvas ref={chartRef} {...props} />
     </div>
   );

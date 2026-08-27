@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="twMerge('relative h-64 w-full', props.class)">
+  <div :class="twMerge('relative h-full w-full', props.class)">
     <canvas ref="canvasRef" />
   </div>
 </template>

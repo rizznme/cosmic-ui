@@ -37,7 +37,7 @@ const config = {
   },
 };
 
-<Chart class="max-w-100" :config="config" />
+<Chart class="max-w-100 h-64" :config="config" />
 `;
 
 const uiSource = `
@@ -75,7 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="twMerge('relative h-64 w-full', props.class)">
+  <div :class="twMerge('relative h-full w-full', props.class)">
     <canvas ref="canvasRef" />
   </div>
 </template>
@@ -111,7 +111,7 @@ const config = {
   },
 };
 
-<Chart class="max-w-100" :config="config" />
+<Chart class="max-w-100 h-64" :config="config" />
 `;
 ---
 

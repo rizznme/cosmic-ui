@@ -49,5 +49,5 @@ const config = {
 </script>
 
 <template>
-  <Chart class="max-w-100" :config="config" />
+  <Chart class="max-w-100 h-64" :config="config" />
 </template>

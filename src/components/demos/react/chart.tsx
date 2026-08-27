@@ -3,7 +3,7 @@ import { Chart, getColor } from "@/components/ui/chart";
 function ChartDemo() {
   return (
     <Chart
-      className="max-w-100"
+      className="max-w-100 h-64"
       config={{
         type: "bar",
         data: {

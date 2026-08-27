@@ -13,7 +13,7 @@ import { ChartDemo } from "@/components/demos/react/chart";
 
 const previewCode = `
 <Chart
-  className="max-w-100"
+  className="max-w-100 h-64"
   config={{
     type: "bar",
     data: {
@@ -102,7 +102,7 @@ function Chart({
   }, []);
 
   return (
-    <div className={twMerge("relative h-64 w-full", className)}>
+    <div className={twMerge("relative h-full w-full", className)}>
       <canvas ref={chartRef} {...props} />
     </div>
   );
@@ -117,7 +117,7 @@ import { Chart, getColor } from "@/components/ui/chart";
 
 const usageExample = `
 <Chart
-  className="max-w-100"
+  className="max-w-100 h-64"
   config={{
     type: "bar",
     data: {
