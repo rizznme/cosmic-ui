@@ -37,9 +37,15 @@ const previewCode = `
 `;
 
 const uiSource = `
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useLayoutEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { type Paths, setupSvgRenderer } from "@left4code/svg-renderer";
+
+// Draw before the browser paints, so there's never a frame where the text
+// is visible but the border isn't. Falls back to useEffect during SSR,
+// where useLayoutEffect would otherwise warn (there's no browser to paint
+// into on the server anyway).
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const pathsCache = new Map<string, Paths>();
 
@@ -67,7 +73,7 @@ function Frame({
 } & React.ComponentProps<"svg">) {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (svgRef.current && svgRef.current.parentElement) {
       const instance = setupSvgRenderer({
         el: svgRef.current,

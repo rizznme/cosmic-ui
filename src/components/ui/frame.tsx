@@ -1,6 +1,13 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useLayoutEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { type Paths, setupSvgRenderer } from "@left4code/svg-renderer";
+
+// useLayoutEffect draws before the browser paints, so there's never a frame
+// where the text is visible but the border isn't. useEffect (paints, then
+// draws) is what causes that flash. useLayoutEffect warns loudly when it
+// runs during SSR though, so fall back to useEffect there - Astro's server
+// render never has a browser to paint into anyway.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const pathsCache = new Map<string, Paths>();
 
@@ -40,7 +47,7 @@ function Frame({
 } & React.ComponentProps<"svg">) {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (svgRef.current && svgRef.current.parentElement) {
       const instance = setupSvgRenderer({
         el: svgRef.current,
