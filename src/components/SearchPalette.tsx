@@ -1,0 +1,164 @@
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { twMerge } from "tailwind-merge";
+import { Search } from "lucide-react";
+import { DialogRoot, DialogContent } from "@/components/ui/dialog";
+import { getFramework, getServerFramework, subscribe as subscribeFramework } from "@/lib/framework-store";
+import { getSearchOpen, setSearchOpen, subscribe as subscribeSearchOpen } from "@/lib/search-palette-store";
+
+type PagefindResultData = {
+  url: string;
+  excerpt: string;
+  meta: { title?: string };
+  filters: Record<string, string[]>;
+};
+
+type PagefindApi = {
+  init: () => Promise<void>;
+  search: (query: string) => Promise<{ results: { id: string; data: () => Promise<PagefindResultData> }[] }>;
+};
+
+declare global {
+  interface Window {
+    pagefind?: PagefindApi;
+  }
+}
+
+let pagefindPromise: Promise<PagefindApi> | null = null;
+function loadPagefind(): Promise<PagefindApi> {
+  if (!pagefindPromise) {
+    // Astro only writes /pagefind/pagefind.js into the build output, so this
+    // import 404s in dev unless the dist/ output happens to be served — that's
+    // expected, it's a production-only module by design (astro-pagefind docs).
+    // @ts-expect-error - generated at build time, no module/types to resolve
+    pagefindPromise = import(/* @vite-ignore */ "/pagefind/pagefind.js").then(
+      async (mod: PagefindApi) => {
+        await mod.init();
+        return mod;
+      }
+    );
+  }
+  return pagefindPromise;
+}
+
+type Result = { url: string; title: string; excerpt: string };
+
+function SearchPalette() {
+  const open = useSyncExternalStore(subscribeSearchOpen, getSearchOpen, () => false);
+  const framework = useSyncExternalStore(subscribeFramework, getFramework, getServerFramework);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Result[]>([]);
+  const [highlighted, setHighlighted] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    if (open) loadPagefind();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setResults([]);
+      setHighlighted(0);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResults([]);
+      return;
+    }
+    const id = ++requestId.current;
+    loadPagefind().then(async (pagefind) => {
+      const search = await pagefind.search(trimmed);
+      if (id !== requestId.current) return; // a newer keystroke already superseded this
+
+      const data = await Promise.all(search.results.slice(0, 20).map((r) => r.data()));
+      if (id !== requestId.current) return;
+
+      // Pages without a "framework" filter (Introduction, Colors) are
+      // framework-agnostic and always shown; framework-tagged pages are
+      // scoped to whichever framework the visitor is currently browsing.
+      const scoped = data.filter((d) => {
+        const fw = d.filters.framework?.[0];
+        return !fw || fw === framework;
+      });
+
+      setResults(
+        scoped.slice(0, 8).map((d) => ({
+          url: d.url,
+          title: d.meta.title?.replace(/\s*\|\s*Cosmic UI$/, "") ?? d.url,
+          excerpt: d.excerpt,
+        }))
+      );
+      setHighlighted(0);
+    });
+  }, [query, framework]);
+
+  function navigate(url: string) {
+    setSearchOpen(false);
+    window.location.href = url;
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlighted((h) => Math.min(h + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlighted((h) => Math.max(h - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const r = results[highlighted];
+      if (r) navigate(r.url);
+    }
+  }
+
+  return (
+    <DialogRoot
+      open={open}
+      onOpenChange={(d) => setSearchOpen(d.open)}
+      initialFocusEl={() => inputRef.current}
+    >
+      <DialogContent className="sm:max-w-xl p-6 top-[20%] translate-y-0">
+        <div className="flex items-center gap-3 border-b border-primary/20 pb-4">
+          <Search className="size-4 opacity-60 shrink-0" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search docs..."
+            className="w-full bg-transparent outline-none placeholder:opacity-50"
+          />
+        </div>
+        <div className="mt-3 max-h-80 overflow-y-auto flex flex-col gap-1">
+          {results.length === 0 && query.trim() && (
+            <div className="py-8 text-center opacity-50 text-sm">No results for "{query}"</div>
+          )}
+          {results.map((r, i) => (
+            <button
+              key={r.url}
+              type="button"
+              onMouseEnter={() => setHighlighted(i)}
+              onClick={() => navigate(r.url)}
+              className={twMerge([
+                "text-left px-3 py-2.5 border border-transparent cursor-pointer",
+                i === highlighted && "border-primary/30 bg-primary/10",
+              ])}
+            >
+              <div className="font-medium text-sm">{r.title}</div>
+              <div
+                className="text-xs opacity-60 mt-0.5 line-clamp-1 [&_mark]:bg-transparent [&_mark]:text-primary [&_mark]:font-medium"
+                dangerouslySetInnerHTML={{ __html: r.excerpt }}
+              />
+            </button>
+          ))}
+        </div>
+      </DialogContent>
+    </DialogRoot>
+  );
+}
+
+export { SearchPalette };

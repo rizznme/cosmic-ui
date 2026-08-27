@@ -1,14 +1,36 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
 import { Zap } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
 import { Frame } from "@/components/ui/frame";
 import { Button } from "@/components/ui/button";
+import { SearchPalette } from "@/components/SearchPalette";
 import { setShowMenu } from "@/lib/mobile-menu-store";
+import { setSearchOpen } from "@/lib/search-palette-store";
 import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
 
 export function SiteChrome() {
   const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
+  // Matches getServerFramework's pattern: a platform-specific label would
+  // differ between server and first client render (no navigator during SSR),
+  // so start neutral and only swap to the Mac glyph once mounted.
+  const [shortcutLabel, setShortcutLabel] = useState("Ctrl+K");
+
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    if (isMac) setShortcutLabel("⌘K");
+
+    function handleKeyDown(e: KeyboardEvent) {
+      const isShortcut = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (!isShortcut) return;
+      e.preventDefault();
+      setSearchOpen(true);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <>
       <div className="h-18 mt-2 mx-2 lg:-mt-px lg:-mx-px flex fixed top-0 inset-x-0 z-50">
@@ -102,10 +124,11 @@ export function SiteChrome() {
             <div className="flex items-center -mt-3.5">
               <Button
                 shape="flat"
+                onClick={() => setSearchOpen(true)}
                 className="font-normal px-9 py-[0.45rem] text-xs text-foreground [--color-frame-1-stroke:var(--color-primary)]/50 [--color-frame-1-fill:var(--color-primary)]/8"
               >
                 <div className="me-10">Search Docs…</div>
-                <div className="ms-auto">⌘+k</div>
+                <div className="ms-auto">{shortcutLabel}</div>
               </Button>
               <a
                 target="_blank"
@@ -137,6 +160,7 @@ export function SiteChrome() {
           />
         </div>
       </div>
+      <SearchPalette />
     </>
   );
 }

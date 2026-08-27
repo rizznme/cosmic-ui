@@ -27,6 +27,7 @@
     "@zag-js/toast": "^1.43.1",
     "@zag-js/vue": "^1.43.1",
     "astro": "^7.2.0",
+    "astro-pagefind": "^2.0.1",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^1.33.0",

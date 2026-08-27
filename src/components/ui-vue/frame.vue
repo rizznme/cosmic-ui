@@ -68,6 +68,6 @@ onUnmounted(() => instance?.destroy());
   <svg
     ref="svgRef"
     xmlns="http://www.w3.org/2000/svg"
-    :class="twMerge(['absolute inset-0 size-full', props.class])"
+    :class="twMerge(['absolute inset-0 size-full pointer-events-none', props.class])"
   />
 </template>

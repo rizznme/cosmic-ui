@@ -3,9 +3,10 @@ import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import tailwindcss from "@tailwindcss/vite";
+import pagefind from "astro-pagefind";
 
 export default defineConfig({
-  integrations: [react(), vue()],
+  integrations: [react(), vue(), pagefind()],
   redirects: {
     "/docs/frame": "/docs/react/frame",
     "/docs/menu": "/docs/react/menu",

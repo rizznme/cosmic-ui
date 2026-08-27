@@ -56,7 +56,7 @@ function Frame({
   return (
     <svg
       {...props}
-      className={twMerge(["absolute inset-0 size-full", className])}
+      className={twMerge(["absolute inset-0 size-full pointer-events-none", className])}
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
     />

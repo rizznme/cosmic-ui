@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { getShowMenu, setShowMenu, subscribe } from "@/lib/mobile-menu-store";
+import { setSearchOpen } from "@/lib/search-palette-store";
 import { FrameworkSwitcher } from "@/components/FrameworkSwitcher";
 import {
   frameworkFromPath,
@@ -79,6 +80,17 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
           <X className="size-6" />
         </div>
         <FrameworkSwitcher currentPath={currentPath} />
+        <button
+          type="button"
+          onClick={() => {
+            setShowMenu(false);
+            setSearchOpen(true);
+          }}
+          className="flex items-center gap-2 text-left hover:text-foreground cursor-pointer lg:hidden"
+        >
+          <Search className="size-4" />
+          Search docs...
+        </button>
         {docLinks.map((group) => (
           <div className="flex flex-col" key={group.group}>
             <div className="font-medium text-foreground mb-2">{group.group}</div>
