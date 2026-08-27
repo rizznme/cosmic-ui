@@ -89,9 +89,12 @@ function Frame({
   return (
     <svg
       {...props}
-      className={twMerge(["absolute inset-0 size-full", className])}
+      className={twMerge(["absolute inset-0 size-full pointer-events-none", className])}
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
+      data-frame-paths={JSON.stringify(paths)}
+      data-frame-backdrop-blur={enableBackdropBlur || undefined}
+      data-frame-view-box={enableViewBox || undefined}
     />
   );
 }
@@ -131,7 +134,15 @@ const usageExample = `
       <InstallPackage>add @left4code/svg-renderer</InstallPackage>
       <SectionContent>Copy and paste the following code into your project.</SectionContent>
       <PreviewCode title="components/ui/frame.tsx" code={uiSource} />
-      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+      <SectionContent>
+        Update the import paths to match your project setup. The <code>data-frame-*</code> attributes
+        are only meaningful on this docs site: a small inline script in our own layout reads them to
+        draw every frame's border before React loads at all, so the chrome isn't bare text for
+        however long the framework bundle takes to arrive on a slow connection. That matters for
+        frameworks that server-render (Next.js, Remix, and Astro with <code>client:load</code> like
+        this site) - without a script like that reading them, the attributes are inert. Safe to leave
+        in, or delete if you don't need them.
+      </SectionContent>
     </div>
     <div id="usage">
       <SectionTitle>Usage</SectionTitle>

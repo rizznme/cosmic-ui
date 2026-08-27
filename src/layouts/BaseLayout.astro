@@ -52,5 +52,156 @@ const { title = "Cosmic UI" } = Astro.props;
         </div>
       </div>
     </div>
+    <script is:inline>
+      // Draws every Frame's border before React/Vue ever loads, using the raw
+      // path data each <svg data-frame-paths> carries on itself (see
+      // src/components/ui/frame.tsx). Without this, every frame is empty
+      // markup until the framework bundle downloads and hydrates - on a
+      // throttled connection that's the difference between text-with-borders
+      // and bare text for the better part of a second.
+      //
+      // This is a faithful port of @left4code/svg-renderer's own
+      // createSvgElement/createSvgPaths - kept in sync manually since it has
+      // no browser-less way to import from that package here. Drawing sets
+      // data-width/data-height to the exact size just measured, which is
+      // what setupSvgRenderer's own "has the size actually changed" guard
+      // checks before it redraws - so once React/Vue mounts and measures the
+      // same layout, it finds a match and leaves these paths alone instead
+      // of tearing them down and redrawing.
+      (function () {
+        function evaluateArithmetic(source) {
+          var tokens = source.match(/\d+\.?\d*|[+\-*/()]/g);
+          if (!tokens || tokens.join("") !== source.replace(/\s+/g, "")) return 0;
+          var pos = 0;
+          function peek() {
+            return tokens[pos];
+          }
+          function eat(t) {
+            return peek() === t ? (pos++, true) : false;
+          }
+          function parseExpr() {
+            var value = parseTerm();
+            for (;;) {
+              if (eat("+")) value += parseTerm();
+              else if (eat("-")) value -= parseTerm();
+              else return value;
+            }
+          }
+          function parseTerm() {
+            var value = parseFactor();
+            for (;;) {
+              if (eat("*")) value *= parseFactor();
+              else if (eat("/")) {
+                var divisor = parseFactor();
+                value = divisor === 0 ? NaN : value / divisor;
+              } else return value;
+            }
+          }
+          function parseFactor() {
+            if (eat("-")) return -parseFactor();
+            if (eat("+")) return parseFactor();
+            if (eat("(")) {
+              var value = parseExpr();
+              if (!eat(")")) return NaN;
+              return value;
+            }
+            var token = peek();
+            if (token === undefined || !/^\d/.test(token)) return NaN;
+            pos++;
+            return parseFloat(token);
+          }
+          var result = parseExpr();
+          if (pos !== tokens.length || !isFinite(result)) return 0;
+          return result;
+        }
+
+        function evalExpression(expr, width, height) {
+          var replaced = expr
+            .replace(/([\d.]+)%/g, function (_, num) {
+              return "(" + parseFloat(num) + " / 100)";
+            })
+            .replace(/width/g, String(width))
+            .replace(/height/g, String(height));
+          return evaluateArithmetic(replaced);
+        }
+
+        function buildPathD(pathCmds, width, height) {
+          return pathCmds
+            .map(function (cmd) {
+              var c = cmd[0],
+                x = cmd[1],
+                y = cmd[2];
+              var px =
+                x.indexOf("%") !== -1 || /[+\-*/]/.test(x)
+                  ? evalExpression(x.replace(/%/g, "* width / 100"), width, height)
+                  : parseFloat(x);
+              var py =
+                y.indexOf("%") !== -1 || /[+\-*/]/.test(y)
+                  ? evalExpression(y.replace(/%/g, "* height / 100"), width, height)
+                  : parseFloat(y);
+              return c + " " + Math.trunc(px) + "," + Math.trunc(py);
+            })
+            .join(" ");
+        }
+
+        function drawFrame(svg) {
+          var raw = svg.getAttribute("data-frame-paths");
+          if (!raw) return;
+          var paths;
+          try {
+            paths = JSON.parse(raw);
+          } catch (e) {
+            return;
+          }
+
+          var rect = svg.getBoundingClientRect();
+          var width = rect.width,
+            height = rect.height;
+          // Not laid out yet (e.g. inside a display:none tab panel) - leave
+          // it for React/Vue's own ResizeObserver to catch once it's shown.
+          if (!width || !height) return;
+
+          // Backdrop-blur frames need setupSvgRenderer's mask <div> inserted
+          // as a *sibling* of the svg - a new sibling changes the child list
+          // of whatever React/Vue component owns that parent, and hydrating
+          // into a parent whose children don't match what was server-rendered
+          // is exactly what trips React error #418 ("Hydration failed").
+          // Paths drawn *inside* the svg are safe (Frame renders the svg with
+          // no children of its own, so React never compares against them),
+          // but the mask sibling isn't. So: draw the border now for the
+          // immediate visual win, but deliberately skip data-width/height for
+          // these few frames, which leaves setupSvgRenderer's own
+          // "has the size actually changed" guard seeing no prior value once
+          // React/Vue mounts - it reruns its full draw, mask included, same
+          // as it always has. The border is just never left unstyled while
+          // that happens.
+          var isBackdropBlur = !!svg.getAttribute("data-frame-backdrop-blur");
+          if (!isBackdropBlur) {
+            svg.setAttribute("data-width", String(width));
+            svg.setAttribute("data-height", String(height));
+          }
+
+          if (svg.getAttribute("data-frame-view-box")) {
+            svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+          }
+
+          for (var i = 0; i < paths.length; i++) {
+            var p = paths[i];
+            if (p.show === false) continue;
+            var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            el.setAttribute("d", buildPathD(p.path, width, height));
+            el.style.fill = p.style.fill;
+            el.style.stroke = p.style.stroke;
+            el.style.strokeWidth = p.style.strokeWidth;
+            el.style.vectorEffect = "non-scaling-stroke";
+            el.style.shapeRendering = "geometricPrecision";
+            svg.appendChild(el);
+          }
+        }
+
+        var svgs = document.querySelectorAll("svg[data-frame-paths]");
+        for (var i = 0; i < svgs.length; i++) drawFrame(svgs[i]);
+      })();
+    </script>
   </body>
 </html>

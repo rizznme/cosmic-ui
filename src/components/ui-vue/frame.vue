@@ -69,5 +69,8 @@ onUnmounted(() => instance?.destroy());
     ref="svgRef"
     xmlns="http://www.w3.org/2000/svg"
     :class="twMerge(['absolute inset-0 size-full pointer-events-none', props.class])"
+    :data-frame-paths="JSON.stringify(paths)"
+    :data-frame-backdrop-blur="enableBackdropBlur || undefined"
+    :data-frame-view-box="enableViewBox || undefined"
   />
 </template>
