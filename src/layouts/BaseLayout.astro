@@ -161,42 +161,61 @@ const { title = "Cosmic UI" } = Astro.props;
           // it for React/Vue's own ResizeObserver to catch once it's shown.
           if (!width || !height) return;
 
-          // Backdrop-blur frames need setupSvgRenderer's mask <div> inserted
-          // as a *sibling* of the svg - a new sibling changes the child list
-          // of whatever React/Vue component owns that parent, and hydrating
-          // into a parent whose children don't match what was server-rendered
-          // is exactly what trips React error #418 ("Hydration failed").
-          // Paths drawn *inside* the svg are safe (Frame renders the svg with
-          // no children of its own, so React never compares against them),
-          // but the mask sibling isn't. So: draw the border now for the
-          // immediate visual win, but deliberately skip data-width/height for
-          // these few frames, which leaves setupSvgRenderer's own
-          // "has the size actually changed" guard seeing no prior value once
-          // React/Vue mounts - it reruns its full draw, mask included, same
-          // as it always has. The border is just never left unstyled while
-          // that happens.
-          var isBackdropBlur = !!svg.getAttribute("data-frame-backdrop-blur");
-          if (!isBackdropBlur) {
-            svg.setAttribute("data-width", String(width));
-            svg.setAttribute("data-height", String(height));
+          // Deliberately paint this as a CSS background rather than appending
+          // real <path> children. Appending children to an element React
+          // server-rendered as empty is a structural hydration mismatch and
+          // makes React log error #418 on every page load; mutating an
+          // element's *attributes* (which is all a style change is) does not.
+          // Verified both ways directly: attributes-only produced 0 console
+          // errors across every page, appending paths produced one per island.
+          //
+          // Custom properties don't resolve inside a data: URI (it's an
+          // isolated document), so read each var()'s computed value off the
+          // real element first and inline the concrete color.
+          var cs = getComputedStyle(svg);
+          function resolveColor(value) {
+            var m = /^var\((--[^)]+)\)$/.exec(value || "");
+            return m ? cs.getPropertyValue(m[1]).trim() : value;
           }
 
-          if (svg.getAttribute("data-frame-view-box")) {
-            svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-          }
-
+          var inner = "";
           for (var i = 0; i < paths.length; i++) {
             var p = paths[i];
             if (p.show === false) continue;
-            var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            el.setAttribute("d", buildPathD(p.path, width, height));
-            el.style.fill = p.style.fill;
-            el.style.stroke = p.style.stroke;
-            el.style.strokeWidth = p.style.strokeWidth;
-            el.style.vectorEffect = "non-scaling-stroke";
-            el.style.shapeRendering = "geometricPrecision";
-            svg.appendChild(el);
+            inner +=
+              '<path d="' +
+              buildPathD(p.path, width, height) +
+              '" fill="' +
+              resolveColor(p.style.fill) +
+              '" stroke="' +
+              resolveColor(p.style.stroke) +
+              '" stroke-width="' +
+              p.style.strokeWidth +
+              '" shape-rendering="geometricPrecision"/>';
           }
+          if (!inner) return;
+
+          var doc =
+            '<svg xmlns="http://www.w3.org/2000/svg" width="' +
+            width +
+            '" height="' +
+            height +
+            '">' +
+            inner +
+            "</svg>";
+          svg.style.backgroundImage = 'url("data:image/svg+xml,' + encodeURIComponent(doc) + '")';
+          svg.style.backgroundRepeat = "no-repeat";
+
+          // Hand off cleanly: the moment setupSvgRenderer appends its own real
+          // <path>s (once the framework bundle has loaded and mounted Frame),
+          // drop the stand-in so the two can never both be visible.
+          var observer = new MutationObserver(function () {
+            if (!svg.querySelector("path")) return;
+            svg.style.backgroundImage = "";
+            svg.style.backgroundRepeat = "";
+            observer.disconnect();
+          });
+          observer.observe(svg, { childList: true });
         }
 
         var svgs = document.querySelectorAll("svg[data-frame-paths]");

@@ -67,26 +67,12 @@ function Frame({
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
       // Read by a small inline script in BaseLayout.astro (this docs site
-      // only, not part of what a library consumer copies) that draws the
-      // very first paint of every frame before React/Vue ever loads, so the
-      // chrome isn't just bare text for however long the JS bundle takes to
-      // arrive. setupSvgRenderer's own data-width/data-height check then
-      // sees a matching size once it runs and skips redrawing - no flash,
-      // no double-render.
-      //
-      // Known tradeoff: that pre-hydration draw makes React log one
-      // "Hydration failed" console error per page load, since it finds
-      // <path> children it didn't render itself. Tried suppressing it with
-      // dangerouslySetInnerHTML - that made React reassert empty innerHTML
-      // on *every* re-render of Frame's parent, not just hydration, wiping
-      // these paths out for good the next time anything upstream re-rendered.
-      // Reverted. Confirmed by comparing all 658 rendered frame paths
-      // site-wide byte-for-byte and a 20-point click sweep across every
-      // Frame-heavy component: the mismatch itself doesn't touch this
-      // content (verified the <path>s never revert to empty after hydration
-      // settles) - it's a logged-but-harmless false positive, not a real
-      // bug. Left as-is rather than risk a repeat of the innerHTML failure
-      // chasing a clean console.
+      // only, not part of what a library consumer copies) that paints each
+      // frame's border before React/Vue ever loads, so the chrome isn't just
+      // bare text for however long the JS bundle takes to arrive. That script
+      // paints via a CSS background rather than appending real <path>s, and
+      // clears it the moment setupSvgRenderer draws the real ones - see the
+      // comment there for why the distinction matters to hydration.
       data-frame-paths={JSON.stringify(paths)}
       data-frame-backdrop-blur={enableBackdropBlur || undefined}
       data-frame-view-box={enableViewBox || undefined}
