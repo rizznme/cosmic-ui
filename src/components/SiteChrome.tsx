@@ -4,7 +4,6 @@ import { Zap } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
 import { Frame } from "@/components/ui/frame";
 import { Button } from "@/components/ui/button";
-import { SearchPalette } from "@/components/SearchPalette";
 import { setShowMenu } from "@/lib/mobile-menu-store";
 import { setSearchOpen } from "@/lib/search-palette-store";
 import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
@@ -160,7 +159,6 @@ export function SiteChrome() {
           />
         </div>
       </div>
-      <SearchPalette />
     </>
   );
 }

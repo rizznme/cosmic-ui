@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Sidebar } from "@/components/Sidebar";
+import { SearchPalette } from "@/components/SearchPalette";
 
 interface Props {
   title?: string;
@@ -26,6 +27,7 @@ const { title = "Cosmic UI" } = Astro.props;
   <body class="min-h-screen before:fixed before:inset-0 before:bg-noise before:z-[-1] after:bg-temper after:opacity-15 after:bg-contain after:fixed after:inset-0 after:blur-xl after:z-[-1]">
     <div class="before:fixed before:inset-x-0 before:top-0 before:h-80 before:bg-gradient-to-b before:from-black/50 before:to-transparent before:z-[-1]">
       <SiteChrome client:load />
+      <SearchPalette client:idle />
       <div class="container mx-auto px-4 sm:px-0">
         <Sidebar client:load currentPath={Astro.url.pathname} />
         <slot />
