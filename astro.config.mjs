@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import pagefind from "astro-pagefind";
 
 export default defineConfig({
+  site: "https://cosmic-ui.com",
   integrations: [react(), vue(), pagefind()],
   redirects: {
     "/docs/frame": "/docs/react/frame",

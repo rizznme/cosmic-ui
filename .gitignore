@@ -4,3 +4,5 @@ dist/
 .env
 .DS_Store
 CLAUDE.md
+marketing/
+cosmic-ui-context.md

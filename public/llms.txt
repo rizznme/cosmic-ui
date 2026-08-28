@@ -1,0 +1,48 @@
+# Cosmic UI
+
+> A free, open-source library of sci-fi themed UI components for React and Vue.
+> Components ship with angular clipped frames, glowing borders, and HUD-style
+> surfaces instead of the usual rounded rectangles. Behaviour comes from Zag.js
+> state machines, so components are accessible and headless underneath; the
+> visual identity lives in SVG path data on a `Frame` primitive, separate from
+> component logic.
+
+Install and usage is copy-in source, not a black-box package: each docs page
+shows the full component source so it can be pasted into a project and edited.
+Styling is Tailwind CSS v4. Every component exists in both a React and a Vue
+version with identical markup and visuals.
+
+## Getting started
+
+- [How to use (React)](https://cosmic-ui.com/docs/react/how-to-use): install steps, Tailwind setup, CSS import order.
+- [How to use (Vue)](https://cosmic-ui.com/docs/vue/how-to-use): same steps for Vue 3.
+- [Frame](https://cosmic-ui.com/docs/react/frame): the primitive every other component is built on. Takes an array of SVG path definitions and renders the angular border, glow, and fill.
+- [Colors](https://cosmic-ui.com/docs/colors): the design tokens and how to retheme.
+
+## Components (React)
+
+- [Accordion](https://cosmic-ui.com/docs/react/accordion)
+- [Alert](https://cosmic-ui.com/docs/react/alert)
+- [Button](https://cosmic-ui.com/docs/react/button)
+- [Chart](https://cosmic-ui.com/docs/react/chart)
+- [Checkbox](https://cosmic-ui.com/docs/react/checkbox)
+- [Combobox](https://cosmic-ui.com/docs/react/combobox)
+- [Dialog](https://cosmic-ui.com/docs/react/dialog)
+- [Input](https://cosmic-ui.com/docs/react/input)
+- [Menu](https://cosmic-ui.com/docs/react/menu)
+- [Radio Group](https://cosmic-ui.com/docs/react/radio-group)
+- [Select](https://cosmic-ui.com/docs/react/select)
+- [Switch](https://cosmic-ui.com/docs/react/switch)
+- [Tabs](https://cosmic-ui.com/docs/react/tabs)
+- [Textarea](https://cosmic-ui.com/docs/react/textarea)
+- [Toast](https://cosmic-ui.com/docs/react/toast)
+
+## Components (Vue)
+
+Same set, same props, under `/docs/vue/` instead of `/docs/react/`. For example
+[Dialog for Vue](https://cosmic-ui.com/docs/vue/dialog).
+
+## Optional
+
+- [GitHub repository](https://github.com/rizznme/cosmic-ui): MIT licensed source and issue tracker.
+- [svg-renderer](https://www.npmjs.com/package/@left4code/svg-renderer): the standalone package that turns Frame path data into rendered SVG.

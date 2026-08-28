@@ -3,12 +3,28 @@ import BaseLayout from "./BaseLayout.astro";
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title } = Astro.props;
+const { title, description } = Astro.props;
+
+// Docs pages pass only a title ("Accordion | Cosmic UI"), so derive a unique
+// meta description from it rather than editing all 34 pages by hand. Unique
+// per page is what stops Google from folding React/Vue variants together.
+const componentName = (title ?? "").split("|")[0].trim();
+const framework = Astro.url.pathname.includes("/vue/")
+  ? "Vue"
+  : Astro.url.pathname.includes("/react/")
+    ? "React"
+    : null;
+
+const derived =
+  componentName && framework
+    ? `A sci-fi themed ${componentName} component for ${framework}. Copy the source, drop it in, and keep the angular frames and glowing borders. Free and open source.`
+    : undefined;
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description={description ?? derived}>
   <div class="mt-30 font-roboto text-base min-h-screen">
     <div class="lg:w-[75%] xl:w-[82%] grid grid-cols-10 ml-auto">
       <slot />
