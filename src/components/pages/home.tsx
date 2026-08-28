@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Chart, getColor } from "@/components/ui/chart";
 import { FilePenLine, CopySlash } from "lucide-react";
 import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
+import { Subscribe } from "@/components/Subscribe";
 
 function HomePage() {
   const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
@@ -990,6 +991,15 @@ function HomePage() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="flex flex-col items-center gap-4 mt-32 mb-20 px-5 text-center">
+        <div className="text-xl md:text-2xl font-bold text-shadow-lg text-shadow-primary">
+          Stay in the loop
+        </div>
+        <div className="opacity-70 max-w-md">
+          New components, releases, and what's coming next. No spam.
+        </div>
+        <Subscribe />
       </div>
     </>
   );
