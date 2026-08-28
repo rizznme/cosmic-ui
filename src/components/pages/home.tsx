@@ -992,15 +992,7 @@ function HomePage() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-center gap-4 mt-32 mb-20 px-5 text-center">
-        <div className="text-xl md:text-2xl font-bold text-shadow-lg text-shadow-primary">
-          Stay in the loop
-        </div>
-        <div className="opacity-70 max-w-md">
-          New components, releases, and what's coming next. No spam.
-        </div>
-        <Subscribe />
-      </div>
+      <Subscribe />
     </>
   );
 }
