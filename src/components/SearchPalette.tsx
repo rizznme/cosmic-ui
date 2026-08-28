@@ -101,16 +101,30 @@ function SearchPalette() {
     window.location.href = url;
   }
 
+  // Before the visitor has typed anything, show a few fixed jump-to links
+  // instead of an empty list - both so the dialog isn't just a single input
+  // row (the decorative frame is designed for a taller box, and looks
+  // pinched at that height) and so there's actually something useful to
+  // land on immediately after opening.
+  const quickLinks: Result[] = [
+    { url: `/docs/${framework}/how-to-use`, title: "How to Use", excerpt: "" },
+    { url: `/docs/${framework}/button`, title: "Button", excerpt: "" },
+    { url: `/docs/${framework}/dialog`, title: "Dialog", excerpt: "" },
+    { url: `/docs/${framework}/tabs`, title: "Tabs", excerpt: "" },
+  ];
+  const showingQuickLinks = !query.trim();
+  const activeList = showingQuickLinks ? quickLinks : results;
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlighted((h) => Math.min(h + 1, results.length - 1));
+      setHighlighted((h) => Math.min(h + 1, activeList.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlighted((h) => Math.max(h - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const r = results[highlighted];
+      const r = activeList[highlighted];
       if (r) navigate(r.url);
     }
   }
@@ -134,10 +148,13 @@ function SearchPalette() {
           />
         </div>
         <div className="mt-3 max-h-80 overflow-y-auto flex flex-col gap-1">
-          {results.length === 0 && query.trim() && (
+          {showingQuickLinks && (
+            <div className="px-3 pb-1 text-xs opacity-50 uppercase tracking-wide">Quick links</div>
+          )}
+          {!showingQuickLinks && results.length === 0 && (
             <div className="py-8 text-center opacity-50 text-sm">No results for "{query}"</div>
           )}
-          {results.map((r, i) => (
+          {activeList.map((r, i) => (
             <button
               key={r.url}
               type="button"
@@ -149,10 +166,12 @@ function SearchPalette() {
               ])}
             >
               <div className="font-medium text-sm">{r.title}</div>
-              <div
-                className="text-xs opacity-60 mt-0.5 line-clamp-1 [&_mark]:bg-transparent [&_mark]:text-primary [&_mark]:font-medium"
-                dangerouslySetInnerHTML={{ __html: r.excerpt }}
-              />
+              {r.excerpt && (
+                <div
+                  className="text-xs opacity-60 mt-0.5 line-clamp-1 [&_mark]:bg-transparent [&_mark]:text-primary [&_mark]:font-medium"
+                  dangerouslySetInnerHTML={{ __html: r.excerpt }}
+                />
+              )}
             </button>
           ))}
         </div>
