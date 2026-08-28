@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind's automatic source detection skips anything git ignores, so an
+   untracked file silently loses every utility class it alone uses - the page
+   still renders, just unstyled, which reads like a layout bug rather than a
+   missing-CSS one. This makes scanning depend on the directory instead of on
+   git status. It has to be an explicit glob: a plain directory ("../") gets
+   folded back into the auto-detected root and is filtered the same way. */
+@source "../**/*.{ts,tsx,astro}";
+
 @theme {
   --background-image-temper: url("../assets/images/temper.svg");
   --background-image-noise: url("../assets/images/noise.png");

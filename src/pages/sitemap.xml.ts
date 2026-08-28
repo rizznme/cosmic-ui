@@ -19,6 +19,10 @@ function toRoute(file: string) {
 
 export const GET: APIRoute = () => {
   const routes = Object.keys(pages)
+    // A dynamic route's filename is a template, not a URL - emitting it
+    // verbatim would publish a literal "/[...slug]/" to Google. Any such route
+    // has to contribute its own concrete URLs instead.
+    .filter((file) => !/[[\]]/.test(file))
     .map(toRoute)
     .sort((a, b) => a.localeCompare(b));
 
