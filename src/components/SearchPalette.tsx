@@ -147,7 +147,7 @@ function SearchPalette() {
             className="w-full bg-transparent outline-none placeholder:opacity-50"
           />
         </div>
-        <div className="mt-3 max-h-80 overflow-y-auto flex flex-col gap-1">
+        <div className="mt-3 pb-2 max-h-80 overflow-y-auto flex flex-col gap-1">
           {showingQuickLinks && (
             <div className="px-3 pb-1 text-xs opacity-50 uppercase tracking-wide">Quick links</div>
           )}
