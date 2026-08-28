@@ -18,9 +18,9 @@ Use the CLI. It resolves the dependencies between components, which is the part
 that is easy to get wrong by hand:
 
 ```
-npx @cosmic-ui/cli@latest init          # writes cosmic.json + design tokens
-npx @cosmic-ui/cli@latest add dialog    # writes dialog AND button, frame, portal, presence
-npx @cosmic-ui/cli@latest list --json   # machine-readable component list
+npx @left4code/cosmic-ui-cli@latest init          # writes cosmic.json + design tokens
+npx @left4code/cosmic-ui-cli@latest add dialog    # writes dialog AND button, frame, portal, presence
+npx @left4code/cosmic-ui-cli@latest list --json   # machine-readable component list
 ```
 
 Flags that matter for non-interactive use: `--yes` (never prompt),

@@ -57,7 +57,7 @@ async function requireConfig(cwd) {
   if (!config) {
     fail(
       `no ${CONFIG_FILE} found in ${cwd}`,
-      "Run `npx @cosmic-ui/cli init` first.",
+      "Run `npx @left4code/cosmic-ui-cli init` first.",
     );
   }
   return config;
@@ -113,7 +113,7 @@ async function resolve_(framework, names, seen = new Map()) {
     if (!item) {
       fail(
         `unknown component "${name}" for ${framework}`,
-        "Run `npx @cosmic-ui/cli list` to see what exists.",
+        "Run `npx @left4code/cosmic-ui-cli list` to see what exists.",
       );
     }
     seen.set(name, item);
@@ -170,7 +170,7 @@ async function cmdInit(cwd, flags) {
   }
 
   console.log(
-    c.dim(`\nNext: npx @cosmic-ui/cli add button`),
+    c.dim(`\nNext: npx @left4code/cosmic-ui-cli add button`),
   );
 }
 
@@ -372,10 +372,10 @@ Options
   --force                   With init: overwrite cosmic.json
 
 Examples
-  npx @cosmic-ui/cli init
-  npx @cosmic-ui/cli add button dialog
-  npx @cosmic-ui/cli add --all --yes
-  npx @cosmic-ui/cli list --json
+  npx @left4code/cosmic-ui-cli init
+  npx @left4code/cosmic-ui-cli add button dialog
+  npx @left4code/cosmic-ui-cli add --all --yes
+  npx @left4code/cosmic-ui-cli list --json
 `;
 
 async function main() {

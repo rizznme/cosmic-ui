@@ -1,11 +1,11 @@
-# @cosmic-ui/cli
+# @left4code/cosmic-ui-cli
 
 Add [Cosmic UI](https://cosmic-ui.com) sci-fi components to a React or Vue
 project. Zero dependencies.
 
 ```bash
-npx @cosmic-ui/cli@latest init
-npx @cosmic-ui/cli@latest add dialog
+npx @left4code/cosmic-ui-cli@latest init
+npx @left4code/cosmic-ui-cli@latest add dialog
 ```
 
 `add dialog` writes `dialog` **and** the components it imports (`button`,

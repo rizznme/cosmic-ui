@@ -1,5 +1,5 @@
 {
-  "name": "@cosmic-ui/cli",
+  "name": "@left4code/cosmic-ui-cli",
   "version": "0.1.0",
   "description": "Add Cosmic UI sci-fi components to your React or Vue project.",
   "keywords": [
