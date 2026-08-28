@@ -9,6 +9,14 @@ import SectionContent from "@/components/docs/SectionContent.astro";
 import InstallPackage from "@/components/docs/InstallPackage.astro";
 import PreviewCode from "@/components/docs/PreviewCode.astro";
 
+const cliInit = `
+npx @cosmic-ui/cli@latest init
+`;
+
+const cliAdd = `
+npx @cosmic-ui/cli@latest add dialog
+`;
+
 const indexCss = `
 @import "tailwindcss";
 `;
@@ -143,6 +151,23 @@ export default App
         <InstallPackage>add -D @types/node</InstallPackage>
         <PreviewCode title="vite.config.ts" code={viteConfig} />
       </div>
+      <div id="cli">
+        <SectionTitle>Install with the CLI</SectionTitle>
+        <SectionContent>
+          The fastest way. It writes each component plus everything that
+          component imports, then installs the packages they need.
+        </SectionContent>
+        <PreviewCode code={cliInit} />
+        <SectionContent>
+          Then add components. Dependencies between components are resolved for
+          you, so this also writes button, frame, portal and presence.
+        </SectionContent>
+        <PreviewCode code={cliAdd} />
+        <SectionContent>
+          Run <code class="text-primary">npx @cosmic-ui/cli@latest list</code> to
+          see everything available. The steps below are the manual alternative.
+        </SectionContent>
+      </div>
       <div id="add-components">
         <SectionTitle>Add Components</SectionTitle>
         <SectionContent>
@@ -153,6 +178,7 @@ export default App
     </div>
   </Wrapper>
   <TocMenu>
+    <a class="hover:text-foreground py-1" href="#cli">Install with the CLI</a>
     <a class="hover:text-foreground py-1" href="#create-project">Create project</a>
     <a class="hover:text-foreground py-1" href="#add-tailwindcss">Add Tailwind CSS</a>
     <a class="hover:text-foreground py-1" href="#edit-tsconfig">Edit tsconfig.json file</a>

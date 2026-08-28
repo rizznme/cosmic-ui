@@ -7,10 +7,49 @@
 > visual identity lives in SVG path data on a `Frame` primitive, separate from
 > component logic.
 
-Install and usage is copy-in source, not a black-box package: each docs page
-shows the full component source so it can be pasted into a project and edited.
-Styling is Tailwind CSS v4. Every component exists in both a React and a Vue
-version with identical markup and visuals.
+Install and usage is copy-in source, not a black-box package: the component
+files are written into the project and owned by it. Styling is Tailwind CSS v4.
+Every component exists in both a React and a Vue version with identical markup
+and visuals.
+
+## Installing components (read this first)
+
+Use the CLI. It resolves the dependencies between components, which is the part
+that is easy to get wrong by hand:
+
+```
+npx @cosmic-ui/cli@latest init          # writes cosmic.json + design tokens
+npx @cosmic-ui/cli@latest add dialog    # writes dialog AND button, frame, portal, presence
+npx @cosmic-ui/cli@latest list --json   # machine-readable component list
+```
+
+Flags that matter for non-interactive use: `--yes` (never prompt),
+`--no-install` (print the package-manager command instead of running it),
+`--overwrite`, `--framework react|vue`, `--dir <path>`, `--alias <path>`.
+
+Important: most components import other components. `dialog`, `menu`, `select`
+and `combobox` each need `button`, `frame`, `portal` and `presence`; nearly
+everything needs `frame`. Copying a single file by hand will fail to build. The
+CLI handles this; if you copy manually, follow `registryDependencies`.
+
+The components also need design tokens (`--color-primary`, the frame colours,
+the type scale) in the same CSS file as `@import "tailwindcss"`. `init` writes
+them; they are also at https://cosmic-ui.com/r/theme.css
+
+## Machine-readable registry
+
+Fetch these directly instead of scraping the docs pages:
+
+- https://cosmic-ui.com/r/index.json - every component, its npm dependencies, its
+  registry dependencies, and the URL for its full definition.
+- https://cosmic-ui.com/r/{framework}/{name}.json - one component: every file with
+  its complete contents, npm dependencies, and registry dependencies.
+  Example: https://cosmic-ui.com/r/react/button.json
+- https://cosmic-ui.com/r/theme.css - the design tokens.
+
+Frameworks are `react` and `vue`. File paths in a registry item are relative to
+the project's components directory, and imports use the `@/components` alias by
+default.
 
 ## Getting started
 

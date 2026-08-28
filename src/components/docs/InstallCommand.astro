@@ -1,0 +1,25 @@
+---
+import PreviewCode from "./PreviewCode.astro";
+
+interface Props {
+  component: string;
+}
+
+const { component } = Astro.props;
+
+// Same trick DocsLayout uses: the framework is already in the URL, so the
+// command shown always matches the page you are on without every page having
+// to pass it in.
+const framework = Astro.url.pathname.includes("/vue/") ? "vue" : "react";
+
+const command = `npx @cosmic-ui/cli@latest add ${component}`;
+---
+
+<PreviewCode code={command} />
+<p class="mt-2 opacity-70">
+  This writes the component and everything it imports, then installs the
+  packages it needs. Run <code class="text-primary">npx @cosmic-ui/cli@latest init</code>
+  first if you haven't already{
+    framework === "vue" ? " (it detects Vue automatically)" : ""
+  }.
+</p>

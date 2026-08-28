@@ -1,5 +1,6 @@
 ---
 import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
 import Wrapper from "@/components/docs/Wrapper.astro";
 import TocMenu from "@/components/docs/TocMenu.astro";
 import Title from "@/components/docs/Title.astro";
@@ -129,9 +130,10 @@ const config = {
     </div>
     <div id="installation">
       <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="chart" />
       <SectionContent>Install the following dependencies:</SectionContent>
       <InstallPackage>add chart.js</InstallPackage>
-      <SectionContent>Copy and paste the following code into your project.</SectionContent>
+      <SectionContent>Or copy and paste the code below by hand.</SectionContent>
       <PreviewCode title="components/ui/chart.vue" code={uiSource} />
       <SectionContent>Update the import paths to match your project setup.</SectionContent>
     </div>

@@ -1,0 +1,31 @@
+{
+  "name": "@cosmic-ui/cli",
+  "version": "0.1.0",
+  "description": "Add Cosmic UI sci-fi components to your React or Vue project.",
+  "keywords": [
+    "cosmic-ui",
+    "ui",
+    "components",
+    "react",
+    "vue",
+    "tailwindcss",
+    "sci-fi"
+  ],
+  "homepage": "https://cosmic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rizznme/cosmic-ui.git",
+    "directory": "cli"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "cosmic-ui": "src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

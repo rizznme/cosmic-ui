@@ -1,5 +1,6 @@
 ---
 import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
 import Wrapper from "@/components/docs/Wrapper.astro";
 import TocMenu from "@/components/docs/TocMenu.astro";
 import Title from "@/components/docs/Title.astro";
@@ -293,6 +294,7 @@ const usageExample = `
     </div>
     <div id="installation">
       <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="menu" />
       <SectionContent>Install the following dependencies:</SectionContent>
       <InstallPackage>add @zag-js/menu @zag-js/vue @zag-js/presence</InstallPackage>
       <SectionContent>

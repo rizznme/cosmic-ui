@@ -1,5 +1,6 @@
 ---
 import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
 import Wrapper from "@/components/docs/Wrapper.astro";
 import TocMenu from "@/components/docs/TocMenu.astro";
 import Title from "@/components/docs/Title.astro";
@@ -313,6 +314,7 @@ const handleInputChange = (details: { inputValue: string }) => {
     </div>
     <div id="installation">
       <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="combobox" />
       <SectionContent>Install the following dependencies:</SectionContent>
       <InstallPackage>add @zag-js/combobox @zag-js/react @zag-js/presence</InstallPackage>
       <SectionContent>
