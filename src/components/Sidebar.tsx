@@ -112,7 +112,7 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
         {/* flex-1 + min-h-0 let this shrink inside the fixed-height column
             above instead of pushing past it, so it scrolls on its own while
             the framework switcher and search button stay put. */}
-        <div className="flex flex-col gap-10 overflow-y-auto flex-1 min-h-0 pr-6 pb-10 mask-b-from-80% mask-b-to-100%">
+        <div className="flex flex-col gap-10 overflow-y-auto flex-1 min-h-0 pr-6 pt-1 pb-14 mask-t-from-[calc(100%-2rem)] mask-t-to-100% mask-b-from-[calc(100%-2rem)] mask-b-to-100%">
           {docLinks.map((group) => (
             <div className="flex flex-col" key={group.group}>
               <div className="font-medium text-foreground mb-2">{group.group}</div>
