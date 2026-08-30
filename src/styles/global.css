@@ -105,6 +105,40 @@ body {
     );
 }
 
+/* Themed scrollbars everywhere (page body, sidebar list, search results,
+   code blocks): a thin bar with no track box, invisible until the scrolling
+   element itself is hovered, matching the sharp/no-radius look used
+   throughout instead of the OS default. `scrollbar-color` covers Firefox
+   (no transition support there, so hover is an instant swap); the
+   `::-webkit-scrollbar-thumb` rules give Chrome/Safari/Edge the smooth
+   fade via a real `transition`. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: --alpha(var(--color-foreground) / 10%) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background-color: --alpha(var(--color-foreground) / 10%);
+}
+
 .typing-container {
   width: fit-content;
   border-right: 4px solid --alpha(var(--color-foreground) / 70%);
