@@ -23,19 +23,28 @@ declare global {
   }
 }
 
+// Dev has no index, so the palette falls back to this: it still opens and shows
+// its quick links instead of throwing on every keystroke.
+const emptyPagefind: PagefindApi = {
+  init: async () => {},
+  search: async () => ({ results: [] }),
+};
+
 let pagefindPromise: Promise<PagefindApi> | null = null;
 function loadPagefind(): Promise<PagefindApi> {
   if (!pagefindPromise) {
-    // Astro only writes /pagefind/pagefind.js into the build output, so this
-    // import 404s in dev unless the dist/ output happens to be served — that's
-    // expected, it's a production-only module by design (astro-pagefind docs).
-    // @ts-expect-error - generated at build time, no module/types to resolve
-    pagefindPromise = import(/* @vite-ignore */ "/pagefind/pagefind.js").then(
-      async (mod: PagefindApi) => {
+    // astro-pagefind only writes /pagefind/pagefind.js into the build output, so
+    // the module exists in production only. The specifier has to stay in a
+    // variable: written as a literal, Vite resolves it at transform time and
+    // fails the whole module in dev, which 500s every docs page — /* @vite-ignore */
+    // alone does not prevent that as of Vite 8.
+    const url = "/pagefind/pagefind.js";
+    pagefindPromise = import(/* @vite-ignore */ url)
+      .then(async (mod: PagefindApi) => {
         await mod.init();
         return mod;
-      }
-    );
+      })
+      .catch(() => emptyPagefind);
   }
   return pagefindPromise;
 }
