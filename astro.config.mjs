@@ -28,7 +28,31 @@ export default defineConfig({
     "/docs/how-to-use": "/docs/react/how-to-use",
   },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      // @vitejs/plugin-react switches on oxc's React Fast Refresh transform for
+      // the whole dev server. Vue SFC script blocks reach oxc under ids ending
+      // in `lang.ts`, so they get instrumented too, and any `use*` call in them
+      // comes back wrapped in `$RefreshSig$` — a helper that only exists in
+      // React modules. It is undefined during SSR, so every Vue component built
+      // on @zag-js/vue's useMachine 500s the page it is on.
+      //
+      // The React plugin's own include/exclude does not gate this, and neither
+      // does oxc.jsx.refresh (both leave the SSR transform untouched), so give
+      // those modules the identity function that Fast Refresh itself falls back
+      // to when a module defines no React components. Replacing the call in
+      // place keeps line numbers intact, and production never gets here because
+      // the transform only runs while serving.
+      {
+        name: "cosmic:neutralize-react-refresh-in-vue",
+        apply: "serve",
+        enforce: "post",
+        transform(code, id) {
+          if (!id.includes(".vue") || !code.includes("$RefreshSig$()")) return;
+          return { code: code.replaceAll("$RefreshSig$()", "((type) => type)"), map: null };
+        },
+      },
+    ],
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
