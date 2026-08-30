@@ -11,7 +11,14 @@ import {
   subscribe as subscribeFramework,
 } from "@/lib/framework-store";
 
-type DocLink = { slug: string; label: string; end?: boolean; badge?: string; absolute?: true };
+type DocLink = {
+  slug: string;
+  label: string;
+  end?: boolean;
+  badge?: string;
+  absolute?: true;
+  comingSoon?: boolean;
+};
 
 const docLinks: { group: string; items: DocLink[] }[] = [
   {
@@ -40,6 +47,17 @@ const docLinks: { group: string; items: DocLink[] }[] = [
       { slug: "chart", label: "Chart" },
       { slug: "combobox", label: "Combobox" },
       { slug: "select", label: "Select", badge: "New" },
+      { slug: "alert-dialog", label: "Alert Dialog", comingSoon: true },
+      { slug: "avatar", label: "Avatar", comingSoon: true },
+      { slug: "breadcrumb", label: "Breadcrumb", comingSoon: true },
+      { slug: "button-group", label: "Button Group", comingSoon: true },
+      { slug: "calendar", label: "Calendar", comingSoon: true },
+      { slug: "datepicker", label: "Datepicker", comingSoon: true },
+      { slug: "daterangepicker", label: "Daterangepicker", comingSoon: true },
+      { slug: "sheet", label: "Sheet", comingSoon: true },
+      { slug: "number-input", label: "Number Input", comingSoon: true },
+      { slug: "pagination", label: "Pagination", comingSoon: true },
+      { slug: "table", label: "Table", comingSoon: true },
     ],
   },
 ];
@@ -91,32 +109,47 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
           <Search className="size-4" />
           Search docs...
         </button>
-        {docLinks.map((group) => (
-          <div className="flex flex-col" key={group.group}>
-            <div className="font-medium text-foreground mb-2">{group.group}</div>
-            {group.items.map((item) => {
-              const href = item.absolute ? item.slug : `/docs/${framework}/${item.slug}`;
-              return (
-                <a
-                  key={item.slug}
-                  onClick={() => setShowMenu(false)}
-                  href={href}
-                  className={twMerge([
-                    "hover:text-foreground py-1",
-                    isActive(currentPath, href, item.end) && "text-foreground",
-                  ])}
-                >
-                  {item.label}
-                  {item.badge && (
-                    <span className="px-2 py-px border border-primary/30 bg-primary/10 text-sm ms-2">
-                      {item.badge}
+        {/* flex-1 + min-h-0 let this shrink inside the fixed-height column
+            above instead of pushing past it, so it scrolls on its own while
+            the framework switcher and search button stay put. */}
+        <div className="flex flex-col gap-10 overflow-y-auto flex-1 min-h-0 pr-6 pb-10 mask-b-from-80% mask-b-to-100%">
+          {docLinks.map((group) => (
+            <div className="flex flex-col" key={group.group}>
+              <div className="font-medium text-foreground mb-2">{group.group}</div>
+              {group.items.map((item) => {
+                if (item.comingSoon) {
+                  return (
+                    <span key={item.slug} className="py-1 text-foreground/30 cursor-default">
+                      {item.label}
+                      <span className="px-2 py-px border border-foreground/20 text-sm ms-2">
+                        Soon
+                      </span>
                     </span>
-                  )}
-                </a>
-              );
-            })}
-          </div>
-        ))}
+                  );
+                }
+                const href = item.absolute ? item.slug : `/docs/${framework}/${item.slug}`;
+                return (
+                  <a
+                    key={item.slug}
+                    onClick={() => setShowMenu(false)}
+                    href={href}
+                    className={twMerge([
+                      "hover:text-foreground py-1",
+                      isActive(currentPath, href, item.end) && "text-foreground",
+                    ])}
+                  >
+                    {item.label}
+                    {item.badge && (
+                      <span className="px-2 py-px border border-primary/30 bg-primary/10 text-sm ms-2">
+                        {item.badge}
+                      </span>
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
