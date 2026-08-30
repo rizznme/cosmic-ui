@@ -66,6 +66,11 @@ function Frame({
       className={twMerge(["absolute inset-0 size-full pointer-events-none", className])}
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
+      // Everything inside this element is drawn imperatively through the ref
+      // after mount, so the server markup is never meant to match what React
+      // would render. Without this, any pre-hydration paint of the frame is
+      // reported as a mismatch on every island.
+      suppressHydrationWarning
       // Read by a small inline script in BaseLayout.astro (this docs site
       // only, not part of what a library consumer copies) that paints each
       // frame's border before React/Vue ever loads, so the chrome isn't just

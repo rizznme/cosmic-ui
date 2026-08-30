@@ -202,10 +202,14 @@ const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
           // Deliberately paint this as a CSS background rather than appending
           // real <path> children. Appending children to an element React
           // server-rendered as empty is a structural hydration mismatch and
-          // makes React log error #418 on every page load; mutating an
-          // element's *attributes* (which is all a style change is) does not.
-          // Verified both ways directly: attributes-only produced 0 console
-          // errors across every page, appending paths produced one per island.
+          // makes React log error #418 on every page load.
+          //
+          // Touching the element at all is still visible to hydration: React
+          // renders no `style` here, so it reports the paint as an unexpected
+          // attribute (a `data-` attribute instead is reported just the same -
+          // both were measured). Frame carries `suppressHydrationWarning` for
+          // exactly this reason; its contents are drawn imperatively, so the
+          // server markup is never meant to match.
           //
           // Custom properties don't resolve inside a data: URI (it's an
           // isolated document), so read each var()'s computed value off the
