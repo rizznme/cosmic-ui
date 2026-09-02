@@ -66,6 +66,15 @@ const ROW_SPAN = {
     stays as the safety net for a demo that outgrows its declared span (and
     for mobile, where every card collapses to one narrow column).
   */}
+  {/*
+    Known limitation of centering here: a demo that outgrows this box overflows
+    equally in both directions, and the half past the start edge can't be
+    scrolled back to. `align-items: safe center` is the fix for that, but
+    Tailwind 4.3.3 has no utility for it (items-safe-center compiles to
+    nothing, silently dropping the centering), so this stays plain centering.
+    Only reachable on mobile, where a card is one narrow column - which is why
+    the cols/rows spans are sized to make overflow the exception, not the norm.
+  */}
   <div class="flex-1 flex items-center justify-center overflow-auto p-5">
     <slot name="preview" />
   </div>

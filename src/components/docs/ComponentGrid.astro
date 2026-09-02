@@ -9,12 +9,18 @@
 // every resize for free, with no measuring, no layout shift, and nothing to
 // hydrate. A hand-rolled packer would have to redo all of that worse.
 //
-// Every row is a fixed 11rem so a span means the same thing on every page. That
+// Every row is a fixed 12rem so a span means the same thing on every page. That
 // number is set by the demos, not picked for looks: after the card's footer and
-// padding, one row leaves 89px of content (the tallest short demo, Number
-// Input, needs 74px) and two rows leave 289px (Table needs 281px, Calendar
-// 272px, Chart and Tabs 256px). Shrinking it re-introduces scrollbars inside
-// the tighter cards.
+// padding, one row leaves 105px of content (the tallest short demo, Number
+// Input, needs 74px) and two rows leave 321px (Table needs 309px, Calendar
+// 272px, Chart and Tabs 256px). Shrinking it re-introduces overflow in the
+// tighter cards.
+//
+// It's tied to the type scale, so it moves when that does: dropping the
+// hardcoded text-sm off Table and friends grew Table from 281px to 309px and
+// this from 11rem to 12rem. Re-measure after any typography change - and
+// measure the demo's real height, not the preview box's scrollHeight, which
+// under-reports here (see ComponentCard.astro).
 //
 // Note dense packing can move a card ahead of one that precedes it in the DOM,
 // so visual order and tab order can disagree. Fine here - each card is a
@@ -22,6 +28,6 @@
 // on the card before it.
 ---
 
-<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[11rem] grid-flow-row-dense">
+<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[12rem] grid-flow-row-dense">
   <slot />
 </div>
