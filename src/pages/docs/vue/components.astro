@@ -1,0 +1,140 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import ComponentCard from "@/components/docs/ComponentCard.astro";
+
+// Astro's client:* directives need the JSX tag to be an identifier bound
+// directly by a static `import` - not a loop variable, not a destructured
+// object/array property, no indirection at all. Tried all three (an
+// import.meta.glob lookup, a Record<string, Component> keyed by slug, a
+// plain array of imports mapped over) and every one failed the exact same
+// way at build time: "NoMatchingImport: Could not render `Demo`". So this
+// list is written out by hand instead of generated from docLinks - keep it
+// in the same order as the "Components" group in Sidebar.tsx, and add a
+// card here (plus the import above it) whenever a component's added there.
+import AccordionDemo from "@/components/demos/vue/accordion.vue";
+import AlertDialogDemo from "@/components/demos/vue/alert-dialog.vue";
+import AlertDemo from "@/components/demos/vue/alert.vue";
+import AvatarDemo from "@/components/demos/vue/avatar.vue";
+import BreadcrumbDemo from "@/components/demos/vue/breadcrumb.vue";
+import ButtonGroupDemo from "@/components/demos/vue/button-group.vue";
+import ButtonDemo from "@/components/demos/vue/button.vue";
+import CalendarDemo from "@/components/demos/vue/calendar.vue";
+import ChartDemo from "@/components/demos/vue/chart.vue";
+import CheckboxDemo from "@/components/demos/vue/checkbox.vue";
+import ComboboxDemo from "@/components/demos/vue/combobox.vue";
+import DatepickerDemo from "@/components/demos/vue/datepicker.vue";
+import DaterangepickerDemo from "@/components/demos/vue/daterangepicker.vue";
+import DialogDemo from "@/components/demos/vue/dialog.vue";
+import FrameDemo from "@/components/demos/vue/frame.vue";
+import InputDemo from "@/components/demos/vue/input.vue";
+import MenuDemo from "@/components/demos/vue/menu.vue";
+import NumberInputDemo from "@/components/demos/vue/number-input.vue";
+import PaginationDemo from "@/components/demos/vue/pagination.vue";
+import RadioGroupDemo from "@/components/demos/vue/radio-group.vue";
+import SelectDemo from "@/components/demos/vue/select.vue";
+import SheetDemo from "@/components/demos/vue/sheet.vue";
+import SwitchDemo from "@/components/demos/vue/switch.vue";
+import TableDemo from "@/components/demos/vue/table.vue";
+import TabsDemo from "@/components/demos/vue/tabs.vue";
+import TextareaDemo from "@/components/demos/vue/textarea.vue";
+import ToastDemo from "@/components/demos/vue/toast.vue";
+---
+
+<DocsLayout title="Components | Cosmic UI">
+  <div
+    class="p-7 sm:p-10 lg:px-20 lg:py-14 sm:mx-10 lg:ml-0 xl:mr-0 col-span-10 border border-primary/20 bg-primary/5"
+    data-pagefind-body
+    data-pagefind-filter="framework:vue"
+  >
+    <Title>Components</Title>
+    <Subtitle>
+      Every component, live. Click Copy for the install command, or click a
+      name to read its docs.
+    </Subtitle>
+    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue">
+        <FrameDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="menu" label="Menu" installName="menu" framework="vue">
+        <MenuDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue">
+        <AlertDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue">
+        <AccordionDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="vue">
+        <DialogDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue">
+        <TabsDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue">
+        <ToastDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button" label="Button" installName="button" framework="vue">
+        <ButtonDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="input" label="Input" installName="input" framework="vue">
+        <InputDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="switch" label="Switch" installName="switch" framework="vue">
+        <SwitchDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="vue">
+        <TextareaDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue">
+        <RadioGroupDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="vue">
+        <CheckboxDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue">
+        <ChartDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue">
+        <ComboboxDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="select" label="Select" installName="select" framework="vue">
+        <SelectDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="vue">
+        <AlertDialogDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="vue">
+        <AvatarDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="vue">
+        <BreadcrumbDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue">
+        <ButtonGroupDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue">
+        <CalendarDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="vue">
+        <DatepickerDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue">
+        <DaterangepickerDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="vue">
+        <SheetDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="vue">
+        <NumberInputDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue">
+        <PaginationDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="table" label="Table" installName="table" framework="vue">
+        <TableDemo client:visible slot="preview" />
+      </ComponentCard>
+    </div>
+  </div>
+</DocsLayout>

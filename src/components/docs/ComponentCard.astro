@@ -1,0 +1,88 @@
+---
+import Icon from "./Icon.astro";
+import type { Framework } from "@/lib/framework-store";
+
+interface Props {
+  slug: string;
+  label: string;
+  installName: string;
+  framework: Framework;
+}
+
+const { slug, label, installName, framework } = Astro.props;
+const href = `/docs/${framework}/${slug}`;
+const installCommand = `npx @left4code/cosmic-ui-cli@latest add ${installName}`;
+---
+
+<div
+  data-slug={slug}
+  class="border bg-primary/5 border-primary/20 backdrop-blur-md h-64 sm:h-72 flex flex-col overflow-hidden"
+>
+  {/*
+    Deliberately not a link: several demos (Switch, Dialog trigger, Menu,
+    NumberInput's +/- buttons, etc.) are interactive by click, and wrapping
+    them in an <a> would hijack that click into a navigation instead of
+    letting the demo actually work.
+
+    No CSS transform here on purpose, even though these demos were sized for
+    Preview.astro's much larger box and some don't fit at natural size:
+    Frame's setupSvgRenderer (@left4code/svg-renderer) measures its container
+    with getBoundingClientRect(), which reports the post-transform size - an
+    ancestor `scale()` was silently feeding it the wrong width/height and
+    every Frame-backed demo (almost all of them) rendered warped. Same root
+    cause as feedback_gbcr_includes_transform from the animated-zoom case,
+    just triggered by a static transform instead. overflow-auto is enough on
+    its own: demos that fit just show; the few that don't (Table, Button's
+    three-variant row, Pagination) scroll instead of being cropped or drawn
+    wrong.
+  */}
+  <div class="flex-1 flex items-center justify-center overflow-auto p-6">
+    <slot name="preview" />
+  </div>
+  <div class="flex items-center justify-between px-4 py-3 border-t border-primary/20">
+    <a
+      href={href}
+      class="font-medium text-sm hover:text-shadow-lg hover:text-shadow-primary/50"
+    >
+      {label}
+    </a>
+    <button
+      type="button"
+      data-copy-btn
+      data-copy-text={installCommand}
+      aria-label={`Copy install command for ${label}`}
+      class="cursor-pointer opacity-70 hover:opacity-100"
+    >
+      <Icon name="clipboard" data-icon-clipboard class="size-4 stroke-1 fill-foreground/10" />
+      <Icon name="check" data-icon-check class="hidden size-4 stroke-1 fill-foreground/10" />
+    </button>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  // Same icon-swap-on-copy pattern as PreviewCode.astro's data-copy-btn, just
+  // copying a fixed data-copy-text attribute instead of a code block's
+  // textContent, and with no expand/collapse machinery to carry over.
+  // Astro dedupes this script to one instance regardless of how many
+  // ComponentCards render, so querying the whole document (not a scoped
+  // root) correctly picks up every card's button in one pass.
+  document.querySelectorAll("[data-copy-btn]").forEach((btn) => {
+    const clipboardIcon = btn.querySelector("[data-icon-clipboard]");
+    const checkIcon = btn.querySelector("[data-icon-check]");
+    let copyTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    btn.addEventListener("click", () => {
+      const text = btn.getAttribute("data-copy-text") ?? "";
+      navigator.clipboard.writeText(text).then(() => {
+        clipboardIcon?.classList.add("hidden");
+        checkIcon?.classList.remove("hidden");
+        if (copyTimeout) clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+          clipboardIcon?.classList.remove("hidden");
+          checkIcon?.classList.add("hidden");
+        }, 3000);
+      });
+    });
+  });
+</script>
