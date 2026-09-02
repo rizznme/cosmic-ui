@@ -1,0 +1,248 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import TableDemo from "@/components/demos/vue/table.vue";
+
+const previewCode = `
+<TableRoot>
+  <TableCaption>A list of your recent invoices.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Invoice</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead>Method</TableHead>
+      <TableHead class="text-right">Amount</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow v-for="row in invoices" :key="row.invoice">
+      <TableCell>{{ row.invoice }}</TableCell>
+      <TableCell>{{ row.status }}</TableCell>
+      <TableCell>{{ row.method }}</TableCell>
+      <TableCell class="text-right">{{ row.amount }}</TableCell>
+    </TableRow>
+  </TableBody>
+  <TableFooter>
+    <TableRow>
+      <TableCell :colspan="3">Total</TableCell>
+      <TableCell class="text-right">$750.00</TableCell>
+    </TableRow>
+  </TableFooter>
+</TableRoot>
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+// See the Breadcrumb docs page: without this, Astro's slot="preview" prop
+// (used to route this island into a named slot) falls through onto this
+// root DOM node inconsistently between SSR and hydration, and Vue flags it
+// as a mismatch on every demo page.
+defineOptions({ inheritAttrs: false });
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <div class="relative w-full overflow-x-auto">
+    <table :class="twMerge(['w-full text-sm border-collapse', className])">
+      <slot />
+    </table>
+  </div>
+</template>
+`;
+
+const headerSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <thead :class="twMerge(['border-b border-primary/30', className])">
+    <slot />
+  </thead>
+</template>
+`;
+
+const bodySource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <tbody :class="twMerge(['[&_tr:last-child]:border-0', className])">
+    <slot />
+  </tbody>
+</template>
+`;
+
+const footerSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <tfoot :class="twMerge(['border-t border-primary/30 font-medium', className])">
+    <slot />
+  </tfoot>
+</template>
+`;
+
+const rowSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <tr :class="twMerge(['border-b border-primary/10 hover:bg-primary/5', className])">
+    <slot />
+  </tr>
+</template>
+`;
+
+const headSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <th :class="twMerge(['h-10 px-4 text-left align-middle font-medium text-foreground/70', className])">
+    <slot />
+  </th>
+</template>
+`;
+
+const cellSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className, colspan } = defineProps<{ class?: string; colspan?: number }>();
+</script>
+
+<template>
+  <td :colspan="colspan" :class="twMerge(['p-4 align-middle', className])">
+    <slot />
+  </td>
+</template>
+`;
+
+const captionSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <caption :class="twMerge(['mt-4 text-sm opacity-70', className])">
+    <slot />
+  </caption>
+</template>
+`;
+
+const indexSource = `
+export { default as TableRoot } from "./TableRoot.vue";
+export { default as TableHeader } from "./TableHeader.vue";
+export { default as TableBody } from "./TableBody.vue";
+export { default as TableFooter } from "./TableFooter.vue";
+export { default as TableRow } from "./TableRow.vue";
+export { default as TableHead } from "./TableHead.vue";
+export { default as TableCell } from "./TableCell.vue";
+export { default as TableCaption } from "./TableCaption.vue";
+`;
+
+const usageImports = `
+import {
+  TableRoot,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
+`;
+
+const usageExample = `
+<TableRoot>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Role</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Ada</TableCell>
+      <TableCell>Engineer</TableCell>
+    </TableRow>
+  </TableBody>
+</TableRoot>
+`;
+---
+
+<DocsLayout title="Table | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Table</Title>
+      <Subtitle>A responsive table for displaying tabular data.</Subtitle>
+      <Preview>
+        <TableDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="table" />
+      <SectionContent>
+        No state machine here - a table doesn't need one, it's semantic HTML
+        (<span class="bg-foreground/15 px-1.5 py-px rounded-md">table</span>
+        {" > "}<span class="bg-foreground/15 px-1.5 py-px rounded-md">thead</span>/
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">tbody</span>/
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">tfoot</span>) wrapped in
+        a horizontally scrolling container so wide tables don't blow out the
+        layout on small screens. Vue SFCs can't export multiple components
+        from one file, so Table is a folder instead of a single file &mdash;
+        copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/table/TableRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/table/TableHeader.vue" code={headerSource} />
+      <PreviewCode title="components/ui/table/TableBody.vue" code={bodySource} />
+      <PreviewCode title="components/ui/table/TableFooter.vue" code={footerSource} />
+      <PreviewCode title="components/ui/table/TableRow.vue" code={rowSource} />
+      <PreviewCode title="components/ui/table/TableHead.vue" code={headSource} />
+      <PreviewCode title="components/ui/table/TableCell.vue" code={cellSource} />
+      <PreviewCode title="components/ui/table/TableCaption.vue" code={captionSource} />
+      <PreviewCode title="components/ui/table/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

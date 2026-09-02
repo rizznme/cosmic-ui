@@ -1,0 +1,211 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { TableDemo } from "@/components/demos/react/table";
+
+const previewCode = `
+<TableRoot>
+  <TableCaption>A list of your recent invoices.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Invoice</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead>Method</TableHead>
+      <TableHead className="text-right">Amount</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {invoices.map((invoice) => (
+      <TableRow key={invoice.invoice}>
+        <TableCell>{invoice.invoice}</TableCell>
+        <TableCell>{invoice.status}</TableCell>
+        <TableCell>{invoice.method}</TableCell>
+        <TableCell className="text-right">{invoice.amount}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+  <TableFooter>
+    <TableRow>
+      <TableCell colSpan={3}>Total</TableCell>
+      <TableCell className="text-right">$750.00</TableCell>
+    </TableRow>
+  </TableFooter>
+</TableRoot>
+`;
+
+const uiSource = `
+import { twMerge } from "tailwind-merge";
+
+function TableRoot({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div className="relative w-full overflow-x-auto">
+      <table className={twMerge(["w-full text-sm border-collapse", className])}>
+        {children}
+      </table>
+    </div>
+  );
+}
+
+function TableHeader({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return <thead className={twMerge(["border-b border-primary/30", className])}>{children}</thead>;
+}
+
+function TableBody({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <tbody className={twMerge(["[&_tr:last-child]:border-0", className])}>{children}</tbody>
+  );
+}
+
+function TableFooter({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <tfoot className={twMerge(["border-t border-primary/30 font-medium", className])}>
+      {children}
+    </tfoot>
+  );
+}
+
+function TableRow({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <tr className={twMerge(["border-b border-primary/10 hover:bg-primary/5", className])}>
+      {children}
+    </tr>
+  );
+}
+
+function TableHead({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <th
+      className={twMerge([
+        "h-10 px-4 text-left align-middle font-medium text-foreground/70",
+        className,
+      ])}
+    >
+      {children}
+    </th>
+  );
+}
+
+function TableCell({
+  children,
+  className,
+  colSpan,
+}: React.PropsWithChildren<{ className?: string; colSpan?: number }>) {
+  return (
+    <td colSpan={colSpan} className={twMerge(["p-4 align-middle", className])}>
+      {children}
+    </td>
+  );
+}
+
+function TableCaption({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return <caption className={twMerge(["mt-4 text-sm opacity-70", className])}>{children}</caption>;
+}
+
+export {
+  TableRoot,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+};
+`;
+
+const usageImports = `
+import {
+  TableRoot,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
+`;
+
+const usageExample = `
+<TableRoot>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Role</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Ada</TableCell>
+      <TableCell>Engineer</TableCell>
+    </TableRow>
+  </TableBody>
+</TableRoot>
+`;
+---
+
+<DocsLayout title="Table | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Table</Title>
+      <Subtitle>A responsive table for displaying tabular data.</Subtitle>
+      <Preview>
+        <TableDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="table" />
+      <SectionContent>
+        No state machine here - a table doesn't need one, it's semantic HTML
+        (<span class="bg-foreground/15 px-1.5 py-px rounded-md">table</span>
+        {" > "}<span class="bg-foreground/15 px-1.5 py-px rounded-md">thead</span>/
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">tbody</span>/
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">tfoot</span>) wrapped in
+        a horizontally scrolling container so wide tables don't blow out the
+        layout on small screens. Or copy and paste the code below by hand.
+      </SectionContent>
+      <PreviewCode title="components/ui/table.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>
