@@ -1,0 +1,125 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import ButtonGroupDemo from "@/components/demos/vue/button-group.vue";
+
+const previewCode = `
+<ButtonGroup>
+  <ButtonGroupItem>Day</ButtonGroupItem>
+  <ButtonGroupItem>Week</ButtonGroupItem>
+  <ButtonGroupItem>Month</ButtonGroupItem>
+</ButtonGroup>
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { twMerge } from "tailwind-merge";
+
+// See BreadcrumbRoot.vue: without this, Astro's slot="preview" prop (used
+// to route this island into a named slot) falls through onto this root DOM
+// node inconsistently between SSR and hydration, and Vue flags it as a
+// mismatch on every demo page.
+defineOptions({ inheritAttrs: false });
+const { class: className } = defineProps<{ class?: string }>();
+</script>
+
+<template>
+  <div
+    role="group"
+    :class="twMerge(['inline-flex divide-x divide-primary/30 border border-primary/30', className])"
+  >
+    <slot />
+  </div>
+</template>
+`;
+
+const itemSource = `
+<script setup lang="ts">
+import { useAttrs } from "vue";
+import { twMerge } from "tailwind-merge";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as { class?: string };
+</script>
+
+<template>
+  <button
+    v-bind="rawAttrs"
+    :class="
+      twMerge([
+        'px-4 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none',
+        rawAttrs.class,
+      ])
+    "
+  >
+    <slot />
+  </button>
+</template>
+`;
+
+const indexSource = `
+export { default as ButtonGroup } from "./ButtonGroup.vue";
+export { default as ButtonGroupItem } from "./ButtonGroupItem.vue";
+`;
+
+const usageImports = `
+import { ButtonGroup, ButtonGroupItem } from "@/components/ui/button-group";
+`;
+
+const usageExample = `
+<ButtonGroup>
+  <ButtonGroupItem>Day</ButtonGroupItem>
+  <ButtonGroupItem>Week</ButtonGroupItem>
+  <ButtonGroupItem>Month</ButtonGroupItem>
+</ButtonGroup>
+`;
+---
+
+<DocsLayout title="Button Group | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Button Group</Title>
+      <Subtitle>Groups a set of related buttons together with a shared border.</Subtitle>
+      <Preview>
+        <ButtonGroupDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="button-group" />
+      <SectionContent>
+        No state machine here - it's a plain layout wrapper with a shared
+        border and dividers between items (
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">divide-x</span>),
+        not the full{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Button</span>{" "}
+        component with its own Frame border underneath, which would clash
+        with a shared outer border. Vue SFCs can't export multiple components
+        from one file, so Button Group is a folder instead of a single file
+        &mdash; copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/button-group/ButtonGroup.vue" code={rootSource} />
+      <PreviewCode title="components/ui/button-group/ButtonGroupItem.vue" code={itemSource} />
+      <PreviewCode title="components/ui/button-group/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

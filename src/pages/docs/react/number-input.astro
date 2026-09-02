@@ -1,0 +1,164 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { NumberInputDemo } from "@/components/demos/react/number-input";
+
+const previewCode = `
+<NumberInputRoot defaultValue="1" min={0} max={10}>
+  <NumberInputLabel>Quantity</NumberInputLabel>
+  <NumberInputControl />
+</NumberInputRoot>
+`;
+
+const uiSource = `
+import { createContext, useContext, useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { Minus, Plus } from "lucide-react";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as numberInputMachine from "@zag-js/number-input";
+
+const NumberInputContext = createContext<ReturnType<
+  typeof numberInputMachine.connect
+> | null>(null);
+
+function useNumberInputContext() {
+  const api = useContext(NumberInputContext);
+  if (!api) throw new Error("NumberInput parts must be used within <NumberInputRoot>");
+  return api;
+}
+
+function NumberInputRoot({
+  children,
+  className,
+  ...rest
+}: React.PropsWithChildren<
+  Partial<numberInputMachine.Props> & { className?: string }
+>) {
+  const service = useMachine(numberInputMachine.machine, { id: useId(), ...rest });
+  const api = numberInputMachine.connect(service, normalizeProps);
+
+  return (
+    <NumberInputContext.Provider value={api}>
+      <div {...api.getRootProps()} className={twMerge(["flex flex-col gap-2", className])}>
+        {children}
+      </div>
+    </NumberInputContext.Provider>
+  );
+}
+
+function NumberInputLabel({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useNumberInputContext();
+
+  return (
+    <label {...api.getLabelProps()} className={className}>
+      {children}
+    </label>
+  );
+}
+
+function NumberInputControl({ className }: { className?: string }) {
+  const api = useNumberInputContext();
+
+  return (
+    <div
+      {...api.getControlProps()}
+      className={twMerge([
+        "flex items-center border border-primary/30 bg-primary/10 w-fit",
+        className,
+      ])}
+    >
+      <button
+        {...api.getDecrementTriggerProps()}
+        className="px-2.5 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <Minus className="size-3.5" />
+      </button>
+      <input
+        {...api.getInputProps()}
+        className="w-16 text-center outline-none bg-transparent py-2"
+      />
+      <button
+        {...api.getIncrementTriggerProps()}
+        className="px-2.5 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <Plus className="size-3.5" />
+      </button>
+    </div>
+  );
+}
+
+export { NumberInputRoot, NumberInputLabel, NumberInputControl };
+`;
+
+const usageImports = `
+import {
+  NumberInputRoot,
+  NumberInputLabel,
+  NumberInputControl,
+} from "@/components/ui/number-input";
+`;
+
+const usageExample = `
+<NumberInputRoot defaultValue="1" min={0} max={10}>
+  <NumberInputLabel>Quantity</NumberInputLabel>
+  <NumberInputControl />
+</NumberInputRoot>
+`;
+---
+
+<DocsLayout title="Number Input | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Number Input</Title>
+      <Subtitle>
+        A control for entering a number, with increment/decrement buttons and
+        keyboard/scroll support.
+      </Subtitle>
+      <DocsLinks component="number-input" />
+      <Preview>
+        <NumberInputDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="number-input" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/number-input @zag-js/react</InstallPackage>
+      <SectionContent>
+        Built directly on the Zag.js state machine.{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">NumberInputControl</span>{" "}
+        renders the decrement button, the input, and the increment button
+        together - it's the one part that needs all three wired to the same
+        machine. The bordered box shown here is a placeholder; swap it for
+        the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive later. Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/number-input.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

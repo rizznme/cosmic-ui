@@ -1,0 +1,129 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { PaginationDemo } from "@/components/demos/react/pagination";
+
+const previewCode = `
+<Pagination count={100} defaultPageSize={10} siblingCount={1} />
+`;
+
+const uiSource = `
+import { useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as paginationMachine from "@zag-js/pagination";
+
+function Pagination({
+  className,
+  ...rest
+}: Partial<paginationMachine.Props> & { className?: string }) {
+  const service = useMachine(paginationMachine.machine, { id: useId(), ...rest });
+  const api = paginationMachine.connect(service, normalizeProps);
+
+  return (
+    <div {...api.getRootProps()} className={twMerge(["flex items-center gap-1.5", className])}>
+      <button
+        {...api.getPrevTriggerProps()}
+        className="size-8 flex items-center justify-center border border-primary/30 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <ChevronLeft className="size-4" />
+      </button>
+      {api.pages.map((page, i) =>
+        page.type === "page" ? (
+          <button
+            key={i}
+            {...api.getItemProps(page)}
+            className="size-8 border border-primary/30 hover:bg-primary/10 data-[selected]:bg-primary/20 data-[selected]:border-primary"
+          >
+            {page.value}
+          </button>
+        ) : (
+          <span
+            key={i}
+            {...api.getEllipsisProps({ index: i })}
+            className="size-8 flex items-center justify-center"
+          >
+            &#8230;
+          </span>
+        )
+      )}
+      <button
+        {...api.getNextTriggerProps()}
+        className="size-8 flex items-center justify-center border border-primary/30 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <ChevronRight className="size-4" />
+      </button>
+    </div>
+  );
+}
+
+export { Pagination };
+`;
+
+const usageImports = `
+import { Pagination } from "@/components/ui/pagination";
+`;
+
+const usageExample = `
+<Pagination count={100} defaultPageSize={10} siblingCount={1} />
+`;
+---
+
+<DocsLayout title="Pagination | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Pagination</Title>
+      <Subtitle>
+        Splits a long list of data into pages, with page number buttons and
+        previous/next triggers.
+      </Subtitle>
+      <DocsLinks component="pagination" />
+      <Preview>
+        <PaginationDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="pagination" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/pagination @zag-js/react</InstallPackage>
+      <SectionContent>
+        Built directly on the Zag.js state machine. This is a single
+        self-contained component rather than a Root + parts split - the page
+        buttons come from{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">api.pages</span>,
+        an array the machine computes from{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">count</span> /{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">pageSize</span>{" "}
+        / <span class="bg-foreground/15 px-1.5 py-px rounded-md">siblingCount</span>,
+        so there's nothing left for a consumer to compose by hand. The plain
+        border shown here is a placeholder; swap it for the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive later. Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/pagination.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

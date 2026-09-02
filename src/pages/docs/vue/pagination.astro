@@ -1,0 +1,131 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import PaginationDemo from "@/components/demos/vue/pagination.vue";
+
+const previewCode = `
+<Pagination :count="100" :defaultPageSize="10" :siblingCount="1" />
+`;
+
+const uiSource = `
+<script setup lang="ts">
+import { computed, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as paginationMachine from "@zag-js/pagination";
+import { ChevronLeft, ChevronRight } from "@lucide/vue";
+import { twMerge } from "tailwind-merge";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<paginationMachine.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, ...rest };
+});
+const service = useMachine(paginationMachine.machine, machineProps);
+const api = computed(() => paginationMachine.connect(service, normalizeProps));
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()" :class="twMerge(['flex items-center gap-1.5', rawAttrs.class])">
+    <button
+      v-bind="api.getPrevTriggerProps()"
+      class="size-8 flex items-center justify-center border border-primary/30 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+    >
+      <ChevronLeft class="size-4" />
+    </button>
+    <template v-for="(page, i) in api.pages" :key="i">
+      <button
+        v-if="page.type === 'page'"
+        v-bind="api.getItemProps(page)"
+        class="size-8 border border-primary/30 hover:bg-primary/10 data-[selected]:bg-primary/20 data-[selected]:border-primary"
+      >
+        {{ page.value }}
+      </button>
+      <span
+        v-else
+        v-bind="api.getEllipsisProps({ index: i })"
+        class="size-8 flex items-center justify-center"
+      >
+        &#8230;
+      </span>
+    </template>
+    <button
+      v-bind="api.getNextTriggerProps()"
+      class="size-8 flex items-center justify-center border border-primary/30 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+    >
+      <ChevronRight class="size-4" />
+    </button>
+  </div>
+</template>
+`;
+
+const usageImports = `
+import Pagination from "@/components/ui/pagination.vue";
+`;
+
+const usageExample = `
+<Pagination :count="100" :defaultPageSize="10" :siblingCount="1" />
+`;
+---
+
+<DocsLayout title="Pagination | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Pagination</Title>
+      <Subtitle>
+        Splits a long list of data into pages, with page number buttons and
+        previous/next triggers.
+      </Subtitle>
+      <DocsLinks component="pagination" framework="vue" />
+      <Preview>
+        <PaginationDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="pagination" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/pagination @zag-js/vue</InstallPackage>
+      <SectionContent>
+        Built directly on the Zag.js state machine. This is a single
+        self-contained component rather than a Root + parts split - the page
+        buttons come from{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">api.pages</span>,
+        an array the machine computes from{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">count</span> /{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">pageSize</span>{" "}
+        / <span class="bg-foreground/15 px-1.5 py-px rounded-md">siblingCount</span>,
+        so there's nothing left for a consumer to compose by hand. The plain
+        border shown here is a placeholder; swap it for the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive later. A single file is enough here (no folder) since there
+        are no child parts to split out. Copy and paste the following code
+        into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/pagination.vue" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

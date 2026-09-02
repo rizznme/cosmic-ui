@@ -1,0 +1,108 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { ButtonGroupDemo } from "@/components/demos/react/button-group";
+
+const previewCode = `
+<ButtonGroup>
+  <ButtonGroupItem>Day</ButtonGroupItem>
+  <ButtonGroupItem>Week</ButtonGroupItem>
+  <ButtonGroupItem>Month</ButtonGroupItem>
+</ButtonGroup>
+`;
+
+const uiSource = `
+import { twMerge } from "tailwind-merge";
+
+function ButtonGroup({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div
+      role="group"
+      className={twMerge(["inline-flex divide-x divide-primary/30 border border-primary/30", className])}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ButtonGroupItem({
+  children,
+  className,
+  ...rest
+}: React.ComponentProps<"button">) {
+  return (
+    <button
+      {...rest}
+      className={twMerge([
+        "px-4 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none",
+        className,
+      ])}
+    >
+      {children}
+    </button>
+  );
+}
+
+export { ButtonGroup, ButtonGroupItem };
+`;
+
+const usageImports = `
+import { ButtonGroup, ButtonGroupItem } from "@/components/ui/button-group";
+`;
+
+const usageExample = `
+<ButtonGroup>
+  <ButtonGroupItem>Day</ButtonGroupItem>
+  <ButtonGroupItem>Week</ButtonGroupItem>
+  <ButtonGroupItem>Month</ButtonGroupItem>
+</ButtonGroup>
+`;
+---
+
+<DocsLayout title="Button Group | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Button Group</Title>
+      <Subtitle>Groups a set of related buttons together with a shared border.</Subtitle>
+      <Preview>
+        <ButtonGroupDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="button-group" />
+      <SectionContent>
+        No state machine here - it's a plain layout wrapper with a shared
+        border and dividers between items (
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">divide-x</span>),
+        not the full{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Button</span>{" "}
+        component with its own Frame border underneath, which would clash
+        with a shared outer border. Or copy and paste the code below by hand.
+      </SectionContent>
+      <PreviewCode title="components/ui/button-group.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

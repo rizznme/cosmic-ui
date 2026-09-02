@@ -1,0 +1,156 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { AvatarDemo } from "@/components/demos/react/avatar";
+
+const previewCode = `
+<AvatarRoot>
+  <AvatarImage src="https://i.pravatar.cc/150?u=cosmic-ui" alt="User avatar" />
+  <AvatarFallback>CU</AvatarFallback>
+</AvatarRoot>
+`;
+
+const uiSource = `
+import { createContext, useContext, useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as avatarMachine from "@zag-js/avatar";
+
+const AvatarContext = createContext<ReturnType<typeof avatarMachine.connect> | null>(
+  null
+);
+
+function useAvatarContext() {
+  const api = useContext(AvatarContext);
+  if (!api) throw new Error("Avatar parts must be used within <AvatarRoot>");
+  return api;
+}
+
+function AvatarRoot({
+  children,
+  className,
+  ...rest
+}: React.PropsWithChildren<Partial<avatarMachine.Props> & { className?: string }>) {
+  const service = useMachine(avatarMachine.machine, { id: useId(), ...rest });
+  const api = avatarMachine.connect(service, normalizeProps);
+
+  return (
+    <AvatarContext.Provider value={api}>
+      <span
+        {...api.getRootProps()}
+        className={twMerge([
+          "relative inline-flex size-10 items-center justify-center overflow-hidden border border-primary/30 bg-primary/10",
+          className,
+        ])}
+      >
+        {children}
+      </span>
+    </AvatarContext.Provider>
+  );
+}
+
+function AvatarImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const api = useAvatarContext();
+
+  return (
+    <img
+      {...api.getImageProps()}
+      src={src}
+      alt={alt}
+      className={twMerge(["size-full object-cover", className])}
+    />
+  );
+}
+
+function AvatarFallback({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useAvatarContext();
+
+  return (
+    <span
+      {...api.getFallbackProps()}
+      className={twMerge(["text-sm font-medium", className])}
+    >
+      {children}
+    </span>
+  );
+}
+
+export { AvatarRoot, AvatarImage, AvatarFallback };
+`;
+
+const usageImports = `
+import { AvatarRoot, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+`;
+
+const usageExample = `
+<AvatarRoot>
+  <AvatarImage src="https://i.pravatar.cc/150?u=cosmic-ui" alt="User avatar" />
+  <AvatarFallback>CU</AvatarFallback>
+</AvatarRoot>
+`;
+---
+
+<DocsLayout title="Avatar | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Avatar</Title>
+      <Subtitle>
+        An image element with a fallback for representing a user.
+      </Subtitle>
+      <DocsLinks component="avatar" />
+      <Preview>
+        <AvatarDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="avatar" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/avatar @zag-js/react</InstallPackage>
+      <SectionContent>
+        Built directly on the Zag.js state machine. The fallback and image
+        both render unconditionally - the machine toggles a{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">hidden</span>{" "}
+        attribute on whichever one shouldn't show, based on whether the image
+        loaded. The square border shown here is a placeholder; swap it for
+        the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive once its avatar-specific paths exist.
+        Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/avatar.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

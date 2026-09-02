@@ -1,0 +1,193 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import NumberInputDemo from "@/components/demos/vue/number-input.vue";
+
+const previewCode = `
+<NumberInputRoot defaultValue="1" :min="0" :max="10">
+  <NumberInputLabel>Quantity</NumberInputLabel>
+  <NumberInputControl />
+</NumberInputRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as numberInputMachine from "@zag-js/number-input";
+
+type NumberInputApi = ComputedRef<ReturnType<typeof numberInputMachine.connect>>;
+
+const NumberInputApiKey: InjectionKey<NumberInputApi> = Symbol("number-input-api");
+
+export { NumberInputApiKey };
+export type { NumberInputApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as numberInputMachine from "@zag-js/number-input";
+import { twMerge } from "tailwind-merge";
+import { NumberInputApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<numberInputMachine.Props> & { class?: string };
+const id = useId();
+
+const machineProps = computed(() => {
+  const { class: _class, ...rest } = rawAttrs;
+  return { id, ...rest };
+});
+const service = useMachine(numberInputMachine.machine, machineProps);
+const api = computed(() => numberInputMachine.connect(service, normalizeProps));
+
+provide(NumberInputApiKey, api);
+</script>
+
+<template>
+  <div v-bind="api.getRootProps()" :class="twMerge(['flex flex-col gap-2', rawAttrs.class])">
+    <slot />
+  </div>
+</template>
+`;
+
+const labelSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { NumberInputApiKey } from "./context";
+
+defineProps<{ class?: string }>();
+
+const injectedApi = inject(NumberInputApiKey);
+if (!injectedApi)
+  throw new Error("NumberInput parts must be used within <NumberInputRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <label v-bind="api.getLabelProps()" :class="$props.class">
+    <slot />
+  </label>
+</template>
+`;
+
+const controlSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { Minus, Plus } from "@lucide/vue";
+import { twMerge } from "tailwind-merge";
+import { NumberInputApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(NumberInputApiKey);
+if (!injectedApi)
+  throw new Error("NumberInput parts must be used within <NumberInputRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="api.getControlProps()"
+    :class="
+      twMerge(['flex items-center border border-primary/30 bg-primary/10 w-fit', className])
+    "
+  >
+    <button
+      v-bind="api.getDecrementTriggerProps()"
+      class="px-2.5 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+    >
+      <Minus class="size-3.5" />
+    </button>
+    <input v-bind="api.getInputProps()" class="w-16 text-center outline-none bg-transparent py-2" />
+    <button
+      v-bind="api.getIncrementTriggerProps()"
+      class="px-2.5 py-2 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none"
+    >
+      <Plus class="size-3.5" />
+    </button>
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as NumberInputRoot } from "./NumberInputRoot.vue";
+export { default as NumberInputLabel } from "./NumberInputLabel.vue";
+export { default as NumberInputControl } from "./NumberInputControl.vue";
+`;
+
+const usageImports = `
+import {
+  NumberInputRoot,
+  NumberInputLabel,
+  NumberInputControl,
+} from "@/components/ui/number-input";
+`;
+
+const usageExample = `
+<NumberInputRoot defaultValue="1" :min="0" :max="10">
+  <NumberInputLabel>Quantity</NumberInputLabel>
+  <NumberInputControl />
+</NumberInputRoot>
+`;
+---
+
+<DocsLayout title="Number Input | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Number Input</Title>
+      <Subtitle>
+        A control for entering a number, with increment/decrement buttons and
+        keyboard/scroll support.
+      </Subtitle>
+      <DocsLinks component="number-input" framework="vue" />
+      <Preview>
+        <NumberInputDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="number-input" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/number-input @zag-js/vue</InstallPackage>
+      <SectionContent>
+        Built directly on the Zag.js state machine.{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">NumberInputControl</span>{" "}
+        renders the decrement button, the input, and the increment button
+        together - it's the one part that needs all three wired to the same
+        machine. The bordered box shown here is a placeholder; swap it for
+        the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive later. Vue SFCs can't export multiple components from one
+        file, so NumberInput is a folder instead of a single file &mdash;
+        copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/number-input/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/number-input/NumberInputRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/number-input/NumberInputLabel.vue" code={labelSource} />
+      <PreviewCode title="components/ui/number-input/NumberInputControl.vue" code={controlSource} />
+      <PreviewCode title="components/ui/number-input/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>
