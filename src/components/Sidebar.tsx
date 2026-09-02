@@ -11,16 +11,24 @@ import {
   subscribe as subscribeFramework,
 } from "@/lib/framework-store";
 
-type DocLink = {
+export type DocLink = {
   slug: string;
   label: string;
   end?: boolean;
   badge?: string;
   absolute?: true;
   comingSoon?: boolean;
+  /**
+   * The name to pass to `cosmic-ui-cli add`, when it differs from the page
+   * slug. Calendar/Datepicker/Daterangepicker are three pages sharing one
+   * registry item (`date-picker.tsx`), so their install command has to name
+   * that shared file, not their own page slug - see each of their docs pages'
+   * `<InstallCommand component="date-picker" />`.
+   */
+  installName?: string;
 };
 
-const docLinks: { group: string; items: DocLink[] }[] = [
+export const docLinks: { group: string; items: DocLink[] }[] = [
   {
     group: "Getting Started",
     items: [
@@ -31,13 +39,14 @@ const docLinks: { group: string; items: DocLink[] }[] = [
   {
     group: "Components",
     items: [
+      { slug: "components", label: "Browse All" },
       { slug: "frame", label: "Frame" },
       { slug: "menu", label: "Menu" },
       { slug: "alert", label: "Alert" },
       { slug: "accordion", label: "Accordion" },
       { slug: "dialog", label: "Dialog" },
       { slug: "tabs", label: "Tabs" },
-      { slug: "toast", label: "Toast", badge: "New" },
+      { slug: "toast", label: "Toast" },
       { slug: "button", label: "Button" },
       { slug: "input", label: "Input" },
       { slug: "switch", label: "Switch" },
@@ -46,18 +55,22 @@ const docLinks: { group: string; items: DocLink[] }[] = [
       { slug: "checkbox", label: "Checkbox" },
       { slug: "chart", label: "Chart" },
       { slug: "combobox", label: "Combobox" },
-      { slug: "select", label: "Select", badge: "New" },
-      { slug: "alert-dialog", label: "Alert Dialog", comingSoon: true },
-      { slug: "avatar", label: "Avatar", comingSoon: true },
-      { slug: "breadcrumb", label: "Breadcrumb", comingSoon: true },
-      { slug: "button-group", label: "Button Group", comingSoon: true },
-      { slug: "calendar", label: "Calendar", comingSoon: true },
-      { slug: "datepicker", label: "Datepicker", comingSoon: true },
-      { slug: "daterangepicker", label: "Daterangepicker", comingSoon: true },
-      { slug: "sheet", label: "Sheet", comingSoon: true },
-      { slug: "number-input", label: "Number Input", comingSoon: true },
-      { slug: "pagination", label: "Pagination", comingSoon: true },
-      { slug: "table", label: "Table", comingSoon: true },
+      { slug: "select", label: "Select" },
+      { slug: "alert-dialog", label: "Alert Dialog" },
+      { slug: "avatar", label: "Avatar" },
+      { slug: "breadcrumb", label: "Breadcrumb" },
+      { slug: "button-group", label: "Button Group" },
+      { slug: "calendar", label: "Calendar", installName: "date-picker" },
+      { slug: "datepicker", label: "Datepicker", installName: "date-picker" },
+      {
+        slug: "daterangepicker",
+        label: "Daterangepicker",
+        installName: "date-picker",
+      },
+      { slug: "sheet", label: "Sheet" },
+      { slug: "number-input", label: "Number Input" },
+      { slug: "pagination", label: "Pagination" },
+      { slug: "table", label: "Table" },
     ],
   },
 ];
