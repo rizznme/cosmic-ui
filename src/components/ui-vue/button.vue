@@ -43,9 +43,11 @@ export type { ButtonVariants };
 </script>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useAttrs } from "vue";
 import { twMerge } from "tailwind-merge";
 import Frame, { parsePaths } from "@/components/ui-vue/frame.vue";
+
+defineOptions({ inheritAttrs: false });
 
 const {
   class: className,
@@ -63,6 +65,18 @@ const {
   enableViewBox?: boolean;
 }>();
 
+const attrs = useAttrs();
+// Astro hands an island's root component an incidental `slot` prop when it's
+// placed inside a named <slot> (e.g. `slot="preview"`); forwarding it onto
+// the real <button> disagrees between SSR and hydration and Vue flags it as
+// a mismatch. Every other attr (onClick, type, disabled, ...) still needs
+// through - this used to rely on Vue's default fallthrough before
+// inheritAttrs was turned off above.
+const forwardedAttrs = computed(() => {
+  const { slot: _slot, ...rest } = attrs;
+  return rest;
+});
+
 const defaultShapePaths = parsePaths(
   '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","17","0"],["L","100% - 7","0"],["L","100% + 0","0% + 9.5"],["L","100% - 18","100% - 6"],["L","4","100% - 6"],["L","0","100% - 15"],["L","17","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","9","100% - 6"],["L","100% - 22","100% - 6"],["L","100% - 25","100% + 0"],["L","12","100% + 0"],["L","9","100% - 6"]]}]'
 );
@@ -75,7 +89,7 @@ const resolvedCustomPaths = computed(() => customPaths?.map((p) => parsePaths(p)
 </script>
 
 <template>
-  <button :class="twMerge(buttonVariants({ variant, shape, className }))">
+  <button v-bind="forwardedAttrs" :class="twMerge(buttonVariants({ variant, shape, className }))">
     <div class="absolute inset-0 -mb-2">
       <Frame
         v-if="!customPaths && (shape == 'default' || shape == 'flat')"

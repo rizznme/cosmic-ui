@@ -6,9 +6,13 @@ import { usePresence } from "@/components/ui-vue/presence";
 import { AlertPresentKey } from "./context";
 
 defineOptions({ inheritAttrs: false });
-const rawAttrs = useAttrs() as { class?: string };
+const rawAttrs = useAttrs() as { class?: string; slot?: string };
+// `class` is applied separately below (merged with the variant classes), and
+// `slot` is Astro's incidental prop from being placed in a named <slot> (e.g.
+// `slot="preview"`) - forwarding either through v-bind here would either
+// double up the class or trip a dev-only SSR/hydration mismatch warning.
 const attrsWithoutClass = computed(() => {
-  const { class: _class, ...rest } = rawAttrs;
+  const { class: _class, slot: _slot, ...rest } = rawAttrs;
   return rest;
 });
 

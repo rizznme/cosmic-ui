@@ -30,9 +30,11 @@ export { parsePaths };
 </script>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from "vue";
+import { computed, ref, watch, onUnmounted, useAttrs } from "vue";
 import { twMerge } from "tailwind-merge";
 import { setupSvgRenderer } from "@left4code/svg-renderer";
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   class?: string;
@@ -40,6 +42,16 @@ const props = defineProps<{
   enableBackdropBlur?: boolean;
   enableViewBox?: boolean;
 }>();
+
+const attrs = useAttrs();
+// Astro hands an island's root component an incidental `slot` prop when it's
+// placed inside a named <slot> (e.g. `slot="preview"`); forwarding it onto
+// the real <svg> disagrees between SSR and hydration and Vue flags it as a
+// mismatch. Every other attr still needs through.
+const forwardedAttrs = computed(() => {
+  const { slot: _slot, ...rest } = attrs;
+  return rest;
+});
 
 const svgRef = ref<SVGSVGElement | null>(null);
 let instance: ReturnType<typeof setupSvgRenderer> | null = null;
@@ -67,6 +79,7 @@ onUnmounted(() => instance?.destroy());
 <template>
   <svg
     ref="svgRef"
+    v-bind="forwardedAttrs"
     xmlns="http://www.w3.org/2000/svg"
     :class="twMerge(['absolute inset-0 size-full pointer-events-none', props.class])"
     :data-frame-paths="JSON.stringify(paths)"

@@ -13,9 +13,11 @@ export { getColor };
 </script>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted, useAttrs } from "vue";
 import ChartJs from "chart.js/auto";
 import { twMerge } from "tailwind-merge";
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   class?: string;
@@ -29,10 +31,20 @@ onMounted(() => {
     canvasRef.value.instance = new ChartJs(canvasRef.value, props.config);
   }
 });
+
+const attrs = useAttrs();
+// Astro hands an island's root component an incidental `slot` prop when it's
+// placed inside a named <slot> (e.g. `slot="preview"`); forwarding it onto
+// the real root disagrees between SSR and hydration and Vue flags it as a
+// mismatch. Every other attr still needs through.
+const forwardedAttrs = computed(() => {
+  const { slot: _slot, ...rest } = attrs;
+  return rest;
+});
 </script>
 
 <template>
-  <div :class="twMerge('relative h-full w-full', props.class)">
+  <div v-bind="forwardedAttrs" :class="twMerge('relative h-full w-full', props.class)">
     <canvas ref="canvasRef" />
   </div>
 </template>

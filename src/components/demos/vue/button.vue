@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import Button from "@/components/ui-vue/button.vue";
 import { CheckCircle, LoaderCircle, Trash } from "@lucide/vue";
+
+// Root here is a plain <div>, not a component - Astro's incidental `slot`
+// prop (from being placed in a named <slot>, e.g. `slot="preview"`) would
+// otherwise land on it directly and trip a dev-only hydration mismatch.
+defineOptions({ inheritAttrs: false });
 </script>
 
 <template>

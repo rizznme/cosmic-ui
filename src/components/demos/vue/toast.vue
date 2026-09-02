@@ -10,6 +10,13 @@ import {
   ToastCloseTrigger,
 } from "@/components/ui-vue/toast";
 
+// This template has two root nodes (Button + Toaster), so Vue can't
+// automatically inherit attrs onto either one - Astro's incidental `slot`
+// prop (from being placed in a named <slot>) then trips a dev-only
+// "extraneous non-props attributes" warning with nowhere to land it. There's
+// nothing to forward either way, so just opt out of the attempt.
+defineOptions({ inheritAttrs: false });
+
 const toaster = createToaster({
   overlap: true,
   placement: "bottom-end",
