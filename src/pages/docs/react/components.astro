@@ -20,6 +20,9 @@ import { AvatarDemo } from "@/components/demos/react/avatar";
 import { BreadcrumbDemo } from "@/components/demos/react/breadcrumb";
 import { ButtonGroupDemo } from "@/components/demos/react/button-group";
 import { ButtonDemo } from "@/components/demos/react/button";
+import { Button01Demo } from "@/components/demos/react/button-01";
+import { Button02Demo } from "@/components/demos/react/button-02";
+import { Button03Demo } from "@/components/demos/react/button-03";
 import { CalendarDemo } from "@/components/demos/react/calendar";
 import { ChartDemo } from "@/components/demos/react/chart";
 import { CheckboxDemo } from "@/components/demos/react/checkbox";
@@ -77,6 +80,15 @@ import { ToastDemo } from "@/components/demos/react/toast";
       </ComponentCard>
       <ComponentCard slug="button" label="Button" installName="button" framework="react">
         <ButtonDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="react">
+        <Button01Demo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="react">
+        <Button02Demo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="react">
+        <Button03Demo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="input" label="Input" installName="input" framework="react">
         <InputDemo client:visible slot="preview" />

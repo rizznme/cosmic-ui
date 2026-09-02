@@ -20,6 +20,9 @@ import AvatarDemo from "@/components/demos/vue/avatar.vue";
 import BreadcrumbDemo from "@/components/demos/vue/breadcrumb.vue";
 import ButtonGroupDemo from "@/components/demos/vue/button-group.vue";
 import ButtonDemo from "@/components/demos/vue/button.vue";
+import Button01Demo from "@/components/demos/vue/button-01.vue";
+import Button02Demo from "@/components/demos/vue/button-02.vue";
+import Button03Demo from "@/components/demos/vue/button-03.vue";
 import CalendarDemo from "@/components/demos/vue/calendar.vue";
 import ChartDemo from "@/components/demos/vue/chart.vue";
 import CheckboxDemo from "@/components/demos/vue/checkbox.vue";
@@ -77,6 +80,15 @@ import ToastDemo from "@/components/demos/vue/toast.vue";
       </ComponentCard>
       <ComponentCard slug="button" label="Button" installName="button" framework="vue">
         <ButtonDemo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="vue">
+        <Button01Demo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="vue">
+        <Button02Demo client:visible slot="preview" />
+      </ComponentCard>
+      <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="vue">
+        <Button03Demo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="input" label="Input" installName="input" framework="vue">
         <InputDemo client:visible slot="preview" />
