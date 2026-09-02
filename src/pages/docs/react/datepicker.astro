@@ -1,0 +1,257 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import { DatepickerDemo } from "@/components/demos/react/datepicker";
+
+const previewCode = `
+<DatePickerRoot>
+  <DatePickerControl />
+  <DatePickerContent>
+    <DatePickerCalendar />
+  </DatePickerContent>
+</DatePickerRoot>
+`;
+
+const uiSource = `
+import { createContext, useContext, useId } from "react";
+import { twMerge } from "tailwind-merge";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from "lucide-react";
+import { useMachine, normalizeProps } from "@zag-js/react";
+import * as datePickerMachine from "@zag-js/date-picker";
+import { Portal } from "@/components/ui/portal";
+
+const DatePickerContext = createContext<ReturnType<typeof datePickerMachine.connect> | null>(
+  null
+);
+
+function useDatePickerContext() {
+  const api = useContext(DatePickerContext);
+  if (!api) throw new Error("DatePicker parts must be used within <DatePickerRoot>");
+  return api;
+}
+
+function DatePickerRoot({
+  children,
+  ...rest
+}: React.PropsWithChildren<Partial<datePickerMachine.Props>>) {
+  const service = useMachine(datePickerMachine.machine, { id: useId(), ...rest });
+  const api = datePickerMachine.connect(service, normalizeProps);
+
+  return <DatePickerContext.Provider value={api}>{children}</DatePickerContext.Provider>;
+}
+
+// The input+trigger row used by the popover variants (Datepicker,
+// Daterangepicker). A plain inline <DatePickerCalendar> (Calendar) has no
+// use for this - there's no text value to type or popover to open.
+function DatePickerControl({ className }: { className?: string }) {
+  const api = useDatePickerContext();
+
+  return (
+    <div
+      {...api.getControlProps()}
+      className={twMerge([
+        "flex items-center gap-2 border border-primary/30 bg-primary/10 px-3 py-2 w-fit",
+        className,
+      ])}
+    >
+      <input
+        {...api.getInputProps({ index: 0 })}
+        placeholder="Pick a date"
+        className="outline-none bg-transparent w-28"
+      />
+      {api.selectionMode === "range" && (
+        <>
+          <span className="opacity-50">-</span>
+          <input
+            {...api.getInputProps({ index: 1 })}
+            placeholder="Pick a date"
+            className="outline-none bg-transparent w-28"
+          />
+        </>
+      )}
+      <button
+        {...api.getClearTriggerProps()}
+        className="opacity-70 hover:opacity-100 cursor-pointer"
+      >
+        <X className="size-3.5" />
+      </button>
+      <button
+        {...api.getTriggerProps()}
+        className="opacity-70 hover:opacity-100 cursor-pointer"
+      >
+        <CalendarIcon className="size-4" />
+      </button>
+    </div>
+  );
+}
+
+// Wraps <DatePickerCalendar> in a floating popover. getContentProps() already
+// manages its own \`hidden\` state, so unlike Dialog/Combobox this doesn't need
+// a separate presence hook for an exit animation.
+function DatePickerContent({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  const api = useDatePickerContext();
+  const positionerProps = api.getPositionerProps();
+
+  return (
+    <Portal>
+      <div {...positionerProps} style={{ ...positionerProps.style, zIndex: 70 }}>
+        <div
+          {...api.getContentProps()}
+          className={twMerge(["border border-primary/30 bg-background outline-none", className])}
+        >
+          {children}
+        </div>
+      </div>
+    </Portal>
+  );
+}
+
+// The day grid, with a prev/next month header. This is the one part shared
+// verbatim across Calendar (rendered inline, no popover), Datepicker (single
+// selection, inside a popover), and Daterangepicker (range selection, inside
+// a popover) - only the selectionMode/inline props passed to DatePickerRoot
+// differ between the three.
+//
+// Scoped to the day view only: Zag's machine also supports drilling into
+// month/year picker views (view/minView/maxView, getMonthsGrid, etc.), left
+// out here to keep this placeholder implementation a manageable size.
+function DatePickerCalendar({ className }: { className?: string }) {
+  const api = useDatePickerContext();
+
+  return (
+    <div className={twMerge(["p-3", className])}>
+      <div className="flex items-center justify-between mb-3">
+        <button
+          {...api.getPrevTriggerProps()}
+          className="p-1 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <span className="font-medium text-sm">{api.visibleRangeText.formatted}</span>
+        <button
+          {...api.getNextTriggerProps()}
+          className="p-1 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+        >
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+      <table {...api.getTableProps({ view: "day" })} className="border-collapse">
+        <thead {...api.getTableHeadProps()}>
+          <tr {...api.getTableRowProps()}>
+            {api.weekDays.map((day, i) => (
+              <th key={i} scope="col" className="text-xs opacity-50 font-normal pb-2 size-8">
+                {day.narrow}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody {...api.getTableBodyProps()}>
+          {api.weeks.map((week, i) => (
+            <tr key={i} {...api.getTableRowProps()}>
+              {week.map((value, j) => (
+                <td key={j} {...api.getDayTableCellProps({ value })} className="text-center p-0.5">
+                  <div
+                    {...api.getDayTableCellTriggerProps({ value })}
+                    className={twMerge([
+                      "size-8 flex items-center justify-center cursor-pointer border border-transparent hover:border-primary/30",
+                      "data-[selected]:bg-primary/20 data-[selected]:border-primary",
+                      "data-[today]:border-primary/50",
+                      "data-[in-range]:bg-primary/10",
+                      "data-[outside-range]:opacity-30",
+                      "data-[unavailable]:opacity-20 data-[unavailable]:pointer-events-none",
+                      "data-[disabled]:opacity-20 data-[disabled]:pointer-events-none",
+                    ])}
+                  >
+                    {value.day}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export { DatePickerRoot, DatePickerControl, DatePickerContent, DatePickerCalendar };
+`;
+
+const usageImports = `
+import {
+  DatePickerRoot,
+  DatePickerControl,
+  DatePickerContent,
+  DatePickerCalendar,
+} from "@/components/ui/date-picker";
+`;
+
+const usageExample = `
+<DatePickerRoot>
+  <DatePickerControl />
+  <DatePickerContent>
+    <DatePickerCalendar />
+  </DatePickerContent>
+</DatePickerRoot>
+`;
+---
+
+<DocsLayout title="Datepicker | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Datepicker</Title>
+      <Subtitle>An input that opens a calendar popover for picking a single date.</Subtitle>
+      <DocsLinks component="date-picker" />
+      <Preview>
+        <DatepickerDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="date-picker" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/date-picker @zag-js/react</InstallPackage>
+      <SectionContent>
+        Datepicker, Calendar, and Daterangepicker are the same{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">date-picker.tsx</span>{" "}
+        primitive (Zag ships one date-picker machine, not three) composed
+        differently: this page adds{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerControl</span>{" "}
+        (the text input and trigger button) and wraps the grid in{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerContent</span>{" "}
+        (a floating popover), instead of rendering{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerCalendar</span>{" "}
+        inline like the Calendar page does. Only the day view is wired up
+        here (no month/year picker view); the plain border is a placeholder
+        for the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive. Copy and paste the following code into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/date-picker.tsx" code={uiSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>

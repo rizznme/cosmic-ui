@@ -1,0 +1,280 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import DatepickerDemo from "@/components/demos/vue/datepicker.vue";
+
+const previewCode = `
+<DatePickerRoot>
+  <DatePickerControl />
+  <DatePickerContent>
+    <DatePickerCalendar />
+  </DatePickerContent>
+</DatePickerRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as datePickerMachine from "@zag-js/date-picker";
+
+type DatePickerApi = ComputedRef<ReturnType<typeof datePickerMachine.connect>>;
+
+const DatePickerApiKey: InjectionKey<DatePickerApi> = Symbol("date-picker-api");
+
+export { DatePickerApiKey };
+export type { DatePickerApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as datePickerMachine from "@zag-js/date-picker";
+import { DatePickerApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<datePickerMachine.Props>;
+const id = useId();
+
+const service = useMachine(
+  datePickerMachine.machine,
+  computed(() => ({ id, ...rawAttrs }))
+);
+const api = computed(() => datePickerMachine.connect(service, normalizeProps));
+
+provide(DatePickerApiKey, api);
+</script>
+
+<template>
+  <slot />
+</template>
+`;
+
+const controlSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { Calendar as CalendarIcon, X } from "@lucide/vue";
+import { twMerge } from "tailwind-merge";
+import { DatePickerApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(DatePickerApiKey);
+if (!injectedApi) throw new Error("DatePicker parts must be used within <DatePickerRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div
+    v-bind="api.getControlProps()"
+    :class="
+      twMerge(['flex items-center gap-2 border border-primary/30 bg-primary/10 px-3 py-2 w-fit', className])
+    "
+  >
+    <input
+      v-bind="api.getInputProps({ index: 0 })"
+      placeholder="Pick a date"
+      class="outline-none bg-transparent w-28"
+    />
+    <template v-if="api.selectionMode === 'range'">
+      <span class="opacity-50">-</span>
+      <input
+        v-bind="api.getInputProps({ index: 1 })"
+        placeholder="Pick a date"
+        class="outline-none bg-transparent w-28"
+      />
+    </template>
+    <button v-bind="api.getClearTriggerProps()" class="opacity-70 hover:opacity-100 cursor-pointer">
+      <X class="size-3.5" />
+    </button>
+    <button v-bind="api.getTriggerProps()" class="opacity-70 hover:opacity-100 cursor-pointer">
+      <CalendarIcon class="size-4" />
+    </button>
+  </div>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Portal from "@/components/ui/portal.vue";
+import { DatePickerApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(DatePickerApiKey);
+if (!injectedApi) throw new Error("DatePicker parts must be used within <DatePickerRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Portal>
+    <div
+      v-bind="api.getPositionerProps()"
+      :style="{ ...api.getPositionerProps().style, zIndex: 70 }"
+    >
+      <div
+        v-bind="api.getContentProps()"
+        :class="twMerge(['border border-primary/30 bg-background outline-none', className])"
+      >
+        <slot />
+      </div>
+    </div>
+  </Portal>
+</template>
+`;
+
+const calendarSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { ChevronLeft, ChevronRight } from "@lucide/vue";
+import { twMerge } from "tailwind-merge";
+import { DatePickerApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(DatePickerApiKey);
+if (!injectedApi) throw new Error("DatePicker parts must be used within <DatePickerRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div :class="twMerge(['p-3', className])">
+    <div class="flex items-center justify-between mb-3">
+      <button
+        v-bind="api.getPrevTriggerProps()"
+        class="p-1 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+      >
+        <ChevronLeft class="size-4" />
+      </button>
+      <span class="font-medium text-sm">{{ api.visibleRangeText.formatted }}</span>
+      <button
+        v-bind="api.getNextTriggerProps()"
+        class="p-1 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+      >
+        <ChevronRight class="size-4" />
+      </button>
+    </div>
+    <table v-bind="api.getTableProps({ view: 'day' })" class="border-collapse">
+      <thead v-bind="api.getTableHeadProps()">
+        <tr v-bind="api.getTableRowProps()">
+          <th
+            v-for="(day, i) in api.weekDays"
+            :key="i"
+            scope="col"
+            class="text-xs opacity-50 font-normal pb-2 size-8"
+          >
+            {{ day.narrow }}
+          </th>
+        </tr>
+      </thead>
+      <tbody v-bind="api.getTableBodyProps()">
+        <tr v-for="(week, i) in api.weeks" :key="i" v-bind="api.getTableRowProps()">
+          <td
+            v-for="(value, j) in week"
+            :key="j"
+            v-bind="api.getDayTableCellProps({ value })"
+            class="text-center p-0.5"
+          >
+            <div
+              v-bind="api.getDayTableCellTriggerProps({ value })"
+              class="size-8 flex items-center justify-center cursor-pointer border border-transparent hover:border-primary/30 data-[selected]:bg-primary/20 data-[selected]:border-primary data-[today]:border-primary/50 data-[in-range]:bg-primary/10 data-[outside-range]:opacity-30 data-[unavailable]:opacity-20 data-[unavailable]:pointer-events-none data-[disabled]:opacity-20 data-[disabled]:pointer-events-none"
+            >
+              {{ value.day }}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+`;
+
+const indexSource = `
+export { default as DatePickerRoot } from "./DatePickerRoot.vue";
+export { default as DatePickerControl } from "./DatePickerControl.vue";
+export { default as DatePickerContent } from "./DatePickerContent.vue";
+export { default as DatePickerCalendar } from "./DatePickerCalendar.vue";
+`;
+
+const usageImports = `
+import {
+  DatePickerRoot,
+  DatePickerControl,
+  DatePickerContent,
+  DatePickerCalendar,
+} from "@/components/ui/date-picker";
+`;
+
+const usageExample = `
+<DatePickerRoot>
+  <DatePickerControl />
+  <DatePickerContent>
+    <DatePickerCalendar />
+  </DatePickerContent>
+</DatePickerRoot>
+`;
+---
+
+<DocsLayout title="Datepicker | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Datepicker</Title>
+      <Subtitle>An input that opens a calendar popover for picking a single date.</Subtitle>
+      <DocsLinks component="date-picker" framework="vue" />
+      <Preview>
+        <DatepickerDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="date-picker" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/date-picker @zag-js/vue</InstallPackage>
+      <SectionContent>
+        Datepicker, Calendar, and Daterangepicker are the same date-picker
+        primitive (Zag ships one date-picker machine, not three) composed
+        differently: this page adds{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerControl</span>{" "}
+        (the text input and trigger button) and wraps the grid in{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerContent</span>{" "}
+        (a floating popover), instead of rendering{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">DatePickerCalendar</span>{" "}
+        inline like the Calendar page does. Only the day view is wired up
+        here (no month/year picker view); the plain border is a placeholder
+        for the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive. Vue SFCs can't export multiple components from one file,
+        so DatePicker is a folder instead of a single file &mdash; copy all
+        of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/date-picker/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/date-picker/DatePickerRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/date-picker/DatePickerControl.vue" code={controlSource} />
+      <PreviewCode title="components/ui/date-picker/DatePickerContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/date-picker/DatePickerCalendar.vue" code={calendarSource} />
+      <PreviewCode title="components/ui/date-picker/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>
