@@ -220,10 +220,16 @@ const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
             return m ? cs.getPropertyValue(m[1]).trim() : value;
           }
 
+          // Every path gets painted, including ones flagged `"show": false`.
+          // That flag is design-time data left over from the frame editor:
+          // setupSvgRenderer has no concept of it and draws the whole array,
+          // so skipping them here made this stand-in disagree with the real
+          // render. The two frames on the home page whose border lives in a
+          // `show: false` path drew as bare text until hydration, then had the
+          // border pop in - exactly the flicker this script exists to prevent.
           var inner = "";
           for (var i = 0; i < paths.length; i++) {
             var p = paths[i];
-            if (p.show === false) continue;
             inner +=
               '<path d="' +
               buildPathD(p.path, width, height) +
