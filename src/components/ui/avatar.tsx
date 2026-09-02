@@ -66,7 +66,7 @@ function AvatarFallback({
   return (
     <span
       {...api.getFallbackProps()}
-      className={twMerge(["text-sm font-medium", className])}
+      className={twMerge(["font-medium", className])}
     >
       {children}
     </span>

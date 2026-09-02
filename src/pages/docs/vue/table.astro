@@ -53,7 +53,7 @@ const { class: className } = defineProps<{ class?: string }>();
 
 <template>
   <div class="relative w-full overflow-x-auto">
-    <table :class="twMerge(['w-full text-sm border-collapse', className])">
+    <table :class="twMerge(['w-full border-collapse', className])">
       <slot />
     </table>
   </div>
@@ -152,7 +152,7 @@ const { class: className } = defineProps<{ class?: string }>();
 </script>
 
 <template>
-  <caption :class="twMerge(['mt-4 text-sm opacity-70', className])">
+  <caption :class="twMerge(['mt-4 opacity-70', className])">
     <slot />
   </caption>
 </template>

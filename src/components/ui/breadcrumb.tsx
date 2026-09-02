@@ -17,7 +17,7 @@ function BreadcrumbList({
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <ol className={twMerge(["flex flex-wrap items-center gap-2 text-sm", className])}>
+    <ol className={twMerge(["flex flex-wrap items-center gap-2", className])}>
       {children}
     </ol>
   );

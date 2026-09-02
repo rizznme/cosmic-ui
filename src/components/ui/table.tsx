@@ -6,7 +6,7 @@ function TableRoot({
 }: React.PropsWithChildren<{ className?: string }>) {
   return (
     <div className="relative w-full overflow-x-auto">
-      <table className={twMerge(["w-full text-sm border-collapse", className])}>
+      <table className={twMerge(["w-full border-collapse", className])}>
         {children}
       </table>
     </div>
@@ -83,7 +83,7 @@ function TableCaption({
   children,
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
-  return <caption className={twMerge(["mt-4 text-sm opacity-70", className])}>{children}</caption>;
+  return <caption className={twMerge(["mt-4 opacity-70", className])}>{children}</caption>;
 }
 
 export {

@@ -5,7 +5,7 @@ const { class: className } = defineProps<{ class?: string }>();
 </script>
 
 <template>
-  <caption :class="twMerge(['mt-4 text-sm opacity-70', className])">
+  <caption :class="twMerge(['mt-4 opacity-70', className])">
     <slot />
   </caption>
 </template>

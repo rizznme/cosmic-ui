@@ -11,7 +11,7 @@ const api = injectedApi;
 </script>
 
 <template>
-  <span v-bind="api.getFallbackProps()" :class="twMerge(['text-sm font-medium', $props.class])">
+  <span v-bind="api.getFallbackProps()" :class="twMerge(['font-medium', $props.class])">
     <slot />
   </span>
 </template>

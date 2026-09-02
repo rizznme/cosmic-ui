@@ -115,7 +115,7 @@ function DatePickerCalendar({ className }: { className?: string }) {
         >
           <ChevronLeft className="size-4" />
         </button>
-        <span className="font-medium text-sm">{api.visibleRangeText.formatted}</span>
+        <span className="font-medium">{api.visibleRangeText.formatted}</span>
         <button
           {...api.getNextTriggerProps()}
           className="p-1 hover:bg-primary/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"

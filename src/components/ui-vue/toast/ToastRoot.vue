@@ -24,7 +24,7 @@ const framePaths = parsePaths(
     <div
       :class="
         twMerge([
-          'relative me-1 px-10 py-6 font-orbitron text-sm',
+          'relative me-1 px-10 py-6 font-orbitron',
           '[--color-frame-1-stroke:var(--color-primary)]',
           '[--color-frame-1-fill:var(--color-primary)]/20',
           '[--color-frame-2-stroke:var(--color-primary)]',

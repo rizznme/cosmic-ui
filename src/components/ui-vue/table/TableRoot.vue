@@ -11,7 +11,7 @@ const { class: className } = defineProps<{ class?: string }>();
 
 <template>
   <div class="relative w-full overflow-x-auto">
-    <table :class="twMerge(['w-full text-sm border-collapse', className])">
+    <table :class="twMerge(['w-full border-collapse', className])">
       <slot />
     </table>
   </div>
