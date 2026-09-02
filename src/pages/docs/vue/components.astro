@@ -3,6 +3,7 @@ import DocsLayout from "@/layouts/DocsLayout.astro";
 import Title from "@/components/docs/Title.astro";
 import Subtitle from "@/components/docs/Subtitle.astro";
 import ComponentCard from "@/components/docs/ComponentCard.astro";
+import ComponentGrid from "@/components/docs/ComponentGrid.astro";
 
 // Astro's client:* directives need the JSX tag to be an identifier bound
 // directly by a static `import` - not a loop variable, not a destructured
@@ -56,29 +57,35 @@ import ToastDemo from "@/components/demos/vue/toast.vue";
       Every component, live. Click Copy for the install command, or click a
       name to read its docs.
     </Subtitle>
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue">
+    {/*
+      Card sizes aren't guesses - each demo's natural size was measured in the
+      browser and rounded up to the smallest span that clears it. Re-measure
+      before changing one; a span that's too small silently turns into a
+      scrollbar inside the card.
+    */}
+    <ComponentGrid>
+      <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue" cols={2} rows={3}>
         <FrameDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="menu" label="Menu" installName="menu" framework="vue">
         <MenuDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue">
+      <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue" cols={2} rows={2}>
         <AlertDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue">
+      <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue" cols={2} rows={3}>
         <AccordionDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="vue">
         <DialogDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue">
+      <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue" cols={3} rows={2}>
         <TabsDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue">
         <ToastDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="button" label="Button" installName="button" framework="vue">
+      <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2}>
         <ButtonDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="vue">
@@ -99,19 +106,19 @@ import ToastDemo from "@/components/demos/vue/toast.vue";
       <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="vue">
         <TextareaDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue">
+      <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue" rows={2}>
         <RadioGroupDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="vue">
         <CheckboxDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue">
+      <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue" cols={2} rows={2}>
         <ChartDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue">
+      <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue" cols={2}>
         <ComboboxDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="select" label="Select" installName="select" framework="vue">
+      <ComponentCard slug="select" label="Select" installName="select" framework="vue" cols={2}>
         <SelectDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="vue">
@@ -123,16 +130,16 @@ import ToastDemo from "@/components/demos/vue/toast.vue";
       <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="vue">
         <BreadcrumbDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue">
+      <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue" cols={2}>
         <ButtonGroupDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue">
+      <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue" cols={2} rows={2}>
         <CalendarDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="vue">
         <DatepickerDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue">
+      <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue" cols={2}>
         <DaterangepickerDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="vue">
@@ -141,12 +148,12 @@ import ToastDemo from "@/components/demos/vue/toast.vue";
       <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="vue">
         <NumberInputDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue">
+      <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue" cols={2}>
         <PaginationDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="table" label="Table" installName="table" framework="vue">
+      <ComponentCard slug="table" label="Table" installName="table" framework="vue" cols={4} rows={2}>
         <TableDemo client:visible slot="preview" />
       </ComponentCard>
-    </div>
+    </ComponentGrid>
   </div>
 </DocsLayout>

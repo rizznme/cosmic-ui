@@ -7,16 +7,46 @@ interface Props {
   label: string;
   installName: string;
   framework: Framework;
+  /** How many grid columns this card occupies (see ComponentGrid.astro). */
+  cols?: 1 | 2 | 3 | 4;
+  /** How many grid rows this card occupies (see ComponentGrid.astro). */
+  rows?: 1 | 2 | 3 | 4;
 }
 
-const { slug, label, installName, framework } = Astro.props;
+const { slug, label, installName, framework, cols = 1, rows = 1 } = Astro.props;
 const href = `/docs/${framework}/${slug}`;
 const installCommand = `npx @left4code/cosmic-ui-cli@latest add ${installName}`;
+
+// Spelled out as whole literal class strings on purpose: Tailwind scans source
+// text, so a constructed name like `lg:col-span-${cols}` would never make it
+// into the stylesheet.
+//
+// The grid is 1 column on mobile and 2 at sm, so a card can't claim more
+// columns than exist - anything wider than the grid clamps to full width there
+// and only takes its real span at lg, where all 4 columns are present.
+const COL_SPAN = {
+  1: "sm:col-span-1 lg:col-span-1",
+  2: "sm:col-span-2 lg:col-span-2",
+  3: "sm:col-span-2 lg:col-span-3",
+  4: "sm:col-span-2 lg:col-span-4",
+} as const;
+
+const ROW_SPAN = {
+  1: "row-span-1",
+  2: "row-span-2",
+  3: "row-span-3",
+  4: "row-span-4",
+} as const;
 ---
 
 <div
   data-slug={slug}
-  class="border bg-primary/5 border-primary/20 backdrop-blur-md h-64 sm:h-72 flex flex-col overflow-hidden"
+  data-span={`${cols}x${rows}`}
+  class:list={[
+    "border bg-primary/5 border-primary/20 backdrop-blur-md h-full flex flex-col overflow-hidden",
+    COL_SPAN[cols],
+    ROW_SPAN[rows],
+  ]}
 >
   {/*
     Deliberately not a link: several demos (Switch, Dialog trigger, Menu,
@@ -31,12 +61,12 @@ const installCommand = `npx @left4code/cosmic-ui-cli@latest add ${installName}`;
     ancestor `scale()` was silently feeding it the wrong width/height and
     every Frame-backed demo (almost all of them) rendered warped. Same root
     cause as feedback_gbcr_includes_transform from the animated-zoom case,
-    just triggered by a static transform instead. overflow-auto is enough on
-    its own: demos that fit just show; the few that don't (Table, Button's
-    three-variant row, Pagination) scroll instead of being cropped or drawn
-    wrong.
+    just triggered by a static transform instead. Sizing a card to its demo
+    via cols/rows is what keeps things from being cropped now; overflow-auto
+    stays as the safety net for a demo that outgrows its declared span (and
+    for mobile, where every card collapses to one narrow column).
   */}
-  <div class="flex-1 flex items-center justify-center overflow-auto p-6">
+  <div class="flex-1 flex items-center justify-center overflow-auto p-5">
     <slot name="preview" />
   </div>
   <div class="flex items-center justify-between px-4 py-3 border-t border-primary/20">

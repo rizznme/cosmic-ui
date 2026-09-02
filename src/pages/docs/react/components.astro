@@ -3,6 +3,7 @@ import DocsLayout from "@/layouts/DocsLayout.astro";
 import Title from "@/components/docs/Title.astro";
 import Subtitle from "@/components/docs/Subtitle.astro";
 import ComponentCard from "@/components/docs/ComponentCard.astro";
+import ComponentGrid from "@/components/docs/ComponentGrid.astro";
 
 // Astro's client:* directives need the JSX tag to be an identifier bound
 // directly by a static `import` - not a loop variable, not a destructured
@@ -56,29 +57,35 @@ import { ToastDemo } from "@/components/demos/react/toast";
       Every component, live. Click Copy for the install command, or click a
       name to read its docs.
     </Subtitle>
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <ComponentCard slug="frame" label="Frame" installName="frame" framework="react">
+    {/*
+      Card sizes aren't guesses - each demo's natural size was measured in the
+      browser and rounded up to the smallest span that clears it. Re-measure
+      before changing one; a span that's too small silently turns into a
+      scrollbar inside the card.
+    */}
+    <ComponentGrid>
+      <ComponentCard slug="frame" label="Frame" installName="frame" framework="react" cols={2} rows={3}>
         <FrameDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="menu" label="Menu" installName="menu" framework="react">
         <MenuDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="alert" label="Alert" installName="alert" framework="react">
+      <ComponentCard slug="alert" label="Alert" installName="alert" framework="react" cols={2} rows={2}>
         <AlertDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="react">
+      <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="react" cols={2} rows={3}>
         <AccordionDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="react">
         <DialogDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="react">
+      <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="react" cols={3} rows={2}>
         <TabsDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="toast" label="Toast" installName="toast" framework="react">
         <ToastDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="button" label="Button" installName="button" framework="react">
+      <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2}>
         <ButtonDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="react">
@@ -99,19 +106,19 @@ import { ToastDemo } from "@/components/demos/react/toast";
       <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="react">
         <TextareaDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react">
+      <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react" rows={2}>
         <RadioGroupDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="react">
         <CheckboxDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="chart" label="Chart" installName="chart" framework="react">
+      <ComponentCard slug="chart" label="Chart" installName="chart" framework="react" cols={2} rows={2}>
         <ChartDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="react">
+      <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="react" cols={2}>
         <ComboboxDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="select" label="Select" installName="select" framework="react">
+      <ComponentCard slug="select" label="Select" installName="select" framework="react" cols={2}>
         <SelectDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="react">
@@ -123,16 +130,16 @@ import { ToastDemo } from "@/components/demos/react/toast";
       <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="react">
         <BreadcrumbDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="react">
+      <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="react" cols={2}>
         <ButtonGroupDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="react">
+      <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="react" cols={2} rows={2}>
         <CalendarDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="react">
         <DatepickerDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="react">
+      <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="react" cols={2}>
         <DaterangepickerDemo client:visible slot="preview" />
       </ComponentCard>
       <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="react">
@@ -141,12 +148,12 @@ import { ToastDemo } from "@/components/demos/react/toast";
       <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="react">
         <NumberInputDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="react">
+      <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="react" cols={2}>
         <PaginationDemo client:visible slot="preview" />
       </ComponentCard>
-      <ComponentCard slug="table" label="Table" installName="table" framework="react">
+      <ComponentCard slug="table" label="Table" installName="table" framework="react" cols={4} rows={2}>
         <TableDemo client:visible slot="preview" />
       </ComponentCard>
-    </div>
+    </ComponentGrid>
   </div>
 </DocsLayout>
