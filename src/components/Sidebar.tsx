@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
-import { Search, X } from "lucide-react";
+import { ChevronRight, Search, X } from "lucide-react";
 import { getShowMenu, setShowMenu, subscribe } from "@/lib/mobile-menu-store";
 import { setSearchOpen } from "@/lib/search-palette-store";
 import { FrameworkSwitcher } from "@/components/FrameworkSwitcher";
@@ -26,6 +26,8 @@ export type DocLink = {
    * `<InstallCommand component="date-picker" />`.
    */
   installName?: string;
+  /** Nested variants shown under this item, expand/collapse in the sidebar. */
+  children?: DocLink[];
 };
 
 export const docLinks: { group: string; items: DocLink[] }[] = [
@@ -47,7 +49,15 @@ export const docLinks: { group: string; items: DocLink[] }[] = [
       { slug: "dialog", label: "Dialog" },
       { slug: "tabs", label: "Tabs" },
       { slug: "toast", label: "Toast" },
-      { slug: "button", label: "Button" },
+      {
+        slug: "button",
+        label: "Button",
+        children: [
+          { slug: "button-01", label: "Outline" },
+          { slug: "button-02", label: "Ghost" },
+          { slug: "button-03", label: "Solid" },
+        ],
+      },
       { slug: "input", label: "Input" },
       { slug: "switch", label: "Switch" },
       { slug: "textarea", label: "Textarea" },
@@ -93,6 +103,30 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
     getServerFramework
   );
   const framework = frameworkFromPath(currentPath) ?? storedFramework;
+
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    for (const group of docLinks) {
+      for (const item of group.items) {
+        if (!item.children) continue;
+        const isChildActive = item.children.some((child) => {
+          const href = child.absolute ? child.slug : `/docs/${framework}/${child.slug}`;
+          return isActive(currentPath, href, child.end);
+        });
+        if (isChildActive) initial.add(item.slug);
+      }
+    }
+    return initial;
+  });
+
+  function toggleExpanded(slug: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
 
   return (
     <div className={desktopVisible ? undefined : "lg:hidden"}>
@@ -141,23 +175,61 @@ export function Sidebar({ currentPath }: { currentPath: string }) {
                   );
                 }
                 const href = item.absolute ? item.slug : `/docs/${framework}/${item.slug}`;
+                const isOpen = expanded.has(item.slug);
                 return (
-                  <a
-                    key={item.slug}
-                    onClick={() => setShowMenu(false)}
-                    href={href}
-                    className={twMerge([
-                      "hover:text-foreground py-1",
-                      isActive(currentPath, href, item.end) && "text-foreground",
-                    ])}
-                  >
-                    {item.label}
-                    {item.badge && (
-                      <span className="px-2 py-px border border-primary/30 bg-primary/10 text-sm ms-2">
-                        {item.badge}
-                      </span>
+                  <div key={item.slug} className="flex flex-col">
+                    <div className="flex items-center">
+                      <a
+                        onClick={() => setShowMenu(false)}
+                        href={href}
+                        className={twMerge([
+                          "flex-1 hover:text-foreground py-1",
+                          isActive(currentPath, href, item.end) && "text-foreground",
+                        ])}
+                      >
+                        {item.label}
+                        {item.badge && (
+                          <span className="px-2 py-px border border-primary/30 bg-primary/10 text-sm ms-2">
+                            {item.badge}
+                          </span>
+                        )}
+                      </a>
+                      {item.children && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpanded(item.slug)}
+                          className="p-1 -mr-1 text-foreground/40 hover:text-foreground cursor-pointer"
+                          aria-label={isOpen ? `Collapse ${item.label}` : `Expand ${item.label}`}
+                        >
+                          <ChevronRight
+                            className={twMerge(["size-3.5 transition-transform", isOpen && "rotate-90"])}
+                          />
+                        </button>
+                      )}
+                    </div>
+                    {item.children && isOpen && (
+                      <div className="flex flex-col ml-3 border-l border-foreground/15 pl-3">
+                        {item.children.map((child) => {
+                          const childHref = child.absolute
+                            ? child.slug
+                            : `/docs/${framework}/${child.slug}`;
+                          return (
+                            <a
+                              key={child.slug}
+                              onClick={() => setShowMenu(false)}
+                              href={childHref}
+                              className={twMerge([
+                                "hover:text-foreground py-1",
+                                isActive(currentPath, childHref, child.end) && "text-foreground",
+                              ])}
+                            >
+                              {child.label}
+                            </a>
+                          );
+                        })}
+                      </div>
                     )}
-                  </a>
+                  </div>
                 );
               })}
             </div>
