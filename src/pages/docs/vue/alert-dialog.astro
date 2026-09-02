@@ -1,0 +1,350 @@
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import InstallCommand from "@/components/docs/InstallCommand.astro";
+import Wrapper from "@/components/docs/Wrapper.astro";
+import TocMenu from "@/components/docs/TocMenu.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import DocsLinks from "@/components/docs/DocsLinks.astro";
+import Preview from "@/components/docs/Preview.astro";
+import SectionTitle from "@/components/docs/SectionTitle.astro";
+import SectionContent from "@/components/docs/SectionContent.astro";
+import InstallPackage from "@/components/docs/InstallPackage.astro";
+import PreviewCode from "@/components/docs/PreviewCode.astro";
+import AlertDialogDemo from "@/components/demos/vue/alert-dialog.vue";
+
+const previewCode = `
+<AlertDialogRoot>
+  <AlertDialogTrigger>Delete account</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+    <AlertDialogDescription>
+      This action cannot be undone. This will permanently delete your
+      account and remove your data from our servers.
+    </AlertDialogDescription>
+    <div class="flex justify-end gap-2 mt-4">
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction @click="handleDelete">Continue</AlertDialogAction>
+    </div>
+  </AlertDialogContent>
+</AlertDialogRoot>
+`;
+
+const contextSource = `
+import type { InjectionKey, ComputedRef } from "vue";
+import type * as dialogMachine from "@zag-js/dialog";
+
+type AlertDialogApi = ComputedRef<ReturnType<typeof dialogMachine.connect>>;
+
+const AlertDialogApiKey: InjectionKey<AlertDialogApi> = Symbol("alert-dialog-api");
+
+export { AlertDialogApiKey };
+export type { AlertDialogApi };
+`;
+
+const rootSource = `
+<script setup lang="ts">
+import { computed, provide, useAttrs, useId } from "vue";
+import { useMachine, normalizeProps } from "@zag-js/vue";
+import * as dialogMachine from "@zag-js/dialog";
+import { AlertDialogApiKey } from "./context";
+
+defineOptions({ inheritAttrs: false });
+const rawAttrs = useAttrs() as Partial<dialogMachine.Props>;
+const id = useId();
+
+const service = useMachine(
+  dialogMachine.machine,
+  computed(() => ({
+    id,
+    role: "alertdialog",
+    // An alert dialog demands an explicit choice - dismissing it by clicking
+    // outside or pressing Escape would let the user skip that choice.
+    closeOnInteractOutside: false,
+    closeOnEscape: false,
+    ...rawAttrs,
+  }))
+);
+const api = computed(() => dialogMachine.connect(service, normalizeProps));
+
+provide(AlertDialogApiKey, api);
+</script>
+
+<template>
+  <slot />
+</template>
+`;
+
+const triggerSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import Button from "@/components/ui/button.vue";
+import { AlertDialogApiKey } from "./context";
+
+defineProps<{ class?: string }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Button v-bind="api.getTriggerProps()" :class="$props.class">
+    <slot />
+  </Button>
+</template>
+`;
+
+const contentSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import Portal from "@/components/ui/portal.vue";
+import { usePresence } from "@/components/ui/presence";
+import { AlertDialogApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+
+const backdrop = usePresence(() => api.value.open);
+const content = usePresence(() => api.value.open);
+</script>
+
+<template>
+  <Portal>
+    <div
+      v-bind="api.getBackdropProps()"
+      :ref="backdrop.setNode"
+      :hidden="!backdrop.present.value"
+      class="fixed inset-0 bg-background/80 z-50 [&[data-state='open']]:animate-in [&[data-state='open']]:fade-in-0 [&[data-state='closed']]:animate-out [&[data-state='closed']]:fade-out-0"
+    />
+    <div v-bind="api.getPositionerProps()">
+      <div
+        v-bind="api.getContentProps()"
+        :ref="content.setNode"
+        :hidden="!content.present.value"
+        :class="
+          twMerge([
+            \`outline-none fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] sm:max-w-lg p-6 border border-primary/30 bg-background\`,
+            \`[&[data-state='open']]:animate-in [&[data-state='open']]:fade-in-0 [&[data-state='open']]:zoom-in-80 [&[data-state='open']]:duration-250\`,
+            \`[&[data-state='closed']]:animate-out [&[data-state='closed']]:fade-out-0 [&[data-state='closed']]:zoom-out-80 [&[data-state='closed']]:duration-400\`,
+            className,
+          ])
+        "
+      >
+        <slot />
+      </div>
+    </div>
+  </Portal>
+</template>
+`;
+
+const titleSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { AlertDialogApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div v-bind="api.getTitleProps()" :class="twMerge(['font-bold text-lg', className])">
+    <slot />
+  </div>
+</template>
+`;
+
+const descriptionSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import { twMerge } from "tailwind-merge";
+import { AlertDialogApiKey } from "./context";
+
+const { class: className } = defineProps<{ class?: string }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <div v-bind="api.getDescriptionProps()" :class="twMerge(['opacity-80 py-2', className])">
+    <slot />
+  </div>
+</template>
+`;
+
+const cancelSource = `
+<script setup lang="ts">
+import { inject } from "vue";
+import Button from "@/components/ui/button.vue";
+import { AlertDialogApiKey } from "./context";
+
+defineProps<{ class?: string }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+</script>
+
+<template>
+  <Button shape="flat" v-bind="api.getCloseTriggerProps()" :class="$props.class">
+    <slot />
+  </Button>
+</template>
+`;
+
+const actionSource = `
+<script setup lang="ts">
+import { computed, inject } from "vue";
+import Button from "@/components/ui/button.vue";
+import { AlertDialogApiKey } from "./context";
+
+defineProps<{ class?: string }>();
+// Declaring this as an emit (rather than leaving @click to fall through as a
+// plain DOM attribute) means it composes cleanly with the machine's own
+// close handler below instead of both landing on the button and firing
+// twice.
+const emit = defineEmits<{ click: [event: MouseEvent] }>();
+
+const injectedApi = inject(AlertDialogApiKey);
+if (!injectedApi)
+  throw new Error("AlertDialog parts must be used within <AlertDialogRoot>");
+const api = injectedApi;
+
+// The consumer's handler runs first (it does the actual delete/confirm
+// action); the machine's own onClick then closes the dialog, unless that
+// handler called event.preventDefault() to keep it open.
+const triggerProps = computed(() => {
+  const { onClick, ...rest } = api.value.getCloseTriggerProps();
+  return {
+    ...rest,
+    onClick: (event: MouseEvent) => {
+      emit("click", event);
+      onClick?.(event);
+    },
+  };
+});
+</script>
+
+<template>
+  <Button variant="destructive" v-bind="triggerProps" :class="$props.class">
+    <slot />
+  </Button>
+</template>
+`;
+
+const indexSource = `
+export { default as AlertDialogRoot } from "./AlertDialogRoot.vue";
+export { default as AlertDialogTrigger } from "./AlertDialogTrigger.vue";
+export { default as AlertDialogContent } from "./AlertDialogContent.vue";
+export { default as AlertDialogTitle } from "./AlertDialogTitle.vue";
+export { default as AlertDialogDescription } from "./AlertDialogDescription.vue";
+export { default as AlertDialogCancel } from "./AlertDialogCancel.vue";
+export { default as AlertDialogAction } from "./AlertDialogAction.vue";
+`;
+
+const usageImports = `
+import {
+  AlertDialogRoot,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+`;
+
+const usageExample = `
+<AlertDialogRoot>
+  <AlertDialogTrigger>Delete account</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+    <div class="flex justify-end gap-2 mt-4">
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction @click="deleteAccount">Continue</AlertDialogAction>
+    </div>
+  </AlertDialogContent>
+</AlertDialogRoot>
+`;
+---
+
+<DocsLayout title="Alert Dialog | Cosmic UI">
+  <Wrapper>
+    <div>
+      <Title>Alert Dialog</Title>
+      <Subtitle>
+        A modal dialog that interrupts the user with important content and
+        expects a response.
+      </Subtitle>
+      <DocsLinks component="dialog" framework="vue" />
+      <Preview>
+        <AlertDialogDemo client:load slot="preview" />
+        <PreviewCode slot="code" code={previewCode} />
+      </Preview>
+    </div>
+    <div id="installation">
+      <SectionTitle>Installation</SectionTitle>
+      <InstallCommand component="alert-dialog" />
+      <SectionContent>Install the following dependencies:</SectionContent>
+      <InstallPackage>add @zag-js/dialog @zag-js/vue</InstallPackage>
+      <SectionContent>
+        Built on the same Zag.js dialog machine as{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Dialog</span>{" "}
+        (there's no separate alert-dialog machine - Zag ships one dialog
+        machine with a{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">role</span>{" "}
+        option), just with{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">role: "alertdialog"</span>{" "}
+        and outside-click/Escape dismissal turned off by default, since an
+        alert dialog is meant to force an explicit choice.{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">AlertDialogAction</span>{" "}
+        runs your handler first, then closes the dialog through the same
+        close-trigger the machine gives{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">AlertDialogCancel</span> -
+        call{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">event.preventDefault()</span>{" "}
+        in your handler to keep it open instead. The plain border shown here
+        is a placeholder; swap it for the{" "}
+        <span class="bg-foreground/15 px-1.5 py-px rounded-md">Frame</span>{" "}
+        primitive later. Vue SFCs can't export multiple components from one
+        file, so Alert Dialog is a folder instead of a single file &mdash;
+        copy all of it into your project.
+      </SectionContent>
+      <PreviewCode title="components/ui/alert-dialog/context.ts" code={contextSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogRoot.vue" code={rootSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogTrigger.vue" code={triggerSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogContent.vue" code={contentSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogTitle.vue" code={titleSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogDescription.vue" code={descriptionSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogCancel.vue" code={cancelSource} />
+      <PreviewCode title="components/ui/alert-dialog/AlertDialogAction.vue" code={actionSource} />
+      <PreviewCode title="components/ui/alert-dialog/index.ts" code={indexSource} />
+      <SectionContent>Update the import paths to match your project setup.</SectionContent>
+    </div>
+    <div id="usage">
+      <SectionTitle>Usage</SectionTitle>
+      <PreviewCode code={usageImports} />
+      <PreviewCode code={usageExample} />
+    </div>
+  </Wrapper>
+  <TocMenu>
+    <a class="hover:text-foreground py-1" href="#installation">Installation</a>
+    <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+  </TocMenu>
+</DocsLayout>
