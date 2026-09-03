@@ -5,6 +5,7 @@ import Subtitle from "@/components/docs/Subtitle.astro";
 import ComponentCard from "@/components/docs/ComponentCard.astro";
 import ComponentGrid from "@/components/docs/ComponentGrid.astro";
 import { FrameworkSwitcher } from "@/components/FrameworkSwitcher";
+import { Button } from "@/components/ui/button";
 
 // Astro's client:* directives need the JSX tag to be an identifier bound
 // directly by a static `import` - not a loop variable, not a destructured
@@ -88,7 +89,32 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
 
 <BaseLayout>
   <div class="mt-30 font-roboto text-base min-h-screen">
-    <div class="p-7 sm:p-10 lg:px-20 lg:py-14 border border-primary/20 bg-primary/5">
+    <section class="px-7 sm:px-10 lg:px-20 lg:grid lg:grid-cols-2 lg:gap-10">
+      <div class="flex flex-col gap-6 max-w-xl">
+        <h1 class="text-4xl sm:text-5xl leading-[1.05] font-bold text-shadow-lg text-shadow-primary">
+          <span class="block">Ready-to-use</span>
+          <span class="block">Futuristic</span>
+          <span class="block">UI components</span>
+        </h1>
+        <p class="text-base md:text-lg opacity-70">
+          A curated set of futuristic UI components — reusable, customizable,
+          and framework-friendly.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 mt-4">
+          <a href="/docs">
+            <Button client:load className="w-64 sm:w-56">Get Started</Button>
+          </a>
+          <a href="#components">
+            <Button client:load variant="accent" className="w-64 sm:w-56">
+              Browse Components
+            </Button>
+          </a>
+        </div>
+      </div>
+      {/* Right column is deliberately empty - breathing room next to the
+          hero text rather than a second piece of content. */}
+    </section>
+    <div id="components" class="mt-24 p-7 sm:p-10 lg:px-20 lg:py-14 border border-primary/20 bg-primary/5">
       <div class="flex flex-wrap items-end justify-between gap-6">
         <div>
           <Title>Components</Title>
@@ -301,6 +327,28 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
             <NumberInputDemoVue client:visible slot="preview" />
           </ComponentCard>
         </ComponentGrid>
+      </div>
+    </div>
+    {/*
+      Giant background wordmark, not a real heading - aria-hidden and
+      select-none because it's decoration, not content a screen reader or a
+      Ctrl+F search should ever land on. Outline-only via -webkit-text-stroke
+      (no Tailwind utility for stroke-without-fill exists) with the fill set
+      transparent, at the same primary color/opacity already used for every
+      border on the site rather than a new one-off color.
+
+      The "cut off by the window" look is a fixed-height, overflow-hidden
+      wrapper shorter than the text's own line-height, not anything tied to
+      actual scroll position - render height stays identical regardless of
+      viewport height, where clipping against the real document edge would
+      make the crop point different on every screen.
+    */}
+    <div aria-hidden="true" class="mt-24 h-14 sm:h-20 lg:h-28 overflow-hidden select-none opacity-20">
+      <div
+        class="text-center font-orbitron font-black leading-none whitespace-nowrap"
+        style="font-size: 15vw; -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
+      >
+        COSMIC UI
       </div>
     </div>
   </div>
