@@ -343,17 +343,24 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
       viewport height, where clipping against the real document edge would
       make the crop point different on every screen.
 
-      font-size is min(15vw, 15rem), not plain vw: BaseLayout's outer
-      container caps out around 1472px wide (Tailwind's `container` utility
-      stops growing past a breakpoint), but unclamped vw keeps scaling with
-      the raw viewport - past ~1550px wide the text outgrew that cap and
-      the trailing "I" started getting clipped by this wrapper's own
-      overflow-hidden before the eye ever got to see the vertical crop.
+      Breaks out of BaseLayout's container (which caps around 1472px wide)
+      with the w-screen/left-1/2/-translate-x-1/2 trick, rather than
+      capping font-size to fit inside that width like earlier attempts
+      did. There's no reason a decorative, aria-hidden element should be
+      bound by the same max-width that keeps body text readable - and
+      once its box is genuinely the full viewport, plain vw is safe at
+      any width with no min() ceiling needed: "COSMIC UI" in this font
+      measures out to ~5.83x its own font-size, so 17vw keeps textWidth
+      at ~0.99x the viewport - just under, at every viewport, not only
+      below whatever px value a cap happened to be set to.
     */}
-    <div aria-hidden="true" class="mt-24 h-28 sm:h-40 lg:h-48 overflow-hidden select-none opacity-20">
+    <div
+      aria-hidden="true"
+      class="relative left-1/2 -translate-x-1/2 w-screen mt-24 h-28 sm:h-40 lg:h-48 overflow-hidden select-none opacity-20"
+    >
       <div
         class="text-center font-orbitron font-black leading-none whitespace-nowrap"
-        style="font-size: min(16.5vw, 15.625rem); -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
+        style="font-size: 15.5vw; -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
       >
         COSMIC UI
       </div>
