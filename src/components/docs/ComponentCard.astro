@@ -40,57 +40,64 @@ const ROW_SPAN = {
 ---
 
 <div
-  data-slug={slug}
-  data-span={`${cols}x${rows}`}
-  class:list={[
-    "border bg-primary/5 border-primary/20 backdrop-blur-md h-full flex flex-col overflow-hidden",
-    COL_SPAN[cols],
-    ROW_SPAN[rows],
-  ]}
+  class:list={["flex flex-col items-start gap-2 h-full", COL_SPAN[cols], ROW_SPAN[rows]]}
 >
-  {/*
-    Deliberately not a link: several demos (Switch, Dialog trigger, Menu,
-    NumberInput's +/- buttons, etc.) are interactive by click, and wrapping
-    them in an <a> would hijack that click into a navigation instead of
-    letting the demo actually work.
+  {/* Title lives outside the card now, sized to its own text (not the
+      card's width) - `items-start` on the flex-col parent above is what
+      keeps it from stretching to fill the column like a block child
+      normally would. */}
+  <a
+    href={href}
+    class="border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium hover:text-shadow-lg hover:text-shadow-primary/50 hover:border-primary/40 hover:bg-primary/10 transition-colors"
+  >
+    {label}
+  </a>
+  <div
+    data-slug={slug}
+    data-span={`${cols}x${rows}`}
+    class="relative w-full flex-1 border bg-primary/5 border-primary/20 backdrop-blur-md overflow-hidden"
+  >
+    {/*
+      Deliberately not a link: several demos (Switch, Dialog trigger, Menu,
+      NumberInput's +/- buttons, etc.) are interactive by click, and wrapping
+      them in an <a> would hijack that click into a navigation instead of
+      letting the demo actually work.
 
-    No CSS transform here on purpose, even though these demos were sized for
-    Preview.astro's much larger box and some don't fit at natural size:
-    Frame's setupSvgRenderer (@left4code/svg-renderer) measures its container
-    with getBoundingClientRect(), which reports the post-transform size - an
-    ancestor `scale()` was silently feeding it the wrong width/height and
-    every Frame-backed demo (almost all of them) rendered warped. Same root
-    cause as feedback_gbcr_includes_transform from the animated-zoom case,
-    just triggered by a static transform instead. Sizing a card to its demo
-    via cols/rows is what keeps things from being cropped now; overflow-auto
-    stays as the safety net for a demo that outgrows its declared span (and
-    for mobile, where every card collapses to one narrow column).
-  */}
-  {/*
-    Known limitation of centering here: a demo that outgrows this box overflows
-    equally in both directions, and the half past the start edge can't be
-    scrolled back to. `align-items: safe center` is the fix for that, but
-    Tailwind 4.3.3 has no utility for it (items-safe-center compiles to
-    nothing, silently dropping the centering), so this stays plain centering.
-    Only reachable on mobile, where a card is one narrow column - which is why
-    the cols/rows spans are sized to make overflow the exception, not the norm.
-  */}
-  <div class="flex-1 flex items-center justify-center overflow-auto p-5">
-    <slot name="preview" />
-  </div>
-  <div class="flex items-center justify-between px-4 py-3 border-t border-primary/20">
-    <a
-      href={href}
-      class="font-medium text-sm hover:text-shadow-lg hover:text-shadow-primary/50"
-    >
-      {label}
-    </a>
+      No CSS transform here on purpose, even though these demos were sized for
+      Preview.astro's much larger box and some don't fit at natural size:
+      Frame's setupSvgRenderer (@left4code/svg-renderer) measures its container
+      with getBoundingClientRect(), which reports the post-transform size - an
+      ancestor `scale()` was silently feeding it the wrong width/height and
+      every Frame-backed demo (almost all of them) rendered warped. Same root
+      cause as feedback_gbcr_includes_transform from the animated-zoom case,
+      just triggered by a static transform instead. Sizing a card to its demo
+      via cols/rows is what keeps things from being cropped now; overflow-auto
+      stays as the safety net for a demo that outgrows its declared span (and
+      for mobile, where every card collapses to one narrow column).
+    */}
+    {/*
+      Known limitation of centering here: a demo that outgrows this box overflows
+      equally in both directions, and the half past the start edge can't be
+      scrolled back to. `align-items: safe center` is the fix for that, but
+      Tailwind 4.3.3 has no utility for it (items-safe-center compiles to
+      nothing, silently dropping the centering), so this stays plain centering.
+      Only reachable on mobile, where a card is one narrow column - which is why
+      the cols/rows spans are sized to make overflow the exception, not the norm.
+    */}
+    <div class="size-full flex items-center justify-center overflow-auto p-5">
+      <slot name="preview" />
+    </div>
+    {/* Icon-only, floated over the preview rather than in a footer bar -
+        opaque background + border so it stays legible over demo content
+        instead of blending into whatever's rendered underneath it (Alert's
+        own close trigger sits in this same corner, which is exactly the
+        case this is guarding against). */}
     <button
       type="button"
       data-copy-btn
       data-copy-text={installCommand}
       aria-label={`Copy install command for ${label}`}
-      class="cursor-pointer opacity-70 hover:opacity-100"
+      class="absolute top-2 right-2 cursor-pointer p-1.5 border border-primary/20 bg-background/80 backdrop-blur-sm opacity-70 hover:opacity-100"
     >
       <Icon name="clipboard" data-icon-clipboard class="size-4 stroke-1 fill-foreground/10" />
       <Icon name="check" data-icon-check class="hidden size-4 stroke-1 fill-foreground/10" />
