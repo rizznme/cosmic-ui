@@ -82,7 +82,7 @@ export function SiteChrome() {
                 </a>
                 <a
                   className="hover:text-shadow-lg hover:text-shadow-primary/50"
-                  href="/"
+                  href="/components"
                 >
                   Components
                 </a>

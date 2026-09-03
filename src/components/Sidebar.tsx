@@ -41,6 +41,7 @@ export const docLinks: { group: string; items: DocLink[] }[] = [
   {
     group: "Components",
     items: [
+      { slug: "/components", label: "Browse All", absolute: true },
       { slug: "frame", label: "Frame" },
       { slug: "menu", label: "Menu" },
       { slug: "alert", label: "Alert" },
