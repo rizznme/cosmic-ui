@@ -273,6 +273,34 @@ const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
 
         var svgs = document.querySelectorAll("svg[data-frame-paths]");
         for (var i = 0; i < svgs.length; i++) drawFrame(svgs[i]);
+
+        // A frame whose box width comes from its own text content (the
+        // topbar nav pill, sized around "Docs Components Colors" in
+        // font-orbitron) can get measured here before that font has
+        // swapped in, painting it at the fallback font's narrower width -
+        // this is the "right side looks short, then snaps to the correct
+        // width a moment later" flicker reported on the nav pill.
+        //
+        // Two races, verified separately with Playwright by delaying the
+        // font and the framework bundle in turn: if hydration finishes
+        // before the font swaps in, setupSvgRenderer's own ResizeObserver
+        // catches the resulting resize and self-corrects - already worked
+        // before this change, nothing to do there. But if the font swaps
+        // in *before* hydration, this stand-in is still the only thing on
+        // screen and nothing was watching for that resize; confirmed the
+        // width otherwise stayed wrong for the whole gap up to hydration
+        // in that ordering. This re-measures once fonts.ready resolves,
+        // skipping any svg that's already handed off (its real <path>s
+        // are already correct via the ResizeObserver above, and
+        // redrawing behind them would just paint a stale background no
+        // one needs).
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            for (var j = 0; j < svgs.length; j++) {
+              if (!svgs[j].querySelector("path")) drawFrame(svgs[j]);
+            }
+          });
+        }
       })();
     </script>
   </body>
