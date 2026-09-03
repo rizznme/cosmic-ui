@@ -1,0 +1,385 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Title from "@/components/docs/Title.astro";
+import Subtitle from "@/components/docs/Subtitle.astro";
+import ComponentCard from "@/components/docs/ComponentCard.astro";
+import ComponentGrid from "@/components/docs/ComponentGrid.astro";
+import { FrameworkSwitcher } from "@/components/FrameworkSwitcher";
+
+// Astro's client:* directives need the JSX tag to be an identifier bound
+// directly by a static `import` - not a loop variable, not a destructured
+// object/array property, no indirection at all. Tried all three (an
+// import.meta.glob lookup, a Record<string, Component> keyed by slug, a
+// plain array of imports mapped over) and every one failed the exact same
+// way at build time: "NoMatchingImport: Could not render `Demo`". So this
+// list is written out by hand instead of generated from docLinks, and its
+// order is not the sidebar's. Dense packing only backfills a hole with a card
+// that comes *after* it, so small cards have to stay available late or the
+// leftover cells strand themselves mid-grid. Sorting big-first satisfies that
+// but stacks every 1x1 in a dull block at the bottom, so instead the two sizes
+// alternate roughly two-and-two, with the last three 1x1s held back as the
+// final mop-up. Measured: same 18 rows and same 3 leftover cells at the end as
+// a strict big-first sort, but 8 rows mixing sizes instead of 1.
+//
+// When adding a card, drop it near cards of its own size rather than at the
+// end, and leave the trailing 1x1s trailing.
+import { AccordionDemo } from "@/components/demos/react/accordion";
+import { AlertDialogDemo } from "@/components/demos/react/alert-dialog";
+import { AlertDemo } from "@/components/demos/react/alert";
+import { AvatarDemo } from "@/components/demos/react/avatar";
+import { BreadcrumbDemo } from "@/components/demos/react/breadcrumb";
+import { ButtonGroupDemo } from "@/components/demos/react/button-group";
+import { ButtonDemo } from "@/components/demos/react/button";
+import { Button01Demo } from "@/components/demos/react/button-01";
+import { Button02Demo } from "@/components/demos/react/button-02";
+import { Button03Demo } from "@/components/demos/react/button-03";
+import { CalendarDemo } from "@/components/demos/react/calendar";
+import { ChartDemo } from "@/components/demos/react/chart";
+import { CheckboxDemo } from "@/components/demos/react/checkbox";
+import { ComboboxDemo } from "@/components/demos/react/combobox";
+import { DatepickerDemo } from "@/components/demos/react/datepicker";
+import { DaterangepickerDemo } from "@/components/demos/react/daterangepicker";
+import { DialogDemo } from "@/components/demos/react/dialog";
+import { FrameDemo } from "@/components/demos/react/frame";
+import { InputDemo } from "@/components/demos/react/input";
+import { MenuDemo } from "@/components/demos/react/menu";
+import { NumberInputDemo } from "@/components/demos/react/number-input";
+import { PaginationDemo } from "@/components/demos/react/pagination";
+import { RadioGroupDemo } from "@/components/demos/react/radio-group";
+import { SelectDemo } from "@/components/demos/react/select";
+import { SheetDemo } from "@/components/demos/react/sheet";
+import { SwitchDemo } from "@/components/demos/react/switch";
+import { TableDemo } from "@/components/demos/react/table";
+import { TabsDemo } from "@/components/demos/react/tabs";
+import { TextareaDemo } from "@/components/demos/react/textarea";
+import { ToastDemo } from "@/components/demos/react/toast";
+
+import AccordionDemoVue from "@/components/demos/vue/accordion.vue";
+import AlertDialogDemoVue from "@/components/demos/vue/alert-dialog.vue";
+import AlertDemoVue from "@/components/demos/vue/alert.vue";
+import AvatarDemoVue from "@/components/demos/vue/avatar.vue";
+import BreadcrumbDemoVue from "@/components/demos/vue/breadcrumb.vue";
+import ButtonGroupDemoVue from "@/components/demos/vue/button-group.vue";
+import ButtonDemoVue from "@/components/demos/vue/button.vue";
+import Button01DemoVue from "@/components/demos/vue/button-01.vue";
+import Button02DemoVue from "@/components/demos/vue/button-02.vue";
+import Button03DemoVue from "@/components/demos/vue/button-03.vue";
+import CalendarDemoVue from "@/components/demos/vue/calendar.vue";
+import ChartDemoVue from "@/components/demos/vue/chart.vue";
+import CheckboxDemoVue from "@/components/demos/vue/checkbox.vue";
+import ComboboxDemoVue from "@/components/demos/vue/combobox.vue";
+import DatepickerDemoVue from "@/components/demos/vue/datepicker.vue";
+import DaterangepickerDemoVue from "@/components/demos/vue/daterangepicker.vue";
+import DialogDemoVue from "@/components/demos/vue/dialog.vue";
+import FrameDemoVue from "@/components/demos/vue/frame.vue";
+import InputDemoVue from "@/components/demos/vue/input.vue";
+import MenuDemoVue from "@/components/demos/vue/menu.vue";
+import NumberInputDemoVue from "@/components/demos/vue/number-input.vue";
+import PaginationDemoVue from "@/components/demos/vue/pagination.vue";
+import RadioGroupDemoVue from "@/components/demos/vue/radio-group.vue";
+import SelectDemoVue from "@/components/demos/vue/select.vue";
+import SheetDemoVue from "@/components/demos/vue/sheet.vue";
+import SwitchDemoVue from "@/components/demos/vue/switch.vue";
+import TableDemoVue from "@/components/demos/vue/table.vue";
+import TabsDemoVue from "@/components/demos/vue/tabs.vue";
+import TextareaDemoVue from "@/components/demos/vue/textarea.vue";
+import ToastDemoVue from "@/components/demos/vue/toast.vue";
+---
+
+<BaseLayout title="Components | Cosmic UI">
+  <div class="mt-30 font-roboto text-base min-h-screen">
+    <div class="p-7 sm:p-10 lg:px-20 lg:py-14 border border-primary/20 bg-primary/5">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <Title>Components</Title>
+          <Subtitle>
+            Every component, live. Click Copy for the install command, or click a
+            name to read its docs.
+          </Subtitle>
+        </div>
+        <FrameworkSwitcher client:load currentPath="/components" />
+      </div>
+      {/*
+        Reads ?q= on load (this is a fully static build, no per-request
+        server, so there's no build-time way to pre-render the filtered
+        state - has to happen client-side) and re-applies it live as you
+        type, syncing the URL via replaceState so the result stays
+        shareable/bookmarkable without a full navigation.
+      */}
+      <div class="relative mt-8 max-w-md">
+        <input
+          id="component-search"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search components..."
+          class="w-full border border-primary/20 bg-primary/5 px-4 py-2.5 outline-none focus:border-primary/50 placeholder:text-foreground/40"
+        />
+      </div>
+      <p id="no-results" hidden class="mt-10 opacity-60">
+        No components match your search.
+      </p>
+      {/*
+        Card sizes aren't guesses - each demo's natural size was measured in
+        the browser and rounded up to the smallest span that clears it.
+        Re-measure before changing one; a span that's too small silently
+        turns into a scrollbar inside the card.
+      */}
+      <div data-fw-panel="react" data-pagefind-body data-pagefind-filter="framework:react">
+        <ComponentGrid>
+          <ComponentCard slug="frame" label="Frame" installName="frame" framework="react" cols={2} rows={3}>
+            <FrameDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="alert" label="Alert" installName="alert" framework="react" cols={2} rows={2}>
+            <AlertDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="menu" label="Menu" installName="menu" framework="react">
+            <MenuDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="react">
+            <DialogDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="react" cols={2} rows={3}>
+            <AccordionDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="react" cols={3} rows={2}>
+            <TabsDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="toast" label="Toast" installName="toast" framework="react">
+            <ToastDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="react">
+            <Button01Demo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2}>
+            <ButtonDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react" rows={2}>
+            <RadioGroupDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="react">
+            <Button02Demo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="react">
+            <Button03Demo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="chart" label="Chart" installName="chart" framework="react" cols={2} rows={2}>
+            <ChartDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="react" cols={2}>
+            <ComboboxDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="input" label="Input" installName="input" framework="react">
+            <InputDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="switch" label="Switch" installName="switch" framework="react">
+            <SwitchDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="select" label="Select" installName="select" framework="react" cols={2}>
+            <SelectDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="react" cols={2}>
+            <BreadcrumbDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="react">
+            <TextareaDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="react">
+            <CheckboxDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="react" cols={2}>
+            <ButtonGroupDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="react" cols={2} rows={2}>
+            <CalendarDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="react">
+            <AlertDialogDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="react">
+            <AvatarDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="react" cols={2}>
+            <DaterangepickerDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="react" cols={2}>
+            <PaginationDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="table" label="Table" installName="table" framework="react" cols={4} rows={2}>
+            <TableDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="react">
+            <DatepickerDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="react">
+            <SheetDemo client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="react">
+            <NumberInputDemo client:visible slot="preview" />
+          </ComponentCard>
+        </ComponentGrid>
+      </div>
+      <div data-fw-panel="vue" data-pagefind-body data-pagefind-filter="framework:vue" hidden>
+        <ComponentGrid>
+          <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue" cols={2} rows={3}>
+            <FrameDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue" cols={2} rows={2}>
+            <AlertDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="menu" label="Menu" installName="menu" framework="vue">
+            <MenuDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="vue">
+            <DialogDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue" cols={2} rows={3}>
+            <AccordionDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue" cols={3} rows={2}>
+            <TabsDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue">
+            <ToastDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="vue">
+            <Button01DemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2}>
+            <ButtonDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue" rows={2}>
+            <RadioGroupDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="vue">
+            <Button02DemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="vue">
+            <Button03DemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue" cols={2} rows={2}>
+            <ChartDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue" cols={2}>
+            <ComboboxDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="input" label="Input" installName="input" framework="vue">
+            <InputDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="switch" label="Switch" installName="switch" framework="vue">
+            <SwitchDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="select" label="Select" installName="select" framework="vue" cols={2}>
+            <SelectDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="vue" cols={2}>
+            <BreadcrumbDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="vue">
+            <TextareaDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="vue">
+            <CheckboxDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue" cols={2}>
+            <ButtonGroupDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue" cols={2} rows={2}>
+            <CalendarDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="vue">
+            <AlertDialogDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="vue">
+            <AvatarDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue" cols={2}>
+            <DaterangepickerDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue" cols={2}>
+            <PaginationDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="table" label="Table" installName="table" framework="vue" cols={4} rows={2}>
+            <TableDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="vue">
+            <DatepickerDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="vue">
+            <SheetDemoVue client:visible slot="preview" />
+          </ComponentCard>
+          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="vue">
+            <NumberInputDemoVue client:visible slot="preview" />
+          </ComponentCard>
+        </ComponentGrid>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Same framework-visibility mechanism as home: both card sets render up
+  // front, this only flips which is shown via the shared framework-store.
+  import { getFramework, subscribe } from "@/lib/framework-store";
+
+  function applyFramework(fw: string) {
+    document.querySelectorAll<HTMLElement>("[data-fw-panel]").forEach((el) => {
+      el.hidden = el.dataset.fwPanel !== fw;
+    });
+  }
+
+  applyFramework(getFramework());
+  subscribe(() => applyFramework(getFramework()));
+
+  // Search: family-precise first, substring fallback - see the plan/commit
+  // message for why a plain substring pass alone can't be the whole story.
+  // "button" has to exclude "Button Group" even though that label contains
+  // the word, which only a slug-shaped check (not a text-contains check)
+  // can tell apart.
+  function escapeRegExp(s: string) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  const searchInput = document.querySelector<HTMLInputElement>("#component-search");
+  const noResults = document.querySelector<HTMLElement>("#no-results");
+
+  function applyFilter(raw: string) {
+    const q = raw.trim().toLowerCase();
+    const cards = document.querySelectorAll<HTMLElement>("[data-slug]");
+
+    if (!q) {
+      cards.forEach((c) => (c.hidden = false));
+      if (noResults) noResults.hidden = true;
+      return;
+    }
+
+    const familyRe = new RegExp(`^${escapeRegExp(q)}(-\\d{2})?$`);
+    let anyFamilyMatch = false;
+    cards.forEach((c) => {
+      if (familyRe.test((c.dataset.slug ?? "").toLowerCase())) anyFamilyMatch = true;
+    });
+
+    let visible = 0;
+    cards.forEach((c) => {
+      const slug = (c.dataset.slug ?? "").toLowerCase();
+      const label = (c.dataset.label ?? "").toLowerCase();
+      const show = anyFamilyMatch ? familyRe.test(slug) : label.includes(q);
+      c.hidden = !show;
+      if (show) visible++;
+    });
+    if (noResults) noResults.hidden = visible > 0;
+  }
+
+  const initialQuery = new URLSearchParams(location.search).get("q") ?? "";
+  if (searchInput) searchInput.value = initialQuery;
+  applyFilter(initialQuery);
+
+  searchInput?.addEventListener("input", (e) => {
+    const value = (e.target as HTMLInputElement).value;
+    applyFilter(value);
+    const url = new URL(location.href);
+    if (value) url.searchParams.set("q", value);
+    else url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+  });
+</script>
