@@ -342,11 +342,18 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
       actual scroll position - render height stays identical regardless of
       viewport height, where clipping against the real document edge would
       make the crop point different on every screen.
+
+      font-size is min(15vw, 15rem), not plain vw: BaseLayout's outer
+      container caps out around 1472px wide (Tailwind's `container` utility
+      stops growing past a breakpoint), but unclamped vw keeps scaling with
+      the raw viewport - past ~1550px wide the text outgrew that cap and
+      the trailing "I" started getting clipped by this wrapper's own
+      overflow-hidden before the eye ever got to see the vertical crop.
     */}
-    <div aria-hidden="true" class="mt-24 h-14 sm:h-20 lg:h-28 overflow-hidden select-none opacity-20">
+    <div aria-hidden="true" class="mt-24 h-24 sm:h-32 lg:h-40 overflow-hidden select-none opacity-20">
       <div
         class="text-center font-orbitron font-black leading-none whitespace-nowrap"
-        style="font-size: 15vw; -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
+        style="font-size: min(15vw, 15rem); -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
       >
         COSMIC UI
       </div>
