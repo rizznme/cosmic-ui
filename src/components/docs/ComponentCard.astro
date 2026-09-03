@@ -11,10 +11,29 @@ interface Props {
   cols?: 1 | 2 | 3 | 4;
   /** How many grid rows this card occupies (see ComponentGrid.astro). */
   rows?: 1 | 2 | 3 | 4;
+  /**
+   * "docs" (default) links straight to this component's docs page, same as
+   * always. "search" is for home's condensed grid: it links to the full
+   * gallery at /components pre-filtered to this card's label instead, since
+   * home only shows one card per component family (see button's 3 variants)
+   * and the search page is where the actual variant picking happens.
+   */
+  linkTo?: "docs" | "search";
 }
 
-const { slug, label, installName, framework, cols = 1, rows = 1 } = Astro.props;
-const href = `/docs/${framework}/${slug}`;
+const {
+  slug,
+  label,
+  installName,
+  framework,
+  cols = 1,
+  rows = 1,
+  linkTo = "docs",
+} = Astro.props;
+const href =
+  linkTo === "search"
+    ? `/components?q=${encodeURIComponent(label)}`
+    : `/docs/${framework}/${slug}`;
 const installCommand = `npx @left4code/cosmic-ui-cli@latest add ${installName}`;
 
 // Spelled out as whole literal class strings on purpose: Tailwind scans source
@@ -40,8 +59,14 @@ const ROW_SPAN = {
 ---
 
 <div
+  data-slug={slug}
+  data-label={label}
   class:list={["flex flex-col items-start gap-2 h-full", COL_SPAN[cols], ROW_SPAN[rows]]}
 >
+  {/* data-slug/data-label live on this outer wrapper (not the card below)
+      because it's the whole unit - title link plus card - that the
+      /components search page hides or shows as one piece. Nothing in the
+      real codebase reads these off the inner box specifically. */}
   {/* Title lives outside the card now, sized to its own text (not the
       card's width) - `items-start` on the flex-col parent above is what
       keeps it from stretching to fill the column like a block child
@@ -53,7 +78,6 @@ const ROW_SPAN = {
     {label}
   </a>
   <div
-    data-slug={slug}
     data-span={`${cols}x${rows}`}
     class="relative w-full flex-1 border bg-primary/5 border-primary/20 backdrop-blur-md overflow-hidden"
   >
