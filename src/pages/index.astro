@@ -31,9 +31,6 @@ import { AvatarDemo } from "@/components/demos/react/avatar";
 import { BreadcrumbDemo } from "@/components/demos/react/breadcrumb";
 import { ButtonGroupDemo } from "@/components/demos/react/button-group";
 import { ButtonDemo } from "@/components/demos/react/button";
-import { Button01Demo } from "@/components/demos/react/button-01";
-import { Button02Demo } from "@/components/demos/react/button-02";
-import { Button03Demo } from "@/components/demos/react/button-03";
 import { CalendarDemo } from "@/components/demos/react/calendar";
 import { ChartDemo } from "@/components/demos/react/chart";
 import { CheckboxDemo } from "@/components/demos/react/checkbox";
@@ -62,9 +59,6 @@ import AvatarDemoVue from "@/components/demos/vue/avatar.vue";
 import BreadcrumbDemoVue from "@/components/demos/vue/breadcrumb.vue";
 import ButtonGroupDemoVue from "@/components/demos/vue/button-group.vue";
 import ButtonDemoVue from "@/components/demos/vue/button.vue";
-import Button01DemoVue from "@/components/demos/vue/button-01.vue";
-import Button02DemoVue from "@/components/demos/vue/button-02.vue";
-import Button03DemoVue from "@/components/demos/vue/button-03.vue";
 import CalendarDemoVue from "@/components/demos/vue/calendar.vue";
 import ChartDemoVue from "@/components/demos/vue/chart.vue";
 import CheckboxDemoVue from "@/components/demos/vue/checkbox.vue";
@@ -142,188 +136,170 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
       */}
       <div data-fw-panel="react" data-pagefind-body data-pagefind-filter="framework:react">
         <ComponentGrid>
-          <ComponentCard slug="frame" label="Frame" installName="frame" framework="react" cols={2} rows={3}>
+          <ComponentCard slug="frame" label="Frame" installName="frame" framework="react" cols={2} rows={3} linkTo="search">
             <FrameDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="alert" label="Alert" installName="alert" framework="react" cols={2} rows={2}>
+          <ComponentCard slug="alert" label="Alert" installName="alert" framework="react" cols={2} rows={2} linkTo="search">
             <AlertDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="menu" label="Menu" installName="menu" framework="react">
+          <ComponentCard slug="menu" label="Menu" installName="menu" framework="react" linkTo="search">
             <MenuDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="react">
+          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="react" linkTo="search">
             <DialogDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="react" cols={2} rows={3}>
+          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="react" cols={2} rows={3} linkTo="search">
             <AccordionDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="react" cols={3} rows={2}>
+          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="react" cols={3} rows={2} linkTo="search">
             <TabsDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="toast" label="Toast" installName="toast" framework="react">
+          <ComponentCard slug="toast" label="Toast" installName="toast" framework="react" linkTo="search">
             <ToastDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="react">
-            <Button01Demo client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2}>
+          <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2} linkTo="search">
             <ButtonDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react" rows={2}>
+          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react" rows={2} linkTo="search">
             <RadioGroupDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="react">
-            <Button02Demo client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="react">
-            <Button03Demo client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="chart" label="Chart" installName="chart" framework="react" cols={2} rows={2}>
+          <ComponentCard slug="chart" label="Chart" installName="chart" framework="react" cols={2} rows={2} linkTo="search">
             <ChartDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="react" cols={2}>
+          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="react" cols={2} linkTo="search">
             <ComboboxDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="input" label="Input" installName="input" framework="react">
+          <ComponentCard slug="input" label="Input" installName="input" framework="react" linkTo="search">
             <InputDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="switch" label="Switch" installName="switch" framework="react">
+          <ComponentCard slug="switch" label="Switch" installName="switch" framework="react" linkTo="search">
             <SwitchDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="select" label="Select" installName="select" framework="react" cols={2}>
+          <ComponentCard slug="select" label="Select" installName="select" framework="react" cols={2} linkTo="search">
             <SelectDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="react" cols={2}>
+          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="react" cols={2} linkTo="search">
             <BreadcrumbDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="react">
+          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="react" linkTo="search">
             <TextareaDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="react">
+          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="react" linkTo="search">
             <CheckboxDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="react" cols={2}>
+          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="react" cols={2} linkTo="search">
             <ButtonGroupDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="react" cols={2} rows={2}>
+          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="react" cols={2} rows={2} linkTo="search">
             <CalendarDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="react">
+          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="react" linkTo="search">
             <AlertDialogDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="react">
+          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="react" linkTo="search">
             <AvatarDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="react" cols={2}>
+          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="react" cols={2} linkTo="search">
             <DaterangepickerDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="react" cols={2}>
+          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="react" cols={2} linkTo="search">
             <PaginationDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="table" label="Table" installName="table" framework="react" cols={4} rows={2}>
+          <ComponentCard slug="table" label="Table" installName="table" framework="react" cols={4} rows={2} linkTo="search">
             <TableDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="react">
+          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="react" linkTo="search">
             <DatepickerDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="react">
+          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="react" linkTo="search">
             <SheetDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="react">
+          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="react" linkTo="search">
             <NumberInputDemo client:visible slot="preview" />
           </ComponentCard>
         </ComponentGrid>
       </div>
       <div data-fw-panel="vue" data-pagefind-body data-pagefind-filter="framework:vue" hidden>
         <ComponentGrid>
-          <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue" cols={2} rows={3}>
+          <ComponentCard slug="frame" label="Frame" installName="frame" framework="vue" cols={2} rows={3} linkTo="search">
             <FrameDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue" cols={2} rows={2}>
+          <ComponentCard slug="alert" label="Alert" installName="alert" framework="vue" cols={2} rows={2} linkTo="search">
             <AlertDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="menu" label="Menu" installName="menu" framework="vue">
+          <ComponentCard slug="menu" label="Menu" installName="menu" framework="vue" linkTo="search">
             <MenuDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="vue">
+          <ComponentCard slug="dialog" label="Dialog" installName="dialog" framework="vue" linkTo="search">
             <DialogDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue" cols={2} rows={3}>
+          <ComponentCard slug="accordion" label="Accordion" installName="accordion" framework="vue" cols={2} rows={3} linkTo="search">
             <AccordionDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue" cols={3} rows={2}>
+          <ComponentCard slug="tabs" label="Tabs" installName="tabs" framework="vue" cols={3} rows={2} linkTo="search">
             <TabsDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue">
+          <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue" linkTo="search">
             <ToastDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-01" label="Button · Outline" installName="button-01" framework="vue">
-            <Button01DemoVue client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2}>
+          <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2} linkTo="search">
             <ButtonDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue" rows={2}>
+          <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue" rows={2} linkTo="search">
             <RadioGroupDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-02" label="Button · Ghost" installName="button-02" framework="vue">
-            <Button02DemoVue client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="button-03" label="Button · Solid" installName="button-03" framework="vue">
-            <Button03DemoVue client:visible slot="preview" />
-          </ComponentCard>
-          <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue" cols={2} rows={2}>
+          <ComponentCard slug="chart" label="Chart" installName="chart" framework="vue" cols={2} rows={2} linkTo="search">
             <ChartDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue" cols={2}>
+          <ComponentCard slug="combobox" label="Combobox" installName="combobox" framework="vue" cols={2} linkTo="search">
             <ComboboxDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="input" label="Input" installName="input" framework="vue">
+          <ComponentCard slug="input" label="Input" installName="input" framework="vue" linkTo="search">
             <InputDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="switch" label="Switch" installName="switch" framework="vue">
+          <ComponentCard slug="switch" label="Switch" installName="switch" framework="vue" linkTo="search">
             <SwitchDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="select" label="Select" installName="select" framework="vue" cols={2}>
+          <ComponentCard slug="select" label="Select" installName="select" framework="vue" cols={2} linkTo="search">
             <SelectDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="vue" cols={2}>
+          <ComponentCard slug="breadcrumb" label="Breadcrumb" installName="breadcrumb" framework="vue" cols={2} linkTo="search">
             <BreadcrumbDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="vue">
+          <ComponentCard slug="textarea" label="Textarea" installName="textarea" framework="vue" linkTo="search">
             <TextareaDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="vue">
+          <ComponentCard slug="checkbox" label="Checkbox" installName="checkbox" framework="vue" linkTo="search">
             <CheckboxDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue" cols={2}>
+          <ComponentCard slug="button-group" label="Button Group" installName="button-group" framework="vue" cols={2} linkTo="search">
             <ButtonGroupDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue" cols={2} rows={2}>
+          <ComponentCard slug="calendar" label="Calendar" installName="date-picker" framework="vue" cols={2} rows={2} linkTo="search">
             <CalendarDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="vue">
+          <ComponentCard slug="alert-dialog" label="Alert Dialog" installName="alert-dialog" framework="vue" linkTo="search">
             <AlertDialogDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="vue">
+          <ComponentCard slug="avatar" label="Avatar" installName="avatar" framework="vue" linkTo="search">
             <AvatarDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue" cols={2}>
+          <ComponentCard slug="daterangepicker" label="Daterangepicker" installName="date-picker" framework="vue" cols={2} linkTo="search">
             <DaterangepickerDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue" cols={2}>
+          <ComponentCard slug="pagination" label="Pagination" installName="pagination" framework="vue" cols={2} linkTo="search">
             <PaginationDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="table" label="Table" installName="table" framework="vue" cols={4} rows={2}>
+          <ComponentCard slug="table" label="Table" installName="table" framework="vue" cols={4} rows={2} linkTo="search">
             <TableDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="vue">
+          <ComponentCard slug="datepicker" label="Datepicker" installName="date-picker" framework="vue" linkTo="search">
             <DatepickerDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="vue">
+          <ComponentCard slug="sheet" label="Sheet" installName="sheet" framework="vue" linkTo="search">
             <SheetDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="vue">
+          <ComponentCard slug="number-input" label="Number Input" installName="number-input" framework="vue" linkTo="search">
             <NumberInputDemoVue client:visible slot="preview" />
           </ComponentCard>
         </ComponentGrid>
