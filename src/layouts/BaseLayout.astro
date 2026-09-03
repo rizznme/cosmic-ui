@@ -7,11 +7,14 @@ import { SearchPalette } from "@/components/SearchPalette";
 interface Props {
   title?: string;
   description?: string;
+  /** Home page ends on its own flush-to-bottom wordmark instead. */
+  hideCredit?: boolean;
 }
 
 const {
   title = "Cosmic UI - Sci-Fi UI Components for React and Vue",
   description = "A free, open-source library of sci-fi themed UI components for React and Vue. Angular frames, glowing borders, and futuristic HUD styling, ready to drop into your app.",
+  hideCredit = false,
 } = Astro.props;
 
 // Every shared link (X, Reddit, Discord, Slack) renders from these tags. This
@@ -69,25 +72,27 @@ const cfBeaconToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN;
       <div class="container mx-auto px-4 sm:px-0">
         <Sidebar client:load currentPath={Astro.url.pathname} />
         <slot />
-        <div class="text-center text-foreground/60 mt-24 mb-20">
-          Powered by synthetic caffeine &middot; Deployed by{" "}
-          <a
-            href="https://github.com/rizznme"
-            target="_blank"
-            class="font-medium text-foreground/70"
-          >
-            Left4code
-          </a>{" "}
-          &middot; Signal traceable on{" "}
-          <a
-            href="https://github.com/rizznme/cosmic-ui"
-            target="_blank"
-            class="font-medium text-foreground/70"
-          >
-            GitHub
-          </a>
-          .
-        </div>
+        {!hideCredit && (
+          <div class="text-center text-foreground/60 mt-24 mb-20">
+            Powered by synthetic caffeine &middot; Deployed by{" "}
+            <a
+              href="https://github.com/rizznme"
+              target="_blank"
+              class="font-medium text-foreground/70"
+            >
+              Left4code
+            </a>{" "}
+            &middot; Signal traceable on{" "}
+            <a
+              href="https://github.com/rizznme/cosmic-ui"
+              target="_blank"
+              class="font-medium text-foreground/70"
+            >
+              GitHub
+            </a>
+            .
+          </div>
+        )}
       </div>
     </div>
     <script is:inline>
