@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Zap } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
@@ -6,10 +6,8 @@ import { Frame } from "@/components/ui/frame";
 import { Button } from "@/components/ui/button";
 import { setShowMenu } from "@/lib/mobile-menu-store";
 import { setSearchOpen } from "@/lib/search-palette-store";
-import { getFramework, getServerFramework, subscribe } from "@/lib/framework-store";
 
 export function SiteChrome() {
-  const framework = useSyncExternalStore(subscribe, getFramework, getServerFramework);
   // Matches getServerFramework's pattern: a platform-specific label would
   // differ between server and first client render (no navigator during SSR),
   // so start neutral and only swap to the Mac glyph once mounted.
@@ -84,7 +82,7 @@ export function SiteChrome() {
                 </a>
                 <a
                   className="hover:text-shadow-lg hover:text-shadow-primary/50"
-                  href={`/docs/${framework}/components`}
+                  href="/"
                 >
                   Components
                 </a>
