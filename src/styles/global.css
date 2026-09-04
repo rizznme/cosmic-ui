@@ -29,11 +29,7 @@
   --color-destructive-foreground: rgb(255, 255, 255);
   --color-success: var(--color-teal-500);
   --color-success-foreground: rgb(255, 255, 255);
-  --color-background: color-mix(
-    in oklab,
-    var(--color-primary),
-    var(--color-black) 80%
-  );
+  --color-background: #020618;
   --color-foreground: var(--color-white);
 
   --font-orbitron: "Orbitron", sans-serif;
