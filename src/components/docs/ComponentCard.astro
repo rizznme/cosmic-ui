@@ -1,5 +1,6 @@
 ---
 import Icon from "./Icon.astro";
+import { Frame, parsePaths } from "@/components/ui/frame";
 import type { Framework } from "@/lib/framework-store";
 
 interface Props {
@@ -19,6 +20,14 @@ interface Props {
    * and the search page is where the actual variant picking happens.
    */
   linkTo?: "docs" | "search";
+  /**
+   * How many variants this family has on /components (e.g. Button's outline/
+   * ghost/solid, counted the same way that page's own family search would -
+   * see its `familyRe` in components.astro's script). Only worth passing
+   * when it's more than 1: a family of one is the normal case, and calling
+   * that out on every card would be noise rather than information.
+   */
+  count?: number;
 }
 
 const {
@@ -29,6 +38,7 @@ const {
   cols = 1,
   rows = 1,
   linkTo = "docs",
+  count,
 } = Astro.props;
 const href =
   linkTo === "search"
@@ -73,9 +83,27 @@ const ROW_SPAN = {
       normally would. */}
   <a
     href={href}
-    class="border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium hover:text-shadow-lg hover:text-shadow-primary/50 hover:border-primary/40 hover:bg-primary/10 transition-colors"
+    class="relative min-w-[200px] px-3 py-1.5 text-sm font-medium transition-colors hover:text-shadow-lg hover:text-shadow-primary/50 [--color-frame-1-stroke:var(--color-primary)]/20 [--color-frame-1-fill:var(--color-primary)]/5"
   >
-    {label}
+    {/* Frame wrapper is a plain (unpositioned-relative-to-siblings) absolute
+        div, but the text span below is `relative` - same trick Button.tsx
+        uses (its own `[&>span]:relative`) so the text, an in-flow inline
+        sibling, doesn't lose to this by CSS's default stacking order despite
+        coming first in the DOM. */}
+    <div class="absolute inset-0">
+      <Frame
+        client:visible
+        paths={parsePaths(
+          '[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","0","0"],["L","100% - 10","0"],["L","100% - 0","10"],["L","100% - 0","100% - 0"],["L","0","100% - 0"],["L","0","0"]]}]'
+        )}
+      />
+    </div>
+    <span class="relative">
+      {label}
+      {count && count > 1 && (
+        <span class="font-normal opacity-60"> · {count} components</span>
+      )}
+    </span>
   </a>
   <div
     data-span={`${cols}x${rows}`}

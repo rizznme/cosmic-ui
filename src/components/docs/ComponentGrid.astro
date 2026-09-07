@@ -26,8 +26,25 @@
 // so visual order and tab order can disagree. Fine here - each card is a
 // self-contained link plus copy button, and nothing about reading one depends
 // on the card before it.
+
+interface Props {
+  /**
+   * Base column count at the lg breakpoint (see ComponentCard's COL_SPAN,
+   * which clamps a card's span to this). Home's bento packing needs all 4 to
+   * mix big/small cards; /components uses 2 so every card can be the same
+   * uniform size instead - see components.astro.
+   */
+  cols?: 2 | 4;
+}
+
+const { cols = 4 } = Astro.props;
+
+const LG_COLS = {
+  2: "lg:grid-cols-2",
+  4: "lg:grid-cols-4",
+} as const;
 ---
 
-<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[12rem] grid-flow-row-dense">
+<div class:list={["mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6 auto-rows-[12rem] grid-flow-row-dense", LG_COLS[cols]]}>
   <slot />
 </div>

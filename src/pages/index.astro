@@ -94,12 +94,27 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
           A curated set of futuristic UI components — reusable, customizable,
           and framework-friendly.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 mt-10">
+        <div class="flex flex-col sm:flex-row gap-1.5 mt-10">
           <a href="/docs">
-            <Button client:load className="w-64 sm:w-56">Get Started</Button>
+            <Button
+              client:load
+              className="min-w-[230px] ps-8 pe-5 pt-2.5 pb-1.5 font-orbitron"
+              customPaths={[
+                '[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","21","0"],["L","100% - 0","0"],["L","100% - 0","100% - 4"],["L","9","100% - 4"],["L","0","100% - 13"],["L","21","0"]]},{"name":"Layer 2","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","13","100% - 4"],["L","16","100% - 0"],["L","100% - 4","100% - 0"],["L","100% - 4","100% - 4"]]}]',
+              ]}
+            >
+              Get Started
+            </Button>
           </a>
           <a href="#components">
-            <Button client:load variant="accent" className="w-64 sm:w-56">
+            <Button
+              client:load
+              variant="accent"
+              className="min-w-[230px] ps-5 pe-8 pt-2.5 pb-1.5 font-orbitron"
+              customPaths={[
+                '[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","100% - 21","0"],["L","0","0"],["L","0","100% - 4"],["L","100% - 9","100% - 4"],["L","100% - 0","100% - 13"],["L","100% - 21","0"]]},{"name":"Layer 2","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","100% - 13","100% - 4"],["L","100% - 16","100% - 0"],["L","4","100% - 0"],["L","4","100% - 4"]]}]',
+              ]}
+            >
               Browse Components
             </Button>
           </a>
@@ -157,7 +172,7 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
           <ComponentCard slug="toast" label="Toast" installName="toast" framework="react" linkTo="search">
             <ToastDemo client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2} linkTo="search">
+          <ComponentCard slug="button" label="Button" installName="button" framework="react" cols={2} linkTo="search" count={4}>
             <ButtonDemo client:visible slot="preview" />
           </ComponentCard>
           <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="react" rows={2} linkTo="search">
@@ -242,7 +257,7 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
           <ComponentCard slug="toast" label="Toast" installName="toast" framework="vue" linkTo="search">
             <ToastDemoVue client:visible slot="preview" />
           </ComponentCard>
-          <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2} linkTo="search">
+          <ComponentCard slug="button" label="Button" installName="button" framework="vue" cols={2} linkTo="search" count={4}>
             <ButtonDemoVue client:visible slot="preview" />
           </ComponentCard>
           <ComponentCard slug="radio-group" label="Radio Group" installName="radio-group" framework="vue" rows={2} linkTo="search">
@@ -308,10 +323,13 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
     {/*
       Giant background wordmark, not a real heading - aria-hidden and
       select-none because it's decoration, not content a screen reader or a
-      Ctrl+F search should ever land on. Outline-only via -webkit-text-stroke
-      (no Tailwind utility for stroke-without-fill exists) with the fill set
-      transparent, at the same primary color/opacity already used for every
-      border on the site rather than a new one-off color.
+      Ctrl+F search should ever land on. Outline via -webkit-text-stroke (no
+      Tailwind utility for that exists) plus a faint fill - fully transparent
+      fill left the stroke as the only thing distinguishing letter from
+      background, too little contrast to read as "COSMIC UI" rather than
+      stray lines. Both colors are the same --color-primary already used for
+      every border on the site, just mixed to two different opacities rather
+      than introducing a one-off color.
 
       The "cut off by the window" look is a fixed-height, overflow-hidden
       wrapper shorter than the text's own line-height, not anything tied to
@@ -336,7 +354,7 @@ import ToastDemoVue from "@/components/demos/vue/toast.vue";
     >
       <div
         class="text-center font-orbitron font-black leading-none whitespace-nowrap"
-        style="font-size: 15.5vw; -webkit-text-stroke: 1px var(--color-primary); color: transparent;"
+        style="font-size: 15.5vw; -webkit-text-stroke: 1px var(--color-primary); color: color-mix(in oklab, var(--color-primary) 15%, transparent);"
       >
         COSMIC UI
       </div>
