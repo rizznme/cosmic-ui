@@ -34,31 +34,67 @@ function parsePaths(json: string): Paths {
   return parsed;
 }
 
+/**
+ * Several Frames designed together as one composite (e.g. a topbar made of
+ * a left wedge, a pill, a search box, and a right wedge), keyed by name.
+ * Each entry is exactly a `Paths` array, unchanged - a set is just a bundle
+ * of them for convenience, not a different rendering concept: every path's
+ * position is already relative to its own Frame's box (that's what the
+ * "100% - N" expressions mean), never to its siblings, so picking one out
+ * of the set to render is no different than passing that entry as `paths`
+ * directly.
+ */
+type FrameSet = Record<string, Paths>;
+
+const frameSetCache = new Map<string, FrameSet>();
+
+/** Same caching rationale as parsePaths(), for a `frames` bundle instead. */
+function parseFrameSet(json: string): FrameSet {
+  const cached = frameSetCache.get(json);
+  if (cached) return cached;
+
+  if (frameSetCache.size > 200) frameSetCache.clear();
+
+  const parsed = JSON.parse(json) as FrameSet;
+  frameSetCache.set(json, parsed);
+  return parsed;
+}
+
 function Frame({
   className,
   paths,
+  frames,
+  frame,
   enableBackdropBlur,
   enableViewBox,
   ...props
 }: {
-  paths: Paths;
+  /** A single Frame's paths. Omit this and pass `frames` + `frame` instead
+   *  to pick one out of a set designed together. */
+  paths?: Paths;
+  /** A bundle from parseFrameSet()/exported by the editor's "Export all
+   *  Frames" - pair with `frame` to pick which one this instance renders. */
+  frames?: FrameSet;
+  /** Which key of `frames` to render. Ignored if `paths` is given. */
+  frame?: string;
   enableBackdropBlur?: boolean;
   enableViewBox?: boolean;
 } & React.ComponentProps<"svg">) {
+  const resolvedPaths = paths ?? (frames && frame ? frames[frame] : undefined);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useIsomorphicLayoutEffect(() => {
-    if (svgRef.current && svgRef.current.parentElement) {
+    if (svgRef.current && svgRef.current.parentElement && resolvedPaths) {
       const instance = setupSvgRenderer({
         el: svgRef.current,
-        paths,
+        paths: resolvedPaths,
         enableBackdropBlur,
         enableViewBox,
       });
 
       return () => instance.destroy();
     }
-  }, [paths]);
+  }, [resolvedPaths]);
 
   return (
     <svg
@@ -78,11 +114,12 @@ function Frame({
       // paints via a CSS background rather than appending real <path>s, and
       // clears it the moment setupSvgRenderer draws the real ones - see the
       // comment there for why the distinction matters to hydration.
-      data-frame-paths={JSON.stringify(paths)}
+      data-frame-paths={JSON.stringify(resolvedPaths)}
       data-frame-backdrop-blur={enableBackdropBlur || undefined}
       data-frame-view-box={enableViewBox || undefined}
     />
   );
 }
 
-export { Frame, parsePaths };
+export { Frame, parsePaths, parseFrameSet };
+export type { FrameSet };

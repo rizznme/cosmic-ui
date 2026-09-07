@@ -61,31 +61,58 @@ function parsePaths(json: string): Paths {
   return parsed;
 }
 
+// Several Frames designed together as one composite (e.g. a topbar made of
+// a left wedge, a pill, a search box, and a right wedge), keyed by name.
+// Each entry is a plain Paths array - a set is just a bundle for
+// convenience, since every path's position is already relative to its own
+// Frame's box, never to its siblings.
+type FrameSet = Record<string, Paths>;
+
+const frameSetCache = new Map<string, FrameSet>();
+
+function parseFrameSet(json: string): FrameSet {
+  const cached = frameSetCache.get(json);
+  if (cached) return cached;
+
+  if (frameSetCache.size > 200) frameSetCache.clear();
+
+  const parsed = JSON.parse(json) as FrameSet;
+  frameSetCache.set(json, parsed);
+  return parsed;
+}
+
 function Frame({
   className,
   paths,
+  frames,
+  frame,
   enableBackdropBlur,
   enableViewBox,
   ...props
 }: {
-  paths: Paths;
+  // A single Frame's paths. Omit this and pass frames + frame instead to
+  // pick one out of a set designed together.
+  paths?: Paths;
+  frames?: FrameSet;
+  frame?: string;
   enableBackdropBlur?: boolean;
   enableViewBox?: boolean;
 } & React.ComponentProps<"svg">) {
+  const resolvedPaths = paths ?? (frames && frame ? frames[frame] : undefined);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useIsomorphicLayoutEffect(() => {
-    if (svgRef.current && svgRef.current.parentElement) {
+    if (svgRef.current && svgRef.current.parentElement && resolvedPaths) {
       const instance = setupSvgRenderer({
         el: svgRef.current,
-        paths,
+        paths: resolvedPaths,
         enableBackdropBlur,
         enableViewBox,
       });
 
       return () => instance.destroy();
     }
-  }, [paths]);
+  }, [resolvedPaths]);
 
   return (
     <svg
@@ -93,14 +120,14 @@ function Frame({
       className={twMerge(["absolute inset-0 size-full pointer-events-none", className])}
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
-      data-frame-paths={JSON.stringify(paths)}
+      data-frame-paths={JSON.stringify(resolvedPaths)}
       data-frame-backdrop-blur={enableBackdropBlur || undefined}
       data-frame-view-box={enableViewBox || undefined}
     />
   );
 }
 
-export { Frame, parsePaths };
+export { Frame, parsePaths, parseFrameSet };
 `;
 
 const usageImports = `
@@ -114,6 +141,21 @@ const usageExample = `
     '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","37","12"],["L","0% + 59","12"],["L","0% + 85","0% + 33"],["L","79","0% + 12"],["L","50% - 3","12"],["L","50% + 16","30"],["L","100% - 35","30"],["L","100% - 16","47"],["L","100% - 16","100% - 47.05882352941177%"],["L","100% - 8","100% - 44.85294117647059%"],["L","100% - 9","100% - 16.666666666666668%"],["L","100% - 17","100% - 14.705882352941176%"],["L","100% - 17","100% - 30"],["L","100% - 34","100% - 12"],["L","50% + 13","100% - 12"],["L","50% + 15","100% - 26"],["L","50% - 11","100% - 12"],["L","37","100% - 12"],["L","19","100% - 30"],["L","19","0% + 50.490196078431374%"],["L","10","0% + 48.529411764705884%"],["L","10","0% + 20.098039215686274%"],["L","0% + 19.000000000000004","0% + 18.38235294117647%"],["L","19","29"],["L","37","12"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","50% + 10","15"],["L","50% + 19","15"],["L","50% + 24","0% + 20"],["L","50% + 16","0% + 20"],["L","50% + 10","15"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","50% + 25","15"],["L","50% + 34","15"],["L","50% + 40","0% + 21"],["L","50% + 31","0% + 21"],["L","50% + 25","15"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-4-stroke)","fill":"var(--color-frame-4-fill)"},"path":[["M","50% + 40","15"],["L","50% + 52","15"],["L","50% + 61","0% + 23"],["L","50% + 49","0% + 23"],["L","50% + 40","15"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-5-stroke)","fill":"var(--color-frame-5-fill)"},"path":[["M","36","3"],["L","0% + 58","0"],["L","0% + 84","0% + 40"],["L","81","0% + 0"],["L","50% - 1","4"],["L","50% + 5","6"],["L","50% + 54","7"],["L","50% + 74","23"],["L","100% - 32","21"],["L","100% - 8","42"],["L","100% - 9","100% - 52.450980392156865%"],["L","100% + 0","100% - 50.245098039215684%"],["L","100% + 0","100% - 15.196078431372548%"],["L","100% - 7","100% - 13.480392156862745%"],["L","100% - 7","100% - 27"],["L","100% - 29","100% - 3"],["L","50% + 14","100% + 0"],["L","50% + 21","100% - 31"],["L","50% - 13","100% + 0"],["L","37","100% - 4"],["L","11","100% - 28"],["L","10","0% + 55.3921568627451%"],["L","0","0% + 52.94117647058823%"],["L","1","0% + 18.627450980392158%"],["L","11","0% + 16.666666666666668%"],["L","11","25"],["L","36","3"]]}]'
   )}
 />
+`;
+
+const frameSetExample = `
+const topbarFrames = parseFrameSet(
+  '{"left-wedge":[{"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"none"},"path":[["M","0","0"],["L","100%","0"],["L","100%","100%"],["L","0","100%"],["L","0","0"]]}],"right-wedge":[{"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"none"},"path":[["M","100%","0"],["L","0","0"],["L","0","100%"],["L","100%","100%"],["L","100%","0"]]}]}'
+);
+
+<div className="flex gap-2">
+  <div className="relative size-24 [--color-frame-1-stroke:var(--color-primary)]">
+    <Frame frames={topbarFrames} frame="left-wedge" />
+  </div>
+  <div className="relative size-24 [--color-frame-1-stroke:var(--color-accent)]">
+    <Frame frames={topbarFrames} frame="right-wedge" />
+  </div>
+</div>
 `;
 ---
 
@@ -151,9 +193,24 @@ const usageExample = `
       <PreviewCode code={usageImports} />
       <PreviewCode code={usageExample} />
     </div>
+    <div id="frame-sets">
+      <SectionTitle>Frame sets</SectionTitle>
+      <SectionContent>
+        Several Frames designed together as one composite - e.g. a topbar made of a left wedge,
+        a pill, a search box, and a right wedge - export as one bundle (keyed by name) from the
+        Cosmic UI editor's "Export all Frames" button. Parse it once with{" "}
+        <code>parseFrameSet</code>, then pass <code>frames</code> + <code>frame</code> instead of{" "}
+        <code>paths</code> to pick which one each instance renders. Every path's position is
+        already relative to its own Frame's box, never to its siblings, so this changes nothing
+        about how a given piece renders - it's just a way to carry several pieces in one constant
+        instead of one <code>paths</code> literal per usage site.
+      </SectionContent>
+      <PreviewCode code={frameSetExample} />
+    </div>
   </Wrapper>
   <TocMenu>
     <a class="hover:text-foreground py-1" href="#installation">Installation</a>
     <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+    <a class="hover:text-foreground py-1" href="#frame-sets">Frame sets</a>
   </TocMenu>
 </DocsLayout>

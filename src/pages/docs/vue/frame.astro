@@ -57,30 +57,56 @@ function parsePaths(json: string): Paths {
   return parsed;
 }
 
-export { parsePaths };
+// Several Frames designed together as one composite (e.g. a topbar made of
+// a left wedge, a pill, a search box, and a right wedge), keyed by name.
+// Each entry is a plain Paths array - a set is just a bundle for
+// convenience, since every path's position is already relative to its own
+// Frame's box, never to its siblings.
+type FrameSet = Record<string, Paths>;
+
+const frameSetCache = new Map<string, FrameSet>();
+
+function parseFrameSet(json: string): FrameSet {
+  const cached = frameSetCache.get(json);
+  if (cached) return cached;
+
+  if (frameSetCache.size > 200) frameSetCache.clear();
+
+  const parsed = JSON.parse(json) as FrameSet;
+  frameSetCache.set(json, parsed);
+  return parsed;
+}
+
+export { parsePaths, parseFrameSet };
 </script>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from "vue";
+import { computed, ref, watch, onUnmounted } from "vue";
 import { twMerge } from "tailwind-merge";
 import { setupSvgRenderer } from "@left4code/svg-renderer";
 
 const props = defineProps<{
   class?: string;
-  paths: Paths;
+  // A single Frame's paths. Omit this and pass frames + frame instead to
+  // pick one out of a set designed together.
+  paths?: Paths;
+  frames?: FrameSet;
+  frame?: string;
   enableBackdropBlur?: boolean;
   enableViewBox?: boolean;
 }>();
+
+const resolvedPaths = computed(() => props.paths ?? (props.frames && props.frame ? props.frames[props.frame] : undefined));
 
 const svgRef = ref<SVGSVGElement | null>(null);
 let instance: ReturnType<typeof setupSvgRenderer> | null = null;
 
 watch(
-  [svgRef, () => props.paths],
+  [svgRef, resolvedPaths],
   ([el, paths]) => {
     instance?.destroy();
     instance = null;
-    if (el && el.parentElement) {
+    if (el && el.parentElement && paths) {
       instance = setupSvgRenderer({
         el,
         paths,
@@ -121,6 +147,27 @@ const framePaths = parsePaths(
   <Frame class="drop-shadow-2xl drop-shadow-primary/50" :paths="framePaths" />
 </template>
 `;
+
+const frameSetExample = `
+<script setup lang="ts">
+import Frame, { parseFrameSet } from "@/components/ui/frame.vue";
+
+const topbarFrames = parseFrameSet(
+  '{"left-wedge":[{"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"none"},"path":[["M","0","0"],["L","100%","0"],["L","100%","100%"],["L","0","100%"],["L","0","0"]]}],"right-wedge":[{"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"none"},"path":[["M","100%","0"],["L","0","0"],["L","0","100%"],["L","100%","100%"],["L","100%","0"]]}]}'
+);
+</script>
+
+<template>
+  <div class="flex gap-2">
+    <div class="relative size-24 [--color-frame-1-stroke:var(--color-primary)]">
+      <Frame :frames="topbarFrames" frame="left-wedge" />
+    </div>
+    <div class="relative size-24 [--color-frame-1-stroke:var(--color-accent)]">
+      <Frame :frames="topbarFrames" frame="right-wedge" />
+    </div>
+  </div>
+</template>
+`;
 ---
 
 <DocsLayout title="Frame | Cosmic UI">
@@ -149,9 +196,24 @@ const framePaths = parsePaths(
       <PreviewCode code={usageImports} />
       <PreviewCode code={usageExample} />
     </div>
+    <div id="frame-sets">
+      <SectionTitle>Frame sets</SectionTitle>
+      <SectionContent>
+        Several Frames designed together as one composite - e.g. a topbar made of a left wedge,
+        a pill, a search box, and a right wedge - export as one bundle (keyed by name) from the
+        Cosmic UI editor's "Export all Frames" button. Parse it once with <code>parseFrameSet</code>,
+        then pass <code>frames</code> + <code>frame</code> instead of <code>paths</code> to pick
+        which one each instance renders. Every path's position is already relative to its own
+        Frame's box, never to its siblings, so this changes nothing about how a given piece
+        renders - it's just a way to carry several pieces in one constant instead of one
+        <code>paths</code> literal per usage site.
+      </SectionContent>
+      <PreviewCode code={frameSetExample} />
+    </div>
   </Wrapper>
   <TocMenu>
     <a class="hover:text-foreground py-1" href="#installation">Installation</a>
     <a class="hover:text-foreground py-1" href="#usage">Usage</a>
+    <a class="hover:text-foreground py-1" href="#frame-sets">Frame sets</a>
   </TocMenu>
 </DocsLayout>

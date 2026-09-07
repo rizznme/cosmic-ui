@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Zap } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
-import { Frame } from "@/components/ui/frame";
+import { Frame, parseFrameSet } from "@/components/ui/frame";
 import { Button } from "@/components/ui/button";
 import { setShowMenu } from "@/lib/mobile-menu-store";
 import { setSearchOpen } from "@/lib/search-palette-store";
+
+// The topbar has 4 slots left-to-right: left-wedge, pill (logo+nav), search
+// box, right-wedge. Keyed here by literal "Frame N" -- the same names the
+// Cosmic UI editor exports them under ("Export all Frames") -- so a fresh
+// paste from there drops in with no renaming.
+const topbarFrames = parseFrameSet(
+  '{"Frame 1":[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","0","0"],["L","100% - 7","0"],["L","100% - 12","6"],["L","100% - 0","28"],["L","0","9"],["L","0","0"]]},{"name":"Layer 5","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","100% - 8","31"],["L","0","12"]]}],"Frame 2":[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","5","0"],["L","0","6"],["L","27","100% - 16"],["L","154","100% - 16"],["L","164","100% - 30"],["L","162","100% - 16"],["L","100% - 28","100% - 16"],["L","100% - 0","6"],["L","100% - 6","0"],["L","5","0"]]},{"name":"Layer 2","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","32","100% - 15"],["L","37","100% - 7"],["L","152","100% - 7"],["L","166","100% - 25"],["L","164","100% - 7"],["L","100% - 36","100% - 7"],["L","100% - 33","100% - 15"]]},{"name":"Layer 3","style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","4","31"],["L","18","100% - 12"],["L","23","100% - 12"],["L","29","100% - 0"],["L","155","100% - 0"],["L","160","100% - 9"],["L","160","100% - 0"],["L","100% - 29","100% - 0"],["L","100% - 24","100% - 12"]]}],"Frame 3":[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","20","0"],["L","100% - 4","0"],["L","100% - 0","5"],["L","100% - 36","100% - 21"],["L","0","100% - 21"],["L","26","6"],["L","20","0"]]},{"name":"Layer 7","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","2","100% - 12"],["L","9","100% - 12"],["L","12","100% - 15"],["L","100% - 33","100% - 14"]]}],"Frame 4":[{"name":"Layer 1","style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","0","100% - 14"],["L","17","34"],["L","100% - 0","18"]]},{"name":"Layer 10","style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","29","0"],["L","100% - 0","0"],["L","100% - 0","14"],["L","14","28"],["L","33","5"],["L","29","0"]]}]}',
+);
 
 export function SiteChrome() {
   // Matches getServerFramework's pattern: a platform-specific label would
@@ -18,7 +26,8 @@ export function SiteChrome() {
     if (isMac) setShortcutLabel("⌘K");
 
     function handleKeyDown(e: KeyboardEvent) {
-      const isShortcut = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      const isShortcut =
+        (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
       if (!isShortcut) return;
       e.preventDefault();
       setSearchOpen(true);
@@ -33,7 +42,7 @@ export function SiteChrome() {
       <div className="h-18 mt-2 mx-2 lg:-mt-px lg:-mx-px flex fixed top-0 inset-x-0 z-50">
         <div
           className={twMerge([
-            "size-full relative -mr-[11px] hidden lg:block",
+            "size-full relative hidden lg:block -mr-[12px]",
             "[--color-frame-1-stroke:var(--color-primary)]/90",
             "[--color-frame-1-fill:var(--color-primary)]/8",
             "[--color-frame-2-stroke:var(--color-primary)]/23",
@@ -42,15 +51,14 @@ export function SiteChrome() {
         >
           <Frame
             className="drop-shadow-2xl drop-shadow-primary"
-            paths={JSON.parse(
-              '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","0","0"],["L","100% - 6","0"],["L","100% - 11","100% - 64"],["L","100% + 0","0% + 29"],["L","0","11"],["L","0","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","0","14"],["L","100% - 7","33"]]}]'
-            )}
+            frames={topbarFrames}
+            frame="Frame 1"
           />
         </div>
         <div className="flex lg:container h-full relative flex-none w-full">
           <div
             className={twMerge([
-              "flex-none h-full px-14 relative w-full lg:w-auto",
+              "flex-none h-full px-14 relative w-full lg:w-auto -mr-[26px]",
               "[--color-frame-1-stroke:var(--color-primary)]",
               "[--color-frame-1-fill:var(--color-primary)]/20",
               "[--color-frame-2-stroke:var(--color-primary)]/57",
@@ -62,9 +70,8 @@ export function SiteChrome() {
             <Frame
               enableBackdropBlur
               className="drop-shadow-2xl drop-shadow-primary/40"
-              paths={JSON.parse(
-                '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","6","0"],["L","100% - 6.5","0"],["L","100% + 0","0% + 9"],["L","100% - 28","100% - 15"],["L","162","100% - 15"],["L","164","100% - 30"],["L","153","100% - 15"],["L","27","100% - 15"],["L","0","0% + 8"],["L","6","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","32","100% - 15"],["L","0% + 152.5","100% - 15"],["L","0% + 163.5","100% - 29"],["L","0% + 161.5","100% - 15"],["L","100% - 32.5","100% - 15"],["L","100% - 36.5","100% - 7"],["L","0% + 163.5","100% - 7"],["L","0% + 165.5","100% - 23"],["L","0% + 152.5","100% - 7"],["L","37","100% - 7"],["L","32","100% - 15"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-3-stroke)","fill":"var(--color-frame-3-fill)"},"path":[["M","0","0% + 33"],["M","4","0% + 33"],["L","0% + 18.5","100% - 12"],["L","0% + 23.5","100% - 12"],["L","29","100% + 0"],["L","155","100% - 0"],["L","160","100% - 8"],["L","161","100% - 0"],["L","100% - 28","100% + 0"],["L","100% - 23","100% - 11"],["L","100% - 17","100% - 11"],["L","100% - 14","100% - 14"],["L","100% + 0","100% - 14"]],"name":"Frame 3"}]'
-              )}
+              frames={topbarFrames}
+              frame="Frame 2"
             />
             <div className="flex items-center mt-4.5 relative">
               <a
@@ -104,7 +111,7 @@ export function SiteChrome() {
           </div>
           <div
             className={twMerge([
-              "w-full relative -ml-[25px] lg:flex justify-end pe-8 hidden",
+              "w-full relative lg:flex justify-end pe-8 hidden",
               "[--color-frame-1-stroke:var(--color-primary)]",
               "[--color-frame-1-fill:var(--color-primary)]/10",
               "[--color-frame-2-stroke:var(--color-primary)]/23",
@@ -114,9 +121,8 @@ export function SiteChrome() {
             <Frame
               enableBackdropBlur
               className="drop-shadow-2xl drop-shadow-primary/40"
-              paths={JSON.parse(
-                '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","19","0"],["L","100% - 5","0"],["L","100% + 0","0% + 7"],["L","100% - 36","100% - 20"],["L","0","100% - 20"],["L","25","8.999992370605469"],["L","19","1"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","25","100% - 14"],["L","100% - 32","100% - 13"],["L","100% - 15","36"]],"name":"Frame 2"}]'
-              )}
+              frames={topbarFrames}
+              frame="Frame 3"
             />
             <div className="flex items-center -mt-3.5">
               <Button
@@ -127,10 +133,7 @@ export function SiteChrome() {
                 <div className="me-10">Search Docs…</div>
                 <div className="ms-auto">{shortcutLabel}</div>
               </Button>
-              <a
-                target="_blank"
-                href="https://github.com/rizznme/cosmic-ui"
-              >
+              <a target="_blank" href="https://github.com/rizznme/cosmic-ui">
                 <Button
                   shape="flat"
                   className="py-[0.45rem] px-6 ms-1 text-foreground [--color-frame-1-stroke:var(--color-accent)]/50 [--color-frame-1-fill:var(--color-accent)]/20"
@@ -143,18 +146,16 @@ export function SiteChrome() {
         </div>
         <div
           className={twMerge([
-            "size-full relative -ml-[18px] hidden lg:block",
+            "size-full relative hidden lg:block -ml-[33px]",
             "[--color-frame-1-stroke:var(--color-primary)]/90",
             "[--color-frame-1-fill:var(--color-primary)]/8",
             "[--color-frame-2-stroke:var(--color-primary)]/23",
             "[--color-frame-2-fill:transparent]",
+            "[--color-frame-3-stroke:var(--color-primary)]/23",
+            "[--color-frame-3-fill:transparent]",
           ])}
         >
-          <Frame
-            paths={JSON.parse(
-              '[{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-1-stroke)","fill":"var(--color-frame-1-fill)"},"path":[["M","12","0"],["L","100% + 0","0"],["L","100% + 0","0% + 16"],["L","0","100% - 42"],["L","18","7"],["L","12","0"]]},{"show":true,"style":{"strokeWidth":"1","stroke":"var(--color-frame-2-stroke)","fill":"var(--color-frame-2-fill)"},"path":[["M","3","100% - 36"],["L","100% + 0","20"]],"name":"Frame 2"}]'
-            )}
-          />
+          <Frame frames={topbarFrames} frame="Frame 4" />
         </div>
       </div>
     </>
